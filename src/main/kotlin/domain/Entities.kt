@@ -19,7 +19,8 @@ data class User(
     val email: String = "",
     val phoneNumber: String = "",
     val roomNumber: String = "",
-    val color: Int? = null
+    val color: Int? = null,
+    val createdAt: LocalDateTime? = null
 ) : IEntity {
     override fun toString() = "$name $surname"
 }

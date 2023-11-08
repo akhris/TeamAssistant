@@ -9,23 +9,35 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import com.arkivanov.decompose.DefaultComponentContext
+import com.arkivanov.essenty.lifecycle.LifecycleRegistry
+import di.di
+import ui.screens.root_ui.IRootComponent
+import ui.screens.root_ui.RootComponent
+import ui.screens.root_ui.RootUi
+import ui.theme.AppTheme
 
 @Composable
-@Preview
-fun App() {
-    var text by remember { mutableStateOf("Hello, World!") }
+fun App(rootComponent: IRootComponent) {
 
-    MaterialTheme {
-        Button(onClick = {
-            text = "Hello, Desktop!"
-        }) {
-            Text(text)
-        }
+    var isDark by remember { mutableStateOf(false) }
+    AppTheme(darkTheme = isDark) {
+//        VerticalReorderList()
+        RootUi(component = rootComponent, isDarkTheme = isDark, onThemeChanged = { isDark = it })
     }
 }
 
-fun main() = application {
-    Window(onCloseRequest = ::exitApplication) {
-        App()
+
+fun main() {
+    // Create the root component before starting Compose
+    val lifecycle = LifecycleRegistry()
+    val root = RootComponent(componentContext = DefaultComponentContext(lifecycle), di = di)
+    application {
+        Window(
+            title = "TeamAssistant",
+            onCloseRequest = ::exitApplication
+        ) {
+            App(root)
+        }
     }
 }
