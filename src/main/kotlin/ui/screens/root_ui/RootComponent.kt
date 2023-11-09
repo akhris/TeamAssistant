@@ -27,7 +27,7 @@ class RootComponent(
     private val _navHostStack =
         childStack(
             source = navHostNav,
-            initialConfiguration = NavHostConfig.UserDetails,
+            initialConfiguration = NavItem.homeItem.toNavHostConfig(),
 //            handleBackButton = true,
             childFactory = ::createChild,
             key = "navhost stack"
@@ -71,9 +71,9 @@ class RootComponent(
 
     private fun createChild(config: NavHostConfig, componentContext: ComponentContext): IRootComponent.NavHost {
         return when (config) {
-            NavHostConfig.Activity -> TODO()
-            NavHostConfig.Projects -> TODO()
-            NavHostConfig.Tasks -> TODO()
+            NavHostConfig.Activity -> IRootComponent.NavHost.Activity()
+            NavHostConfig.Projects -> IRootComponent.NavHost.Projects()
+            NavHostConfig.Tasks -> IRootComponent.NavHost.Tasks()
             NavHostConfig.Team -> IRootComponent.NavHost.Team()
             NavHostConfig.UserDetails -> IRootComponent.NavHost.UserDetails()
         }
@@ -93,16 +93,20 @@ class RootComponent(
 
 
     override fun navigateTo(navItem: NavItem) {
-        val newConf = when (navItem) {
-            NavItem.Activity -> TODO()
-            NavItem.Projects -> TODO()
-            NavItem.Tasks -> TODO()
-            NavItem.Team -> NavHostConfig.Team
-            NavItem.UserDetails -> NavHostConfig.UserDetails
-        }
+        val newConf = navItem.toNavHostConfig()
         if (newConf != null && newConf != _navHostStack.value.active.configuration) {
             navHostNav.replaceCurrent(newConf)
             _currentDestination.value = navItem
+        }
+    }
+
+    private fun NavItem.toNavHostConfig(): NavHostConfig {
+        return when (this) {
+            NavItem.Activity -> NavHostConfig.Activity
+            NavItem.Projects -> NavHostConfig.Projects
+            NavItem.Tasks -> NavHostConfig.Tasks
+            NavItem.Team -> NavHostConfig.Team
+            NavItem.UserDetails -> NavHostConfig.UserDetails
         }
     }
 

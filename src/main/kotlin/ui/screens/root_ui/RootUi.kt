@@ -12,9 +12,14 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.stack.Children
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.fade
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimation
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
+import tests.testTask1
+import tests.testTask2
 import tests.testTeam1
 import tests.testUser1
 import ui.SideNavigationPanel
+import ui.screens.activity.ActivityUi
+import ui.screens.projects.ProjectsUi
+import ui.screens.tasks.TasksUi
 import ui.screens.team.TeamUi
 import ui.screens.user_details.UserDetailsUi
 
@@ -34,6 +39,7 @@ fun RootUi(component: IRootComponent, isDarkTheme: Boolean, onThemeChanged: (isD
         topBar = {
             TopAppBar {
                 Spacer(modifier = Modifier.weight(1f))
+                Text(text = "TeamAssistant")
 //                Children(stack = component.toolbarUtilsStack) {
 //                    when (val child = it.instance) {
 //                        is IRootComponent.ToolbarUtils.SampleTypesSelector -> SampleTypesSelectorUi(
@@ -72,9 +78,9 @@ fun RootUi(component: IRootComponent, isDarkTheme: Boolean, onThemeChanged: (isD
                 ) {
                     Children(stack = component.navHostStack, animation = stackAnimation(fade())) {
                         when (val child = it.instance) {
-                            is IRootComponent.NavHost.Activity -> TODO()
-                            is IRootComponent.NavHost.Projects -> TODO()
-                            is IRootComponent.NavHost.Tasks -> TODO()
+                            is IRootComponent.NavHost.Activity -> ActivityUi()
+                            is IRootComponent.NavHost.Projects -> ProjectsUi()
+                            is IRootComponent.NavHost.Tasks -> TasksUi(listOf(testTask1, testTask2))
                             is IRootComponent.NavHost.Team -> TeamUi(testTeam1)
                             is IRootComponent.NavHost.UserDetails -> UserDetailsUi(testUser1)
                         }

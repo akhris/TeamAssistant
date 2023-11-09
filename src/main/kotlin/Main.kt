@@ -35,7 +35,8 @@ fun main() {
     application {
         Window(
             title = "TeamAssistant",
-            onCloseRequest = ::exitApplication
+            onCloseRequest = ::exitApplication,
+            undecorated = true
         ) {
             App(root)
         }
