@@ -1,14 +1,5 @@
-import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.application
+import androidx.compose.runtime.*
+import androidx.compose.ui.window.*
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import di.di
@@ -18,12 +9,17 @@ import ui.screens.root_ui.RootUi
 import ui.theme.AppTheme
 
 @Composable
-fun App(rootComponent: IRootComponent) {
+fun FrameWindowScope.App(rootComponent: IRootComponent, windowState: WindowState) {
 
     var isDark by remember { mutableStateOf(false) }
     AppTheme(darkTheme = isDark) {
 //        VerticalReorderList()
-        RootUi(component = rootComponent, isDarkTheme = isDark, onThemeChanged = { isDark = it })
+        RootUi(
+            component = rootComponent,
+            isDarkTheme = isDark,
+            onThemeChanged = { isDark = it },
+            windowState = windowState
+        )
     }
 }
 
@@ -32,13 +28,16 @@ fun main() {
     // Create the root component before starting Compose
     val lifecycle = LifecycleRegistry()
     val root = RootComponent(componentContext = DefaultComponentContext(lifecycle), di = di)
+
     application {
+        val windowState = rememberWindowState()
         Window(
+            state = windowState,
             title = "TeamAssistant",
             onCloseRequest = ::exitApplication,
             undecorated = true
-        ) {
-            App(root)
+        ){
+            App(root, windowState)
         }
     }
 }

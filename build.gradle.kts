@@ -1,17 +1,19 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
-plugins {
-    kotlin("jvm")
-    id("org.jetbrains.compose")
-}
-
-group = "com.akhris"
-version = "1.0-SNAPSHOT"
-
 val exposedVersion: String by project
 val kodeinVersion: String by project
 val decomposeVersion: String by project
 val SQLiteDriverVersion: String by project
+val realmVersion: String by project
+
+plugins {
+    kotlin("jvm")
+    id("org.jetbrains.compose")
+    id("io.realm.kotlin") version "1.12.0"
+}
+
+group = "com.akhris"
+version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -44,6 +46,10 @@ dependencies {
 
     //for qualifiers
     implementation("javax.inject:javax.inject:1")
+
+    //realm:
+    implementation("io.realm.kotlin:library-base:1.12.0")
+
 }
 
 compose.desktop {
