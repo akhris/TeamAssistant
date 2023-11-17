@@ -7,15 +7,32 @@ import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.replaceCurrent
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
+import com.arkivanov.essenty.lifecycle.subscribe
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
+import io.realm.kotlin.Realm
+import io.realm.kotlin.ext.query
+import io.realm.kotlin.notifications.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import org.kodein.di.DI
+import org.kodein.di.instance
+import persistence.realm.RealmUser
+import persistence.realm.toUser
 import ui.NavItem
+import utils.UserUtils
 
 class RootComponent(
     private val di: DI,
     componentContext: ComponentContext
 ) : IRootComponent, ComponentContext by componentContext {
+
+    protected val scope =
+        CoroutineScope(Dispatchers.Default + SupervisorJob())
+
+    val userName = UserUtils.getUserName()
+    private val realm by di.instance<Realm>()
 
     private val dialogNav = StackNavigation<DialogConfig>()
     private val navHostNav = StackNavigation<NavHostConfig>()
@@ -23,6 +40,22 @@ class RootComponent(
 
     private val _currentDestination = MutableValue<NavItem>(NavItem.homeItem)
     override val currentDestination: Value<NavItem> = _currentDestination
+
+    override val userLoggingInfo: Flow<IRootComponent.UserLoggingInfo> =
+        realm
+            .query<RealmUser>("_id == $0", userName)
+            .first()
+            .asFlow()
+            .map {
+                val user = when (it) {
+                    is DeletedObject -> it.obj
+                    is InitialObject -> it.obj
+                    is UpdatedObject -> it.obj
+                    is PendingObject -> it.obj
+                }?.toUser()
+                IRootComponent.UserLoggingInfo(userID = userName, user = user)
+            }
+
 
     private val _navHostStack =
         childStack(
@@ -143,6 +176,15 @@ class RootComponent(
     @Parcelize
     private sealed class ToolbarUtilsConfig : Parcelable {
 //        object SampleTypesSelector : ToolbarUtilsConfig()
+    }
+
+    init {
+        componentContext
+            .lifecycle
+            .subscribe(onDestroy = {
+                scope.coroutineContext.cancelChildren()
+            })
+
     }
 
 }

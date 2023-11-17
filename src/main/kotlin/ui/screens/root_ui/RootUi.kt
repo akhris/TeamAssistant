@@ -29,6 +29,7 @@ import ui.screens.projects.ProjectsUi
 import ui.screens.tasks.TasksUi
 import ui.screens.team.TeamUi
 import ui.screens.user_details.UserDetailsUi
+import utils.log
 
 
 @OptIn(ExperimentalDecomposeApi::class, ExperimentalFoundationApi::class)
@@ -44,6 +45,18 @@ fun FrameWindowScope.RootUi(
     val navigationItem by remember(component) { component.currentDestination }.subscribeAsState()
 //    val sampleTypes by remember(component) { component.sampleTypes }.subscribeAsState()
 
+    val currentlyLoggedUser by component.userLoggingInfo.collectAsState(IRootComponent.UserLoggingInfo())
+
+    remember(currentlyLoggedUser) {  log(currentlyLoggedUser, prefix = "logged user: ") }
+
+    when(currentlyLoggedUser.user){
+        null->{
+            //show new user screen
+        }
+        else->{
+            //show main screen
+        }
+    }
 
     Scaffold(
         scaffoldState = scaffoldState,

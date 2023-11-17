@@ -2,6 +2,8 @@ package ui.screens.root_ui
 
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
+import domain.User
+import kotlinx.coroutines.flow.Flow
 import ui.NavItem
 
 interface IRootComponent {
@@ -10,6 +12,7 @@ interface IRootComponent {
     val dialogStack: Value<ChildStack<*, Dialog>>
 //    val toolbarUtilsStack: Value<ChildStack<*, ToolbarUtils>>
 
+    val userLoggingInfo: Flow<UserLoggingInfo>
     val currentDestination: Value<NavItem>
 
     fun navigateTo(navItem: NavItem)
@@ -20,10 +23,10 @@ interface IRootComponent {
         class Activity : NavHost()
         class Projects : NavHost()
         class Team : NavHost()
-           }
+    }
 
     sealed class Dialog {
-               object None : Dialog()
+        object None : Dialog()
     }
 
     sealed class ToolbarUtils {
@@ -31,4 +34,9 @@ interface IRootComponent {
     }
 
     fun dismissDialog()
+
+    data class UserLoggingInfo(
+        val userID: String = "",
+        val user: User? = null
+    )
 }
