@@ -11,18 +11,21 @@ import utils.UserUtils
 import utils.log
 
 @Composable
-fun FrameWindowScope.App(rootComponent: IRootComponent, windowState: WindowState) {
+fun FrameWindowScope.App(rootComponent: IRootComponent, windowState: WindowState, onCloseRequest: () -> Unit) {
 
     var isDark by remember { mutableStateOf(false) }
     AppTheme(darkTheme = isDark) {
-//        VerticalReorderList()
+
         RootUi(
             component = rootComponent,
             isDarkTheme = isDark,
             onThemeChanged = { isDark = it },
-            windowState = windowState
+            windowState = windowState,
+            onCloseRequest = onCloseRequest
         )
+
     }
+
 }
 
 
@@ -34,13 +37,16 @@ fun main() {
     log(userName, "userName: ")
     application {
         val windowState = rememberWindowState()
-        Window(
-            state = windowState,
-            title = "TeamAssistant",
-            onCloseRequest = ::exitApplication,
-            undecorated = true
-        ) {
-            App(root, windowState)
+        var isRunning by remember { mutableStateOf(true) }
+        if (isRunning) {
+            Window(
+                state = windowState,
+                title = "TeamAssistant",
+                onCloseRequest = ::exitApplication,
+                undecorated = true
+            ) {
+                App(root, windowState, onCloseRequest = { isRunning = false })
+            }
         }
     }
 }

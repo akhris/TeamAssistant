@@ -15,6 +15,7 @@ interface IRootComponent {
     val userLoggingInfo: Flow<UserLoggingInfo>
     val currentDestination: Value<NavItem>
 
+    fun createNewUser(user: User)
     fun navigateTo(navItem: NavItem)
 
     sealed class NavHost {

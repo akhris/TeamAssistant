@@ -10,6 +10,7 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.lifecycle.subscribe
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
+import domain.User
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.notifications.*
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.map
 import org.kodein.di.DI
 import org.kodein.di.instance
 import persistence.realm.RealmUser
+import persistence.realm.toRealmUser
 import persistence.realm.toUser
 import ui.NavItem
 import utils.UserUtils
@@ -90,6 +92,14 @@ class RootComponent(
 //    override fun showAddSampleTypeDialog() {
 //        dialogNav.replaceCurrent(DialogConfig.AddSampleType)
 //    }
+
+    override fun createNewUser(user: User) {
+        scope.launch {
+            realm.write {
+                copyToRealm(user.toRealmUser())
+            }
+        }
+    }
 
     override fun dismissDialog() {
         dialogNav.replaceCurrent(DialogConfig.None)
