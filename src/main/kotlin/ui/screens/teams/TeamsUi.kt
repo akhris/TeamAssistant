@@ -1,4 +1,4 @@
-package ui.screens.team
+package ui.screens.teams
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Arrangement
@@ -15,7 +15,7 @@ import tests.testTeam1
 
 
 @Composable
-fun TeamUi(team: Team) {
+fun TeamsUi(team: Team) {
     Column(
         modifier = Modifier.padding(4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -31,5 +31,5 @@ fun TeamUi(team: Team) {
 @Preview
 @Composable
 fun userDetailsPreview() {
-    TeamUi(testTeam1)
+    TeamsUi(testTeam1)
 }

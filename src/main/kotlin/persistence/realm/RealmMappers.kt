@@ -1,11 +1,14 @@
 package persistence.realm
 
+import domain.Team
 import domain.User
+import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.types.RealmInstant
+import org.mongodb.kbson.ObjectId
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
-fun RealmInstant.toLocalDateTime() = LocalDateTime.ofEpochSecond(epochSeconds, nanosecondsOfSecond, ZoneOffset.UTC)
+fun RealmInstant.toLocalDateTime(): LocalDateTime = LocalDateTime.ofEpochSecond(epochSeconds, nanosecondsOfSecond, ZoneOffset.UTC)
 
 fun LocalDateTime.toRealmInstant() = RealmInstant.from(toEpochSecond(ZoneOffset.UTC), nano)
 
@@ -34,4 +37,28 @@ fun User.toRealmUser(): RealmUser =
         roomNumber = this@toRealmUser.roomNumber
         color = this@toRealmUser.color
         createdAt = this@toRealmUser.createdAt?.toRealmInstant()
+    }
+
+fun RealmTeam.toTeam(): Team =
+    Team(
+        id = _id.toHexString(),
+        name = name,
+        creator = creator?.toUser(),
+        parentTeamID = parentTeamId?.toHexString(),
+        admins = admins.map { it.toUser() },
+        members = members.map { it.toUser() },
+        createdAt = createdAt?.toLocalDateTime(),
+        childTeams = childTeams.map { it.toTeam() }
+    )
+
+fun Team.toRealmTeam(): RealmTeam =
+    RealmTeam().apply {
+        _id = ObjectId(this@toRealmTeam.id)
+        name = this@toRealmTeam.name
+        creator = this@toRealmTeam.creator?.toRealmUser()
+        parentTeamId = this@toRealmTeam.parentTeamID?.let { ObjectId(it) }
+        admins = this@toRealmTeam.admins.map { it.toRealmUser() }.toRealmList()
+        members = this@toRealmTeam.members.map { it.toRealmUser() }.toRealmList()
+        createdAt = this@toRealmTeam.createdAt?.toRealmInstant()
+        childTeams = this@toRealmTeam.childTeams.map { it.toRealmTeam() }.toRealmList()
     }

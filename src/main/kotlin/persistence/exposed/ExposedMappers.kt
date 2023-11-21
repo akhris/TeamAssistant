@@ -9,9 +9,9 @@ fun EntityTeam.toTeam(): Team {
         id = this.id.value.toString(),
         name = this.name,
         createdAt = this.createdAt,
-        creator = this.roles.find { it.isCreator }?.user?.value?.toString(),
-        admins = this.roles.filter { it.isAdmin }.map { it.user.value.toString() },
-        members = this.roles.filter { it.isMember }.map { it.user.value.toString() },
+//        creator = this.roles.find { it.isCreator }?.user?.value?.toString(),
+//        admins = this.roles.filter { it.isAdmin }.map { it.user.value.toString() },
+//        members = this.roles.filter { it.isMember }.map { it.user.value.toString() },
         childTeams = this.childTeams.map { it.toTeam() }
     )
 }

@@ -31,10 +31,10 @@ data class User(
 data class Team(
     override val id: String = UUID.randomUUID().toString(),
     val name: String = "",
-    val creator: String? = null,
+    val creator: User? = null,
     val parentTeamID: String? = null,
-    val admins: List<String> = listOf(),
-    val members: List<String> = listOf(),
+    val admins: List<User> = listOf(),
+    val members: List<User> = listOf(),
     val createdAt: LocalDateTime? = null,
     val childTeams: List<Team> = listOf()
 ) : IEntity {

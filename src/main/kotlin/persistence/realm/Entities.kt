@@ -45,3 +45,17 @@ class RealmUser : RealmObject {
 
 }
 
+class RealmTeam : RealmObject {
+    @PrimaryKey
+    var _id: ObjectId = ObjectId()
+    var name: String = ""
+    var description: String = ""
+    var color: Int? = null
+    var creator: RealmUser? = null
+    var members: RealmList<RealmUser> = realmListOf()
+    var admins: RealmList<RealmUser> = realmListOf()
+    var childTeams: RealmList<RealmTeam> = realmListOf()
+    var parentTeamId: ObjectId? = null
+    var createdAt: RealmInstant? = null
+}
+

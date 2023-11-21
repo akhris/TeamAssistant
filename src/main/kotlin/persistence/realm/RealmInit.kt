@@ -6,7 +6,14 @@ import io.realm.kotlin.RealmConfiguration
 object RealmInit {
 
     fun createRealm(): Realm {
-        val config = RealmConfiguration.create(schema = setOf(RealmTask::class, RealmProject::class, RealmUser::class))
+        val config = RealmConfiguration.create(
+            schema = setOf(
+                RealmTask::class,
+                RealmProject::class,
+                RealmUser::class,
+                RealmTeam::class
+            )
+        )
         return Realm.open(config)
     }
 

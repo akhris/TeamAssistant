@@ -1,5 +1,6 @@
 package ui.screens.root_ui
 
+import LocalCurrentUser
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -27,7 +28,7 @@ import ui.SideNavigationPanel
 import ui.screens.activity.ActivityUi
 import ui.screens.projects.ProjectsUi
 import ui.screens.tasks.TasksUi
-import ui.screens.team.TeamUi
+import ui.screens.teams.TeamsUi
 import ui.screens.user_details.UserDetailsUi
 import utils.log
 
@@ -128,22 +129,25 @@ fun FrameWindowScope.RootUi(
                 }
             } else if (currentlyLoggedUser.user != null) {
                 //show main stuff
-                Row {
-                    SideNavigationPanel(
-                        isExpandable = false,
-                        withLabels = true,
-                        currentSelection = navigationItem,
-                        onNavigationItemSelected = { component.navigateTo(it) })
-                    Box(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Children(stack = component.navHostStack, animation = stackAnimation(fade())) {
-                            when (val child = it.instance) {
-                                is IRootComponent.NavHost.Activity -> ActivityUi()
-                                is IRootComponent.NavHost.Projects -> ProjectsUi()
-                                is IRootComponent.NavHost.Tasks -> TasksUi(listOf(testTask1, testTask2))
-                                is IRootComponent.NavHost.Team -> TeamUi(testTeam1)
-                                is IRootComponent.NavHost.UserDetails -> UserDetailsUi(testUser1)
+                CompositionLocalProvider(LocalCurrentUser provides currentlyLoggedUser.user) {
+                    //providing current user for all children views
+                    Row {
+                        SideNavigationPanel(
+                            isExpandable = false,
+                            withLabels = true,
+                            currentSelection = navigationItem,
+                            onNavigationItemSelected = { component.navigateTo(it) })
+                        Box(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Children(stack = component.navHostStack, animation = stackAnimation(fade())) {
+                                when (val child = it.instance) {
+                                    is IRootComponent.NavHost.Activity -> ActivityUi()
+                                    is IRootComponent.NavHost.Projects -> ProjectsUi()
+                                    is IRootComponent.NavHost.Tasks -> TasksUi(listOf(testTask1, testTask2))
+                                    is IRootComponent.NavHost.Team -> TeamsUi(testTeam1)
+                                    is IRootComponent.NavHost.UserDetails -> UserDetailsUi(testUser1)
+                                }
                             }
                         }
                     }
