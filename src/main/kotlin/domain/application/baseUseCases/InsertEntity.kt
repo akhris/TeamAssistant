@@ -13,8 +13,7 @@ import kotlinx.coroutines.CoroutineDispatcher
  */
 open class InsertEntity<ENTITY : IEntity>(
     private val repo: IRepository<ENTITY>,
-    private val entityCopier: ((ENTITY) -> ENTITY)? = null,
-    @IoDispatcher
+        @IoDispatcher
     ioDispatcher: CoroutineDispatcher
 ) : UseCase<ENTITY, InsertEntity.Params>(ioDispatcher) {
 
@@ -22,8 +21,6 @@ open class InsertEntity<ENTITY : IEntity>(
         return when (params) {
             is Insert -> (params.entityToInsert as? ENTITY)?.let { insert(params.entityToInsert) }
                 ?: throw IllegalArgumentException("Entity to insert is not type of insert use case: $this")
-            is Copy -> (params.entityToCopy as? ENTITY)?.let { copy(params.entityToCopy) }
-                ?: throw IllegalArgumentException("Entity to copy is not type of insert use case: $this")
         }
     }
 
@@ -32,16 +29,10 @@ open class InsertEntity<ENTITY : IEntity>(
         return entity
     }
 
-    private suspend fun copy(entity: ENTITY): ENTITY {
-        val copiedEntity = entityCopier?.invoke(entity)
-            ?: throw IllegalArgumentException("To copy an entity entityCopier must be provided: $this")
-        repo.insert(copiedEntity)
-        return copiedEntity
-    }
 
 
     sealed class Params
     data class Insert(val entityToInsert: Any) : Params()
-    data class Copy(val entityToCopy: Any) : Params()
+
 
 }

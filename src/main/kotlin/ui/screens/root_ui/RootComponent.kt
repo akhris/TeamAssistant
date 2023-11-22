@@ -10,18 +10,18 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.lifecycle.subscribe
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
+import domain.IRepositoryCallback
+import domain.RepoResult
 import domain.User
+import domain.application.Result
+import domain.application.baseUseCases.GetEntity
+import domain.application.baseUseCases.InsertEntity
 import io.realm.kotlin.Realm
-import io.realm.kotlin.ext.query
 import io.realm.kotlin.notifications.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import org.kodein.di.DI
 import org.kodein.di.instance
-import persistence.realm.RealmUser
 import persistence.realm.toRealmUser
-import persistence.realm.toUser
 import ui.NavItem
 import utils.UserUtils
 
@@ -30,33 +30,39 @@ class RootComponent(
     componentContext: ComponentContext
 ) : IRootComponent, ComponentContext by componentContext {
 
-    protected val scope =
+    private val scope =
         CoroutineScope(Dispatchers.Default + SupervisorJob())
 
-    val userName = UserUtils.getUserName()
+    private val usersRepoCallbacks: IRepositoryCallback<User> by di.instance()
+
+    private val userID = UserUtils.getUserID()
     private val realm by di.instance<Realm>()
 
     private val dialogNav = StackNavigation<DialogConfig>()
     private val navHostNav = StackNavigation<NavHostConfig>()
 //    private val toolbarUtilsNav = StackNavigation<ToolbarUtilsConfig>()
 
+    private val getUser: GetEntity<User> by di.instance()
+    private val insertUser: InsertEntity<User> by di.instance()
+
     private val _currentDestination = MutableValue<NavItem>(NavItem.homeItem)
     override val currentDestination: Value<NavItem> = _currentDestination
 
-    override val userLoggingInfo: Flow<IRootComponent.UserLoggingInfo> =
-        realm
-            .query<RealmUser>("_id == $0", userName)
-            .first()
-            .asFlow()
-            .map {
-                val user = when (it) {
-                    is DeletedObject -> it.obj
-                    is InitialObject -> it.obj
-                    is UpdatedObject -> it.obj
-                    is PendingObject -> it.obj
-                }?.toUser()
-                IRootComponent.UserLoggingInfo(userID = userName, user = user)
-            }
+    private val _userLoggingInfo = MutableValue(IRootComponent.UserLoggingInfo())
+    override val userLoggingInfo: Value<IRootComponent.UserLoggingInfo> = _userLoggingInfo
+//        realm
+//            .query<RealmUser>("_id == $0", userID)
+//            .first()
+//            .asFlow()
+//            .map {
+//                val user = when (it) {
+//                    is DeletedObject -> it.obj
+//                    is InitialObject -> it.obj
+//                    is UpdatedObject -> it.obj
+//                    is PendingObject -> it.obj
+//                }?.toUser()
+//                IRootComponent.UserLoggingInfo(userID = userID, user = user)
+//            }
 
 
     private val _navHostStack =
@@ -95,9 +101,8 @@ class RootComponent(
 
     override fun createNewUser(user: User) {
         scope.launch {
-            realm.write {
-                copyToRealm(user.toRealmUser())
-            }
+            //make insert user usecase
+            insertUser(InsertEntity.Insert(user))
         }
     }
 
@@ -188,12 +193,36 @@ class RootComponent(
 //        object SampleTypesSelector : ToolbarUtilsConfig()
     }
 
+    private suspend fun invalidateUser() {
+        val user = when (val userResponse = getUser(GetEntity.GetByID(userID))) {
+            is Result.Success -> {
+                userResponse.value
+            }
+
+            is Result.Failure -> {
+                null
+            }
+        }
+        _userLoggingInfo.value = IRootComponent.UserLoggingInfo(userID = userID, user = user)
+    }
+
     init {
         componentContext
             .lifecycle
             .subscribe(onDestroy = {
                 scope.coroutineContext.cancelChildren()
             })
+
+        scope.launch { invalidateUser() }
+
+        //subscribe to repository callbacks:
+        scope.launch {
+            usersRepoCallbacks
+                .updates
+                .collect {
+                    invalidateUser()
+                }
+        }
 
     }
 

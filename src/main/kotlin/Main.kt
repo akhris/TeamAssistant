@@ -33,7 +33,7 @@ fun main() {
     // Create the root component before starting Compose
     val lifecycle = LifecycleRegistry()
     val root = RootComponent(componentContext = DefaultComponentContext(lifecycle), di = di)
-    val userName = UserUtils.getUserName()
+    val userName = UserUtils.getUserID()
     log(userName, "userName: ")
     application {
         val windowState = rememberWindowState()

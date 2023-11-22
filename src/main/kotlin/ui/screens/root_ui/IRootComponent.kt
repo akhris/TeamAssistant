@@ -3,7 +3,6 @@ package ui.screens.root_ui
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
 import domain.User
-import kotlinx.coroutines.flow.Flow
 import ui.NavItem
 
 interface IRootComponent {
@@ -12,7 +11,7 @@ interface IRootComponent {
     val dialogStack: Value<ChildStack<*, Dialog>>
 //    val toolbarUtilsStack: Value<ChildStack<*, ToolbarUtils>>
 
-    val userLoggingInfo: Flow<UserLoggingInfo>
+    val userLoggingInfo: Value<UserLoggingInfo>
     val currentDestination: Value<NavItem>
 
     fun createNewUser(user: User)

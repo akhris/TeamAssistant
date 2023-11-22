@@ -3,7 +3,7 @@ package utils
 import java.net.InetAddress
 
 object UserUtils {
-    fun getUserName(): String {
+    fun getUserID(): String {
         val domainName = InetAddress.getLocalHost().hostName
         val userName = System.getProperty("user.name")
 

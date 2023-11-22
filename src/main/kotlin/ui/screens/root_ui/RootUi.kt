@@ -45,7 +45,7 @@ fun FrameWindowScope.RootUi(
 
 
 //    val sampleTypes by remember(component) { component.sampleTypes }.subscribeAsState()
-    val currentlyLoggedUser by component.userLoggingInfo.collectAsState(IRootComponent.UserLoggingInfo())
+    val currentlyLoggedUser by remember(component) { component.userLoggingInfo}.subscribeAsState()
 
 
     val scaffoldState = rememberScaffoldState()

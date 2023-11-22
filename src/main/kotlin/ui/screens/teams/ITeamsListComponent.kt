@@ -3,7 +3,7 @@ package ui.screens.teams
 import com.arkivanov.decompose.value.Value
 import domain.Team
 
-interface ITeamsComponent {
+interface ITeamsListComponent {
     /**
      * teams available for user
      * (created by user or with user as a member)

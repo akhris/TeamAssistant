@@ -9,7 +9,7 @@ import domain.application.UseCase
 import kotlinx.coroutines.CoroutineDispatcher
 
 open class GetEntities<ENTITY : IEntity>(
-    val repo: IRepository<ENTITY>,
+    private val repo: IRepository<ENTITY>,
     @IoDispatcher
     ioDispatcher: CoroutineDispatcher
 ) : UseCase<EntitiesList<ENTITY>, GetEntities.Params>(ioDispatcher) {

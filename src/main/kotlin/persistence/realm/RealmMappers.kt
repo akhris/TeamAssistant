@@ -3,6 +3,7 @@ package persistence.realm
 import domain.Team
 import domain.User
 import io.realm.kotlin.ext.toRealmList
+import io.realm.kotlin.ext.toRealmSet
 import io.realm.kotlin.types.RealmInstant
 import org.mongodb.kbson.ObjectId
 import java.time.LocalDateTime
@@ -57,8 +58,8 @@ fun Team.toRealmTeam(): RealmTeam =
         name = this@toRealmTeam.name
         creator = this@toRealmTeam.creator?.toRealmUser()
         parentTeamId = this@toRealmTeam.parentTeamID?.let { ObjectId(it) }
-        admins = this@toRealmTeam.admins.map { it.toRealmUser() }.toRealmList()
-        members = this@toRealmTeam.members.map { it.toRealmUser() }.toRealmList()
+        admins = this@toRealmTeam.admins.map { it.toRealmUser() }.toRealmSet()
+        members = this@toRealmTeam.members.map { it.toRealmUser() }.toRealmSet()
         createdAt = this@toRealmTeam.createdAt?.toRealmInstant()
-        childTeams = this@toRealmTeam.childTeams.map { it.toRealmTeam() }.toRealmList()
+        childTeams = this@toRealmTeam.childTeams.map { it.toRealmTeam() }.toRealmSet()
     }
