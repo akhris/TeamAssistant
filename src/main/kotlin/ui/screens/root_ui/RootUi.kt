@@ -6,6 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.window.WindowDraggableArea
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,10 +22,13 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.fade
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimation
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import domain.User
+import kotlinx.coroutines.launch
 import tests.testTask1
 import tests.testTask2
 import tests.testTeam1
 import tests.testUser1
+import ui.FABController
+import ui.FABState
 import ui.SideNavigationPanel
 import ui.screens.activity.ActivityUi
 import ui.screens.projects.ProjectsUi
@@ -43,14 +48,17 @@ fun FrameWindowScope.RootUi(
     onCloseRequest: () -> Unit
 ) {
 
-
+    val scope = rememberCoroutineScope()
 //    val sampleTypes by remember(component) { component.sampleTypes }.subscribeAsState()
-    val currentlyLoggedUser by remember(component) { component.userLoggingInfo}.subscribeAsState()
+    val currentlyLoggedUser by remember(component) { component.userLoggingInfo }.subscribeAsState()
 
 
     val scaffoldState = rememberScaffoldState()
 
     val navigationItem by remember(component) { component.currentDestination }.subscribeAsState()
+
+    val fabController = remember(component) { FABController() }
+    val fabState by remember(fabController) { fabController.state }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -110,6 +118,27 @@ fun FrameWindowScope.RootUi(
                 }
             }
         },
+        floatingActionButton = {
+            when (fabState) {
+                FABState.HIDDEN -> {
+                    //show no FAB
+                }
+
+                FABState.VISIBLE -> {
+                    //show FAB
+                    FloatingActionButton(
+                        onClick = {
+                            scope.launch {
+                                fabController.onClick()
+                            }
+                        },
+                        content = {
+                            Icon(Icons.Rounded.Add, "add FAB")
+                        }
+                    )
+                }
+            }
+        },
         content = {
             if (currentlyLoggedUser.user == null && currentlyLoggedUser.userID.isNotEmpty()) {
                 //show new user ui
@@ -145,8 +174,8 @@ fun FrameWindowScope.RootUi(
                                     is IRootComponent.NavHost.Activity -> ActivityUi()
                                     is IRootComponent.NavHost.Projects -> ProjectsUi()
                                     is IRootComponent.NavHost.Tasks -> TasksUi(listOf(testTask1, testTask2))
-                                    is IRootComponent.NavHost.Team -> TeamsUi(testTeam1)
-                                    is IRootComponent.NavHost.UserDetails -> UserDetailsUi(testUser1)
+                                    is IRootComponent.NavHost.Team -> TeamsUi(child.component, fabController)
+                                    is IRootComponent.NavHost.UserDetails -> UserDetailsUi(testUser1, fabController)
                                 }
                             }
                         }

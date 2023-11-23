@@ -4,6 +4,7 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
 import domain.User
 import ui.NavItem
+import ui.screens.teams.ITeamsListComponent
 
 interface IRootComponent {
 
@@ -22,7 +23,7 @@ interface IRootComponent {
         class Tasks : NavHost()
         class Activity : NavHost()
         class Projects : NavHost()
-        class Team : NavHost()
+        class Team(val component: ITeamsListComponent) : NavHost()
     }
 
     sealed class Dialog {

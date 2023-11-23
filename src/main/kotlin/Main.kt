@@ -45,7 +45,7 @@ fun main() {
                 onCloseRequest = ::exitApplication,
                 undecorated = true
             ) {
-                App(root, windowState, onCloseRequest = { isRunning = false })
+                App(remember { root }, windowState, onCloseRequest = { isRunning = false })
             }
         }
     }

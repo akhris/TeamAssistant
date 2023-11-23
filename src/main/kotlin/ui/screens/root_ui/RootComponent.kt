@@ -23,6 +23,7 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import persistence.realm.toRealmUser
 import ui.NavItem
+import ui.screens.teams.TeamsListComponent
 import utils.UserUtils
 
 class RootComponent(
@@ -122,7 +123,7 @@ class RootComponent(
             NavHostConfig.Activity -> IRootComponent.NavHost.Activity()
             NavHostConfig.Projects -> IRootComponent.NavHost.Projects()
             NavHostConfig.Tasks -> IRootComponent.NavHost.Tasks()
-            NavHostConfig.Team -> IRootComponent.NavHost.Team()
+            NavHostConfig.Team -> IRootComponent.NavHost.Team(TeamsListComponent(di, componentContext))
             NavHostConfig.UserDetails -> IRootComponent.NavHost.UserDetails()
         }
     }

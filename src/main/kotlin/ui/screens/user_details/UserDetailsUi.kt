@@ -9,16 +9,27 @@ import androidx.compose.material.ListItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import domain.User
+import kotlinx.coroutines.channels.consume
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.launch
 import tests.testUser1
+import ui.FABController
+import ui.FABState
+import utils.log
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun UserDetailsUi(user: User) {
+fun UserDetailsUi(user: User, fabController: FABController) {
 
+
+    val scope = rememberCoroutineScope()
     Column(modifier = Modifier.padding(4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
@@ -47,10 +58,24 @@ fun UserDetailsUi(user: User) {
         })
     }
 
+
+    LaunchedEffect(Unit){
+        log("showing UserDetailsUi with fabController: $fabController")
+        fabController.setFABState(FABState.HIDDEN)
+
+    }
+
+    scope.launch {
+        fabController.clicks.collect {
+            log("fab clicked on UserDetailsUI")
+        }
+    }
+
+
 }
 
 @Preview
 @Composable
 fun userDetailsPreview() {
-    UserDetailsUi(testUser1)
+//    UserDetailsUi(testUser1)
 }
