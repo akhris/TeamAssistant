@@ -7,7 +7,7 @@ import ui.dialogs.IDialogComponent
 
 interface ITeamsListComponent {
 
-    val dialog: Value<ChildSlot<*, IDialogComponent>>
+    val dialogSlot: Value<ChildSlot<*, IDialogComponent>>
     /**
      * teams available for user
      * (created by user or with user as a member)

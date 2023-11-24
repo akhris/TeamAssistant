@@ -1,6 +1,11 @@
 package ui.dialogs
 
-interface IDialogComponent {
+sealed interface IDialogComponent {
 
-    fun onDismissClicked()
+    fun onDismiss()
+
+    interface ITextInputDialogComponent : IDialogComponent {
+
+    }
 }
+

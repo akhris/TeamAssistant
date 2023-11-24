@@ -6,8 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.window.WindowDraggableArea
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,7 +23,6 @@ import domain.User
 import kotlinx.coroutines.launch
 import tests.testTask1
 import tests.testTask2
-import tests.testTeam1
 import tests.testUser1
 import ui.FABController
 import ui.FABState
@@ -119,21 +116,27 @@ fun FrameWindowScope.RootUi(
             }
         },
         floatingActionButton = {
-            when (fabState) {
+            when (val fabSt = fabState) {
                 FABState.HIDDEN -> {
                     //show no FAB
                 }
 
-                FABState.VISIBLE -> {
+                is FABState.VISIBLE -> {
                     //show FAB
-                    FloatingActionButton(
+                    ExtendedFloatingActionButton(
                         onClick = {
                             scope.launch {
+                                log("calling fabController $fabController onClick")
                                 fabController.onClick()
                             }
                         },
-                        content = {
-                            Icon(Icons.Rounded.Add, "add FAB")
+                        text = {
+                            Text(text = fabSt.text)
+                        },
+                        icon = fabSt.iconPath?.let {
+                            {
+                                Icon(painter = painterResource(it), contentDescription = fabSt.description)
+                            }
                         }
                     )
                 }
@@ -165,7 +168,10 @@ fun FrameWindowScope.RootUi(
                             isExpandable = false,
                             withLabels = true,
                             currentSelection = navigationItem,
-                            onNavigationItemSelected = { component.navigateTo(it) })
+                            onNavigationItemSelected = {
+                                fabController.setFABState(FABState.HIDDEN)  //hide FAB
+                                component.navigateTo(it)
+                            })
                         Box(
                             modifier = Modifier.weight(1f)
                         ) {

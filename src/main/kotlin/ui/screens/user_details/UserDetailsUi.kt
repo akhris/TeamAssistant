@@ -28,9 +28,8 @@ import utils.log
 @Composable
 fun UserDetailsUi(user: User, fabController: FABController) {
 
-
-    val scope = rememberCoroutineScope()
-    Column(modifier = Modifier.padding(4.dp),
+    Column(
+        modifier = Modifier.padding(4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
@@ -59,18 +58,12 @@ fun UserDetailsUi(user: User, fabController: FABController) {
     }
 
 
-    LaunchedEffect(Unit){
-        log("showing UserDetailsUi with fabController: $fabController")
-        fabController.setFABState(FABState.HIDDEN)
-
-    }
-
-    scope.launch {
-        fabController.clicks.collect {
-            log("fab clicked on UserDetailsUI")
-        }
-    }
-
+//    LaunchedEffect(fabController) {
+//        fabController.setFABState(FABState.HIDDEN)
+//        fabController.clicks.collect {
+//            log("fab clicked on UserDetailsUI")
+//        }
+//    }
 
 }
 

@@ -6,26 +6,23 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import domain.Team
-import kotlinx.coroutines.channels.consume
-import kotlinx.coroutines.launch
-import tests.testTeam1
+import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import ui.FABState
 import ui.IFABController
+import ui.dialogs.IDialogComponent
+import ui.dialogs.text_input_dialog.TextInputDialogUi
 import utils.log
 
 
 @Composable
 fun TeamsUi(teamsListComponent: ITeamsListComponent, fabController: IFABController) {
-    val scope = rememberCoroutineScope()
 
+    val dialogSlot by remember(teamsListComponent) { teamsListComponent.dialogSlot }.subscribeAsState()
 
     Column(
         modifier = Modifier.padding(4.dp),
@@ -38,16 +35,34 @@ fun TeamsUi(teamsListComponent: ITeamsListComponent, fabController: IFABControll
         )
     }
 
-    LaunchedEffect(fabController) {
-        log("showing TeamsUi with component: $teamsListComponent and fabController: $fabController")
-        fabController.setFABState(FABState.VISIBLE)
+
+    dialogSlot.child?.instance?.also { comp ->
+        when (comp) {
+            is IDialogComponent.ITextInputDialogComponent -> {
+                TextInputDialogUi(comp)
+            }
+        }
 
     }
 
-    scope.launch {
-        fabController.clicks.collect {
-            log("fab clicked on teamsUI")
-        }
+
+
+
+
+    LaunchedEffect(fabController) {
+        fabController.setFABState(
+            FABState.VISIBLE(
+                iconPath = "vector/add_black_24dp.svg",
+                text = "добавить команду",
+                description = "добавить новую команду"
+            )
+        )
+        fabController
+            .clicks
+            .collect {
+                teamsListComponent.createNewTeam()
+                log("fab clicked on teamsUI")
+            }
     }
 }
 

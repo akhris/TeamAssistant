@@ -35,6 +35,6 @@ interface IFABController {
 }
 
 sealed class FABState {
-    object VISIBLE : FABState()
+    data class VISIBLE(val iconPath: String?, val text: String, val description: String) : FABState()
     object HIDDEN : FABState()
 }

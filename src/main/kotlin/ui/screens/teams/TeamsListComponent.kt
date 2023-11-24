@@ -26,7 +26,7 @@ class TeamsListComponent(
 
     private val dialogNavigation = SlotNavigation<DialogConfig>()
 
-    override val dialog: Value<ChildSlot<*, IDialogComponent>> =
+    override val dialogSlot: Value<ChildSlot<*, IDialogComponent>> =
         childSlot(
             source = dialogNavigation,
             // persistent = false, // Disable navigation state saving, if needed
