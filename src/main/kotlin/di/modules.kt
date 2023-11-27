@@ -10,6 +10,7 @@ import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 import persistence.realm.dao.TeamsDao
 import persistence.realm.dao.UsersDao
+import persistence.realm.repository.RealmTeamsRepository
 import persistence.repositories.Repository
 
 val usersModule = DI.Module("users module") {
@@ -32,5 +33,6 @@ val teamsModule = DI.Module("teams module"){
     bindSingleton<GetEntity<Team>> { GetEntity(instance(), ioDispatcher = Dispatchers.IO) }
     bindSingleton<InsertEntity<Team>> { InsertEntity(instance(), ioDispatcher = Dispatchers.IO) }
     bindSingleton<GetEntities<Team>> { GetEntities(instance(), ioDispatcher = Dispatchers.IO) }
+    bindSingleton<IRepositoryObservable<Team> > { RealmTeamsRepository(instance()) }
 
 }

@@ -2,6 +2,7 @@ package domain
 
 import domain.RepoResult.*
 import domain.valueobjects.SliceResult
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 
 
@@ -21,6 +22,16 @@ interface IRepository<ENTITY : IEntity> {
     suspend fun getSlice(columnName: String): List<SliceResult>
 }
 
+interface IRepositoryObservable<ENTITY : IEntity> {
+    fun getByID(id: String): Flow<RepoResult<ENTITY>>
+    suspend fun remove(entity: ENTITY)
+    suspend fun update(entity: ENTITY)
+    suspend fun update(entities: List<ENTITY>)
+    suspend fun insert(entity: ENTITY)
+    suspend fun remove(specifications: List<ISpecification>)
+    fun query(specifications: List<ISpecification>): Flow<EntitiesList<ENTITY>>
+}
+
 
 /**
  * Marker interface for querying list of data from repository
@@ -33,6 +44,7 @@ interface ISpecification
  * It returns whether item was updated ([ItemUpdated]), inserted [ItemInserted] or removed [ItemRemoved] from the repo.
  */
 sealed class RepoResult<T>(val item: T) {
+    class InitialItem<T>(item: T) : RepoResult<T>(item)
     class ItemUpdated<T>(item: T) : RepoResult<T>(item)
     class ItemRemoved<T>(item: T) : RepoResult<T>(item)
     class ItemInserted<T>(item: T) : RepoResult<T>(item)
