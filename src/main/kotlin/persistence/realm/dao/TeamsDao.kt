@@ -5,6 +5,7 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
 import persistence.realm.*
+import utils.log
 
 class TeamsDao(private val realm: Realm) : IDao<Team> {
 
@@ -33,7 +34,7 @@ class TeamsDao(private val realm: Realm) : IDao<Team> {
         return (specs.find { it is Specification.GetAllForUserID } as? Specification.GetAllForUserID)?.let { spec: Specification.GetAllForUserID ->
             EntitiesList.NotGrouped(
                 realm
-                    .query<RealmTeam>("admins._id == $0 OR members._id == $0", spec.userID)
+                    .query<RealmTeam>("admins._id == $0 OR members._id == $0 OR creator._id == $0", spec.userID)
                     .find()
                     .map { it.toTeam() }
             )
@@ -67,7 +68,12 @@ class TeamsDao(private val realm: Realm) : IDao<Team> {
      */
     override suspend fun insert(entity: Team) {
         realm.write {
-            copyToRealm(entity.toRealmTeam())
+            log("going to insert team: $entity")
+            try {
+                copyToRealm(entity.toRealmTeam(), updatePolicy = UpdatePolicy.ALL)
+            } catch (e: Throwable) {
+                log(e.localizedMessage)
+            }
         }
     }
 }

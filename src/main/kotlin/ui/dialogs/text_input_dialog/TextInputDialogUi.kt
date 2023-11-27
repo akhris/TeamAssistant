@@ -1,27 +1,36 @@
 package ui.dialogs.text_input_dialog
 
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import ui.dialogs.IDialogComponent
 
 @Composable
-fun TextInputDialogUi(component: IDialogComponent.ITextInputDialogComponent) {
-    AlertDialog(onDismissRequest = { component.onDismiss() }, text = {
-        TextField(
-            value = "team 2",
-            onValueChange = { },
-            label = { Text("имя команды") })
-    }, confirmButton = {
-        Button(onClick = {
-//            if (newSampleTypeName.isNotEmpty()) {
-//                val newSampleType = SampleType(name = newSampleTypeName)
-//                component.addSampleType(
-//                    newSampleType
-//                )
-            component.onDismiss()
-//            }
-        }, content = { Text("добавить") })
-    }, title = {
-        Text("создать команду")
-    }, shape = MaterialTheme.shapes.medium)
+fun TextInputDialogUi(
+    component: IDialogComponent.ITextInputDialogComponent,
+    onOkClicked: (edittext: String) -> Unit
+) {
+    var editText by remember { mutableStateOf("") }
+
+    val hint = remember(component) { component.hint }
+    val okButtonText = remember(component) { component.OKButtonText }
+    val title = remember(component) { component.title }
+    AlertDialog(
+        onDismissRequest = { component.onDismiss() },
+        text = {
+            TextField(
+                value = editText,
+                onValueChange = { editText = it },
+                label = { Text(hint) })
+        },
+        confirmButton = {
+            Button(onClick = {
+                onOkClicked(editText)
+                component.onDismiss()
+            }, content = { Text(okButtonText) })
+        },
+        title = {
+            Text(title)
+        },
+        shape = MaterialTheme.shapes.medium
+    )
 }

@@ -21,7 +21,7 @@ class Repository<ENTITY : IEntity>(private val dao: IDao<ENTITY>) : IRepository<
     }
 
     override suspend fun query(specifications: List<ISpecification>): EntitiesList<ENTITY> {
-        TODO("Not yet implemented")
+        return dao.query(specifications)
     }
 
     override suspend fun getItemsCount(specifications: List<ISpecification>): Long {

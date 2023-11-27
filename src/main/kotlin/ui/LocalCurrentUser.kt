@@ -7,6 +7,6 @@ import domain.User
  *
  * It changes when a value in types selector is changed.
  *
- * Every UI in root scaffold's content can access current SampleType by calling [LocalCurrentUser.current]
+ * Every UI in root scaffold's content can access current User by calling [LocalCurrentUser.current]
  */
 val LocalCurrentUser = compositionLocalOf<User?> { null }

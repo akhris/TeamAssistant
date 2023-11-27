@@ -12,7 +12,7 @@ import java.util.*
 
 class RealmTask() : RealmObject {
     @PrimaryKey
-    var _id: ObjectId = ObjectId()
+    var _id:  String = UUID.randomUUID().toString()
     var name: String = ""
     var description: String = ""
     var realmProject: RealmProject? = null
@@ -25,7 +25,7 @@ class RealmProject(
 
 ) : RealmObject {
     @PrimaryKey
-    var _id: ObjectId = ObjectId()
+    var _id:  String = UUID.randomUUID().toString()
     var name: String = ""
     var description: String = ""
     var color: Int? = null
@@ -49,7 +49,7 @@ class RealmUser : RealmObject {
 
 class RealmTeam : RealmObject {
     @PrimaryKey
-    var _id: ObjectId = ObjectId()
+    var _id:  String = UUID.randomUUID().toString()
     var name: String = ""
     var description: String = ""
     var color: Int? = null

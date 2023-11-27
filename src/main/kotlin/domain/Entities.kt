@@ -1,5 +1,6 @@
 package domain
 
+import androidx.compose.ui.text.capitalize
 import domain.valueobjects.State
 import java.time.LocalDateTime
 import java.util.*
@@ -23,6 +24,28 @@ data class User(
     val createdAt: LocalDateTime? = null
 ) : IEntity {
     override fun toString() = "$name $surname"
+
+    fun getInitials(): String {
+        val builder = StringBuilder()
+        if (name.isNotEmpty()) {
+            builder.append(name.first().uppercase())
+            builder.append(".")
+        }
+        if (middleName.isNotEmpty()) {
+            if (builder.isNotEmpty()) {
+                builder.append(" ")
+            }
+            builder.append(middleName.first().uppercase())
+            builder.append(".")
+        }
+        if (surname.isNotEmpty()) {
+            if (builder.isNotEmpty()) {
+                builder.append(" ")
+            }
+            builder.append(surname.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() })
+        }
+        return builder.toString()
+    }
 }
 
 /**

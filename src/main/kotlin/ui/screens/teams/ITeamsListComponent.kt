@@ -3,6 +3,7 @@ package ui.screens.teams
 import com.arkivanov.decompose.router.slot.ChildSlot
 import com.arkivanov.decompose.value.Value
 import domain.Team
+import domain.User
 import ui.dialogs.IDialogComponent
 
 interface ITeamsListComponent {
@@ -15,9 +16,14 @@ interface ITeamsListComponent {
     val teams: Value<List<Team>>
 
     /**
-     * create new team
+     * Show a dialog for creating new team
      */
-    fun createNewTeam()
+    fun createNewTeamRequest()
+
+    /**
+     * Create new team and store it in database
+     */
+    fun createNewTeam(name: String, creator: User?)
 
     /**
      * delete the team (if user is a team creator)

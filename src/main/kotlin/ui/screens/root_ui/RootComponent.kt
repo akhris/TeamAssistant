@@ -37,7 +37,6 @@ class RootComponent(
     private val usersRepoCallbacks: IRepositoryCallback<User> by di.instance()
 
     private val userID = UserUtils.getUserID()
-    private val realm by di.instance<Realm>()
 
     private val dialogNav = StackNavigation<DialogConfig>()
     private val navHostNav = StackNavigation<NavHostConfig>()

@@ -42,7 +42,7 @@ fun User.toRealmUser(): RealmUser =
 
 fun RealmTeam.toTeam(): Team =
     Team(
-        id = _id.toHexString(),
+        id = _id,
         name = name,
         creator = creator?.toUser(),
         parentTeamID = parentTeamId?.toHexString(),
@@ -54,7 +54,7 @@ fun RealmTeam.toTeam(): Team =
 
 fun Team.toRealmTeam(): RealmTeam =
     RealmTeam().apply {
-        _id = ObjectId(this@toRealmTeam.id)
+        _id = this@toRealmTeam.id
         name = this@toRealmTeam.name
         creator = this@toRealmTeam.creator?.toRealmUser()
         parentTeamId = this@toRealmTeam.parentTeamID?.let { ObjectId(it) }
