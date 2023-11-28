@@ -1,4 +1,4 @@
-package ui.screens.teams
+package ui.screens.teams_list
 
 import LocalCurrentUser
 import androidx.compose.desktop.ui.tooling.preview.Preview
@@ -17,7 +17,6 @@ import ui.FABState
 import ui.IFABController
 import ui.dialogs.IDialogComponent
 import ui.dialogs.text_input_dialog.TextInputDialogUi
-import utils.log
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -34,10 +33,10 @@ fun TeamsUi(teamsListComponent: ITeamsListComponent, fabController: IFABControll
         modifier = Modifier.padding(4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        when (val t = teams) {
+        when (val teamsList = teams) {
             is EntitiesList.Grouped -> TODO()
             is EntitiesList.NotGrouped -> {
-                t.items.forEach { team ->
+                teamsList.items.forEach { team ->
                     ListItem(
                         text = { Text(team.name) },
                         secondaryText = team.creator?.let { { Text(it.getInitials()) } }
@@ -76,7 +75,6 @@ fun TeamsUi(teamsListComponent: ITeamsListComponent, fabController: IFABControll
             .clicks
             .collect {
                 teamsListComponent.createNewTeamRequest()
-                log("fab clicked on teamsUI")
             }
     }
 }

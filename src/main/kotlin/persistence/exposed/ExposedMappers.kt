@@ -35,10 +35,10 @@ fun EntityProject.toProject(): Project {
         name = this.name,
         description = this.description,
         color = this.color,
-        creatorID = this.creatorID.value.toString(),
+//        creatorID = this.creatorID.value.toString(),
         createdAt = this.createdAt,
         state = this.states.maxBy { it.setAt }.toState(),
-        tasks = tasks.map { it.toTask() }
+//        tasks = tasks.map { it.toTask() }
     )
 }
 

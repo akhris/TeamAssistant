@@ -70,10 +70,10 @@ class RealmTeamsRepository(private val realm: Realm) : IRepositoryObservable<Tea
     }
 
     override suspend fun update(entity: Team) {
-        val mappedUser = entity.toRealmTeam()
+        val mappedTeam = entity.toRealmTeam()
         realm.write {
             //make an upsert
-            copyToRealm(mappedUser, UpdatePolicy.ALL)
+            copyToRealm(mappedTeam, UpdatePolicy.ALL)
         }
     }
 

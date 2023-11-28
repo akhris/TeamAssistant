@@ -1,4 +1,4 @@
-package ui.screens.teams
+package ui.screens.teams_list
 
 import com.arkivanov.decompose.router.slot.ChildSlot
 import com.arkivanov.decompose.value.Value

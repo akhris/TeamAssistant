@@ -28,10 +28,11 @@ import ui.FABController
 import ui.FABState
 import ui.SideNavigationPanel
 import ui.screens.activity.ActivityUi
-import ui.screens.projects.ProjectsUi
+import ui.screens.projects_list.ProjectsUi
 import ui.screens.tasks.TasksUi
-import ui.screens.teams.TeamsUi
+import ui.screens.teams_list.TeamsUi
 import ui.screens.user_details.UserDetailsUi
+import utils.UserUtils
 import utils.log
 
 
@@ -47,8 +48,9 @@ fun FrameWindowScope.RootUi(
 
     val scope = rememberCoroutineScope()
 //    val sampleTypes by remember(component) { component.sampleTypes }.subscribeAsState()
-    val currentlyLoggedUser by remember(component) { component.userLoggingInfo }.subscribeAsState()
+    val currentlyLoggedUser by remember(component) { component.userLoggingInfo }.collectAsState(IRootComponent.UserLoggingInfo())
 
+    log("currentlyLoggedUser: $currentlyLoggedUser")
 
     val scaffoldState = rememberScaffoldState()
 
@@ -178,7 +180,7 @@ fun FrameWindowScope.RootUi(
                             Children(stack = component.navHostStack, animation = stackAnimation(fade())) {
                                 when (val child = it.instance) {
                                     is IRootComponent.NavHost.Activity -> ActivityUi()
-                                    is IRootComponent.NavHost.Projects -> ProjectsUi()
+                                    is IRootComponent.NavHost.Projects -> ProjectsUi(child.component, fabController)
                                     is IRootComponent.NavHost.Tasks -> TasksUi(listOf(testTask1, testTask2))
                                     is IRootComponent.NavHost.Team -> TeamsUi(child.component, fabController)
                                     is IRootComponent.NavHost.UserDetails -> UserDetailsUi(testUser1, fabController)

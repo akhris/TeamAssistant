@@ -12,7 +12,7 @@ import java.util.*
 
 class RealmTask() : RealmObject {
     @PrimaryKey
-    var _id:  String = UUID.randomUUID().toString()
+    var _id: String = UUID.randomUUID().toString()
     var name: String = ""
     var description: String = ""
     var realmProject: RealmProject? = null
@@ -21,16 +21,15 @@ class RealmTask() : RealmObject {
     var realmUsers: RealmList<RealmUser> = realmListOf()
 }
 
-class RealmProject(
-
-) : RealmObject {
+class RealmProject() : RealmObject {
     @PrimaryKey
-    var _id:  String = UUID.randomUUID().toString()
+    var _id: String = UUID.randomUUID().toString()
     var name: String = ""
     var description: String = ""
     var color: Int? = null
     var creator: RealmUser? = null
     var createdAt: RealmInstant? = null
+    var teams: RealmSet<RealmTeam> = realmSetOf()
 }
 
 class RealmUser : RealmObject {
@@ -49,7 +48,7 @@ class RealmUser : RealmObject {
 
 class RealmTeam : RealmObject {
     @PrimaryKey
-    var _id:  String = UUID.randomUUID().toString()
+    var _id: String = UUID.randomUUID().toString()
     var name: String = ""
     var description: String = ""
     var color: Int? = null

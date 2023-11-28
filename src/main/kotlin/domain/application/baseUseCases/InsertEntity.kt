@@ -2,6 +2,7 @@ package domain.application.baseUseCases
 
 import domain.IEntity
 import domain.IRepository
+import domain.IRepositoryObservable
 import domain.application.IoDispatcher
 import domain.application.UseCase
 import kotlinx.coroutines.CoroutineDispatcher
@@ -12,7 +13,7 @@ import kotlinx.coroutines.CoroutineDispatcher
  * May be overridden for more complex use cases.
  */
 open class InsertEntity<ENTITY : IEntity>(
-    private val repo: IRepository<ENTITY>,
+    private val repo: IRepositoryObservable<ENTITY>,
         @IoDispatcher
     ioDispatcher: CoroutineDispatcher
 ) : UseCase<ENTITY, InsertEntity.Params>(ioDispatcher) {

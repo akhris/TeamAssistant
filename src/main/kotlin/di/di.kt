@@ -8,5 +8,6 @@ val di = DI {
     bindSingleton { RealmInit.createRealm() }
     import(usersModule)
     import(teamsModule)
+    import(projectsModule)
 }
 

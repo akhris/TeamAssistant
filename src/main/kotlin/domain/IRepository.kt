@@ -43,11 +43,12 @@ interface ISpecification
  * Result sealed class that is used in [IRepositoryCallback].
  * It returns whether item was updated ([ItemUpdated]), inserted [ItemInserted] or removed [ItemRemoved] from the repo.
  */
-sealed class RepoResult<T>(val item: T) {
-    class InitialItem<T>(item: T) : RepoResult<T>(item)
-    class ItemUpdated<T>(item: T) : RepoResult<T>(item)
-    class ItemRemoved<T>(item: T) : RepoResult<T>(item)
-    class ItemInserted<T>(item: T) : RepoResult<T>(item)
+sealed class RepoResult<T>(val item: T?) {
+    class InitialItem<T>(item: T?) : RepoResult<T>(item)
+    class ItemUpdated<T>(item: T?) : RepoResult<T>(item)
+    class ItemRemoved<T>(item: T?) : RepoResult<T>(item)
+    class ItemInserted<T>(item: T?) : RepoResult<T>(item)
+    class PendindObject<T> : RepoResult<T>(null)
 }
 
 /**

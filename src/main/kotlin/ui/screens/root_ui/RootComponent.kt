@@ -10,21 +10,20 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.lifecycle.subscribe
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
-import domain.IRepositoryCallback
-import domain.RepoResult
-import domain.User
+import domain.*
 import domain.application.Result
 import domain.application.baseUseCases.GetEntity
 import domain.application.baseUseCases.InsertEntity
-import io.realm.kotlin.Realm
-import io.realm.kotlin.notifications.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import org.kodein.di.DI
 import org.kodein.di.instance
-import persistence.realm.toRealmUser
 import ui.NavItem
-import ui.screens.teams.TeamsListComponent
+import ui.screens.projects_list.ProjectsListComponent
+import ui.screens.teams_list.TeamsListComponent
 import utils.UserUtils
+import utils.log
 
 class RootComponent(
     private val di: DI,
@@ -34,22 +33,33 @@ class RootComponent(
     private val scope =
         CoroutineScope(Dispatchers.Default + SupervisorJob())
 
-    private val usersRepoCallbacks: IRepositoryCallback<User> by di.instance()
-
     private val userID = UserUtils.getUserID()
+    private val repo: IRepositoryObservable<User> by di.instance()
 
     private val dialogNav = StackNavigation<DialogConfig>()
     private val navHostNav = StackNavigation<NavHostConfig>()
 //    private val toolbarUtilsNav = StackNavigation<ToolbarUtilsConfig>()
 
-    private val getUser: GetEntity<User> by di.instance()
-    private val insertUser: InsertEntity<User> by di.instance()
-
     private val _currentDestination = MutableValue<NavItem>(NavItem.homeItem)
     override val currentDestination: Value<NavItem> = _currentDestination
 
-    private val _userLoggingInfo = MutableValue(IRootComponent.UserLoggingInfo())
-    override val userLoggingInfo: Value<IRootComponent.UserLoggingInfo> = _userLoggingInfo
+    //    override val userLoggingInfo: Value<IRootComponent.UserLoggingInfo> = _userLoggingInfo
+
+    override val userLoggingInfo: Flow<IRootComponent.UserLoggingInfo> = repo
+        .getByID(userID)
+        .map { result ->
+            when (result) {
+                is RepoResult.InitialItem -> result.item
+                is RepoResult.ItemInserted -> result.item
+                is RepoResult.ItemRemoved -> null
+                is RepoResult.ItemUpdated -> result.item
+                is RepoResult.PendindObject -> null
+            }
+        }
+        .map {
+            IRootComponent.UserLoggingInfo(userID = userID, user = it)
+        }
+
 //        realm
 //            .query<RealmUser>("_id == $0", userID)
 //            .first()
@@ -102,7 +112,7 @@ class RootComponent(
     override fun createNewUser(user: User) {
         scope.launch {
             //make insert user usecase
-            insertUser(InsertEntity.Insert(user))
+            repo.insert(user)
         }
     }
 
@@ -120,7 +130,7 @@ class RootComponent(
     private fun createChild(config: NavHostConfig, componentContext: ComponentContext): IRootComponent.NavHost {
         return when (config) {
             NavHostConfig.Activity -> IRootComponent.NavHost.Activity()
-            NavHostConfig.Projects -> IRootComponent.NavHost.Projects()
+            NavHostConfig.Projects -> IRootComponent.NavHost.Projects(ProjectsListComponent(di, componentContext))
             NavHostConfig.Tasks -> IRootComponent.NavHost.Tasks()
             NavHostConfig.Team -> IRootComponent.NavHost.Team(TeamsListComponent(di, componentContext))
             NavHostConfig.UserDetails -> IRootComponent.NavHost.UserDetails()
@@ -193,18 +203,6 @@ class RootComponent(
 //        object SampleTypesSelector : ToolbarUtilsConfig()
     }
 
-    private suspend fun invalidateUser() {
-        val user = when (val userResponse = getUser(GetEntity.GetByID(userID))) {
-            is Result.Success -> {
-                userResponse.value
-            }
-
-            is Result.Failure -> {
-                null
-            }
-        }
-        _userLoggingInfo.value = IRootComponent.UserLoggingInfo(userID = userID, user = user)
-    }
 
     init {
         componentContext
@@ -212,17 +210,6 @@ class RootComponent(
             .subscribe(onDestroy = {
                 scope.coroutineContext.cancelChildren()
             })
-
-        scope.launch { invalidateUser() }
-
-        //subscribe to repository callbacks:
-        scope.launch {
-            usersRepoCallbacks
-                .updates
-                .collect {
-                    invalidateUser()
-                }
-        }
 
     }
 

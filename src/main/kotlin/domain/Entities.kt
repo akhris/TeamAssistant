@@ -74,10 +74,11 @@ data class Project(
     val name: String = "",
     val description: String = "",
     val color: Int? = null,
-    val creatorID: String = "",
+    val creator: User? = null,
     val createdAt: LocalDateTime? = null,
     val state: State.Project? = null,
-    val tasks: List<Task> = listOf()
+//    val tasks: List<Task> = listOf(),
+    val teams: List<Team> = listOf()
 ) : IEntity
 
 
