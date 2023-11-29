@@ -5,6 +5,7 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
 import androidx.compose.material.Text
@@ -13,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import domain.EntitiesList
+import domain.Team
 import ui.FABState
 import ui.IFABController
 import ui.dialogs.IDialogComponent
@@ -37,10 +39,7 @@ fun TeamsUi(teamsListComponent: ITeamsListComponent, fabController: IFABControll
             is EntitiesList.Grouped -> TODO()
             is EntitiesList.NotGrouped -> {
                 teamsList.items.forEach { team ->
-                    ListItem(
-                        text = { Text(team.name) },
-                        secondaryText = team.creator?.let { { Text(it.getInitials()) } }
-                    )
+                    RenderTeam(team)
                 }
             }
         }
@@ -76,6 +75,20 @@ fun TeamsUi(teamsListComponent: ITeamsListComponent, fabController: IFABControll
             .collect {
                 teamsListComponent.createNewTeamRequest()
             }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun RenderTeam(team: Team){
+    Card {
+        ListItem(modifier = Modifier.padding(4.dp), text = {
+            Text(text = team.name)
+        }, secondaryText = team.creator?.getInitials()?.let {
+            {
+                Text(text = it)
+            }
+        })
     }
 }
 

@@ -1,9 +1,13 @@
-package ui.screens.projects_list
+package ui.screens.tasks_list
 
 import LocalCurrentUser
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
@@ -13,45 +17,44 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import domain.EntitiesList
-import domain.Project
+import domain.Task
+import domain.valueobjects.State
 import ui.FABState
 import ui.IFABController
 import ui.dialogs.IDialogComponent
 import ui.dialogs.text_input_dialog.TextInputDialogUi
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ProjectsUi(projectsListComponent: IProjectsListComponent, fabController: IFABController) {
+fun TasksUi(tasksListComponent: ITasksListComponent, fabController: IFABController) {
+    val dialogSlot by remember(tasksListComponent) { tasksListComponent.dialogSlot }.subscribeAsState()
 
-    val dialogSlot by remember(projectsListComponent) { projectsListComponent.dialogSlot }.subscribeAsState()
-
-    val projects by remember(projectsListComponent) { projectsListComponent.projects }.collectAsState(EntitiesList.empty())
-
+    val tasks by remember(tasksListComponent) { tasksListComponent.tasks }.collectAsState(EntitiesList.empty())
     val user = LocalCurrentUser.current
 
+    val scrollstate = rememberScrollState()
+
     Column(
-        modifier = Modifier.padding(4.dp),
+        modifier = Modifier.fillMaxSize().verticalScroll(state = scrollstate),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        when (val projectsList = projects) {
+        when (val tasksList = tasks) {
             is EntitiesList.Grouped -> TODO()
             is EntitiesList.NotGrouped -> {
-                projectsList.items.forEach { project ->
-                    RenderProject(project)
+                tasksList.items.forEach { task ->
+                    RenderTask(task)
                 }
             }
         }
 
     }
 
-
     dialogSlot.child?.instance?.also { comp ->
         when (comp) {
             is IDialogComponent.ITextInputDialogComponent -> {
                 TextInputDialogUi(
                     component = comp,
-                    onOkClicked = { projectName ->
-                        projectsListComponent.createNewProject(projectName, user)
+                    onOkClicked = { taskName ->
+                        tasksListComponent.createNewTask(taskName, user)
                     }
                 )
             }
@@ -64,30 +67,36 @@ fun ProjectsUi(projectsListComponent: IProjectsListComponent, fabController: IFA
         fabController.setFABState(
             FABState.VISIBLE(
                 iconPath = "vector/add_black_24dp.svg",
-                text = "добавить проект",
-                description = "добавить новый проект"
+                text = "добавить задачу",
+                description = "добавить новую задачу"
             )
         )
         fabController
             .clicks
             .collect {
-                projectsListComponent.createNewProjectRequest()
+                tasksListComponent.createNewTaskRequest()
             }
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun RenderProject(project: Project) {
+private fun RenderTask(task: Task) {
     Card {
         ListItem(modifier = Modifier.padding(4.dp), text = {
-            Text(text = project.description)
+            Text(text = task.description)
         }, overlineText = {
-            Text(text = project.name)
-        }, secondaryText = project.creator?.getInitials()?.let {
+            Text(text = task.name)
+        }, secondaryText = task.creator?.getInitials()?.let {
             {
                 Text(text = it)
             }
         })
     }
+}
+
+@Preview
+@Composable
+private fun PreviewTasksUi() {
+//    TasksUi(listOf(testTask1, testTask2))
 }

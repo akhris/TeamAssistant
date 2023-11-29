@@ -13,7 +13,7 @@ object UiSettings {
     }
 
     object Debounce {
-        const val debounceTime: Long = 500L
+        const val debounceTime: Long = 200L
     }
 
     object AppBar {
@@ -31,6 +31,10 @@ object UiSettings {
     object SampleTypesSelector {
         val selectorWidth = 320.dp
         val dropDownIconSize = 32.dp
+    }
+
+    object Screen {
+        val screenPadding = 16.dp
     }
 
     object DataTable {

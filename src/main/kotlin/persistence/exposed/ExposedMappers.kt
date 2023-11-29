@@ -47,10 +47,10 @@ fun EntityTask.toTask(): Task {
         id = this.id.value.toString(),
         name = this.name,
         description = this.description,
-        projectID = this.project?.value?.toString(),
-        creatorID = this.users.find { it.isCreator }?.user?.value?.toString(),
+//        project = this.project?.value?.toString(),
+//        creatorID = this.users.find { it.isCreator }?.user?.value?.toString(),
         createdAt = this.createdAt,
-        mustBeDoneBefore = this.doneBefore,
+        targetDate = this.doneBefore,
         subtasks = this.subTasks.map { it.toSubTask() }
     )
 }

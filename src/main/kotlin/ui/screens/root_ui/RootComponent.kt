@@ -11,9 +11,6 @@ import com.arkivanov.essenty.lifecycle.subscribe
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import domain.*
-import domain.application.Result
-import domain.application.baseUseCases.GetEntity
-import domain.application.baseUseCases.InsertEntity
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -21,9 +18,10 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import ui.NavItem
 import ui.screens.projects_list.ProjectsListComponent
+import ui.screens.tasks_list.TasksListComponent
 import ui.screens.teams_list.TeamsListComponent
+import ui.screens.user_details.UserDetailsComponent
 import utils.UserUtils
-import utils.log
 
 class RootComponent(
     private val di: DI,
@@ -131,9 +129,15 @@ class RootComponent(
         return when (config) {
             NavHostConfig.Activity -> IRootComponent.NavHost.Activity()
             NavHostConfig.Projects -> IRootComponent.NavHost.Projects(ProjectsListComponent(di, componentContext))
-            NavHostConfig.Tasks -> IRootComponent.NavHost.Tasks()
+            NavHostConfig.Tasks -> IRootComponent.NavHost.Tasks(TasksListComponent(di, componentContext))
             NavHostConfig.Team -> IRootComponent.NavHost.Team(TeamsListComponent(di, componentContext))
-            NavHostConfig.UserDetails -> IRootComponent.NavHost.UserDetails()
+            NavHostConfig.UserDetails -> IRootComponent.NavHost.UserDetails(
+                UserDetailsComponent(
+                    userID = userID,
+                    di,
+                    componentContext
+                )
+            )
         }
     }
 

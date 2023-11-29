@@ -1,6 +1,5 @@
 package domain
 
-import androidx.compose.ui.text.capitalize
 import domain.valueobjects.State
 import java.time.LocalDateTime
 import java.util.*
@@ -89,13 +88,13 @@ data class Task(
     override val id: String = UUID.randomUUID().toString(),
     val name: String = "",
     val description: String = "",
-    val projectID: String? = null,
-    val creatorID: String? = null,
+    val project: Project? = null,
+    val creator: User? = null,
     val createdAt: LocalDateTime? = null,
     val completedAt: LocalDateTime? = null,
-    val mustBeDoneBefore: LocalDateTime? = null,
+    val targetDate: LocalDateTime? = null,
     val state: State.Task? = null,
-    val users: List<String> = listOf(),
+    val users: List<User> = listOf(),
     val subtasks: List<SubTask> = listOf()
 ) : IEntity {
     override fun toString() = name

@@ -21,18 +21,15 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stac
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import domain.User
 import kotlinx.coroutines.launch
-import tests.testTask1
-import tests.testTask2
-import tests.testUser1
 import ui.FABController
 import ui.FABState
 import ui.SideNavigationPanel
+import ui.UiSettings
 import ui.screens.activity.ActivityUi
 import ui.screens.projects_list.ProjectsUi
-import ui.screens.tasks.TasksUi
+import ui.screens.tasks_list.TasksUi
 import ui.screens.teams_list.TeamsUi
 import ui.screens.user_details.UserDetailsUi
-import utils.UserUtils
 import utils.log
 
 
@@ -175,15 +172,15 @@ fun FrameWindowScope.RootUi(
                                 component.navigateTo(it)
                             })
                         Box(
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f).padding(UiSettings.Screen.screenPadding)
                         ) {
                             Children(stack = component.navHostStack, animation = stackAnimation(fade())) {
                                 when (val child = it.instance) {
                                     is IRootComponent.NavHost.Activity -> ActivityUi()
                                     is IRootComponent.NavHost.Projects -> ProjectsUi(child.component, fabController)
-                                    is IRootComponent.NavHost.Tasks -> TasksUi(listOf(testTask1, testTask2))
+                                    is IRootComponent.NavHost.Tasks -> TasksUi(child.component, fabController)
                                     is IRootComponent.NavHost.Team -> TeamsUi(child.component, fabController)
-                                    is IRootComponent.NavHost.UserDetails -> UserDetailsUi(testUser1, fabController)
+                                    is IRootComponent.NavHost.UserDetails -> UserDetailsUi(child.component, fabController)
                                 }
                             }
                         }

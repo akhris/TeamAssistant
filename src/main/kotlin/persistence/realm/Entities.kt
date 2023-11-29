@@ -1,13 +1,12 @@
 package persistence.realm
 
-import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.ext.realmSetOf
 import io.realm.kotlin.types.RealmInstant
-import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.RealmSet
 import io.realm.kotlin.types.annotations.PrimaryKey
 import org.mongodb.kbson.ObjectId
+import java.time.LocalDateTime
 import java.util.*
 
 class RealmTask() : RealmObject {
@@ -15,10 +14,23 @@ class RealmTask() : RealmObject {
     var _id: String = UUID.randomUUID().toString()
     var name: String = ""
     var description: String = ""
-    var realmProject: RealmProject? = null
+    var project: RealmProject? = null
     var creator: RealmUser? = null
     var createdAt: RealmInstant? = null
-    var realmUsers: RealmList<RealmUser> = realmListOf()
+    var targetDate: RealmInstant? = null
+    var completedAt: RealmInstant? = null
+    var users: RealmSet<RealmUser> = realmSetOf()
+    var subtasks: RealmSet<RealmSubTask> = realmSetOf()
+}
+
+class RealmSubTask() : RealmObject {
+    @PrimaryKey
+    var _id: String = UUID.randomUUID().toString()
+    var name: String = ""
+    var description: String = ""
+    var createdAt: RealmInstant? = null
+    var targetDate: RealmInstant? = null
+    var completedAt: RealmInstant? = null
 }
 
 class RealmProject() : RealmObject {
@@ -28,6 +40,7 @@ class RealmProject() : RealmObject {
     var description: String = ""
     var color: Int? = null
     var creator: RealmUser? = null
+    var admins: RealmSet<RealmUser> = realmSetOf()
     var createdAt: RealmInstant? = null
     var teams: RealmSet<RealmTeam> = realmSetOf()
 }
