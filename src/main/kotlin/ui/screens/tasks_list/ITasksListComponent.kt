@@ -35,6 +35,6 @@ interface ITasksListComponent {
     /**
      * navigate to task details screen for selected task
      */
-    fun onTaskSelected(task: Task)
+    fun onTaskClicked(task: Task)
 
 }

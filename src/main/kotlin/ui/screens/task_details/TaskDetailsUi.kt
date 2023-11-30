@@ -1,14 +1,13 @@
 package ui.screens.task_details
 
+import LocalCurrentUser
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -20,14 +19,84 @@ import tests.testTask1
 @Composable
 fun TaskDetailsUi(component: ITaskDetailsComponent) {
     val task by remember(component) { component.task }.collectAsState(null)
+    val user = LocalCurrentUser.current ?: return
     task?.let {
-        RenderTaskDetails(it)
+        if (listOfNotNull(it.creator).contains(user)) {
+            //only creator can edit the task
+            RenderTaskDetailsEditable(it, onTaskUpdated = {
+
+            })
+        } else {
+            RenderTaskDetailsNotEditable(it)
+        }
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalLayoutApi::class)
 @Composable
-private fun RenderTaskDetails(task: Task) {
+private fun RenderTaskDetailsEditable(task: Task, onTaskUpdated: (Task) -> Unit) {
+    var tempTask by remember(task) { mutableStateOf(task) }
+    Card {
+        Column(modifier = Modifier.padding(4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            //name
+            TextField(value = tempTask.name, onValueChange = {
+                tempTask = tempTask.copy(name = it)
+            }, textStyle = MaterialTheme.typography.h4, label = { Text("название") })
+
+            Chip(onClick = {
+                //show date/time picker
+            }) {
+                Text("date and time")
+            }
+            //users:
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                task.users.forEach {
+                    Chip(onClick = {}, content = {
+                        Text(it.getInitials())
+                    }, leadingIcon = {
+                        Icon(
+                            painterResource("vector/person_remove_black_24dp.svg"),
+                            contentDescription = "remove user from task"
+                        )
+                    })
+                }
+                Chip(onClick = {}) {
+                    Icon(
+                        painterResource("vector/person_add_black_24dp.svg"),
+                        contentDescription = "add users to task"
+                    )
+                }
+            }
+            Divider(modifier = Modifier.fillMaxWidth().height(1.dp))
+
+            //attachments
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                task.attachments.forEach {
+                    RenderAttachment(it, onClick = {})
+                }
+                Chip(onClick = {}) { Icon(Icons.Rounded.Add, contentDescription = "add attachment to task") }
+            }
+            Divider(modifier = Modifier.fillMaxWidth().height(1.dp))
+
+            //description
+            TextField(value = tempTask.description, onValueChange = {
+                tempTask = tempTask.copy(description = it)
+            }, textStyle = MaterialTheme.typography.body1, label = { Text("описание") })
+
+
+            //subtasks
+            task.subtasks.forEach {
+                RenderSubTask(subTask = it, onClick = {})
+            }
+            OutlinedButton(onClick = {},content = { Text("Добавить подзадачу") })
+
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class, ExperimentalLayoutApi::class)
+@Composable
+private fun RenderTaskDetailsNotEditable(task: Task) {
     Card {
         Column(modifier = Modifier.padding(4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             //name
@@ -119,5 +188,5 @@ private fun RenderSubTask(subTask: SubTask, onClick: () -> Unit) {
 @Preview
 @Composable
 private fun PreviewTasksUi() {
-    RenderTaskDetails(testTask1)
+    RenderTaskDetailsNotEditable(testTask1)
 }

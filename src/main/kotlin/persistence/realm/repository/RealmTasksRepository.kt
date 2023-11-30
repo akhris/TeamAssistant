@@ -4,6 +4,10 @@ import domain.*
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
+import io.realm.kotlin.notifications.DeletedObject
+import io.realm.kotlin.notifications.InitialObject
+import io.realm.kotlin.notifications.PendingObject
+import io.realm.kotlin.notifications.UpdatedObject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
@@ -13,7 +17,19 @@ import utils.log
 
 class RealmTasksRepository(private val realm: Realm) : IRepositoryObservable<Task> {
     override fun getByID(id: String): Flow<RepoResult<Task>> {
-        TODO("Not yet implemented")
+        return realm
+            .query<RealmTask>("_id == $0", id)
+            .first()
+            .asFlow()
+            .map { result ->
+                when (result) {
+                    is DeletedObject -> RepoResult.ItemRemoved(result.obj?.toTask())
+                    is InitialObject -> RepoResult.InitialItem(result.obj.toTask())
+                    is UpdatedObject -> RepoResult.ItemUpdated(result.obj.toTask())
+                    is PendingObject -> RepoResult.PendindObject()
+                }
+            }
+            .distinctUntilChanged()
     }
 
     override suspend fun remove(specifications: List<ISpecification>) {

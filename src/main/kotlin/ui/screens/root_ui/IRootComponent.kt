@@ -6,6 +6,7 @@ import domain.User
 import kotlinx.coroutines.flow.Flow
 import ui.NavItem
 import ui.screens.projects_list.IProjectsListComponent
+import ui.screens.task_details.ITaskDetailsComponent
 import ui.screens.tasks_list.ITasksListComponent
 import ui.screens.teams_list.ITeamsListComponent
 import ui.screens.user_details.IUserDetailsComponent
@@ -24,7 +25,9 @@ interface IRootComponent {
 
     sealed class NavHost {
         class UserDetails(val component: IUserDetailsComponent) : NavHost()
-        class Tasks(val component: ITasksListComponent) : NavHost()
+        class TasksList(val component: ITasksListComponent) : NavHost()
+
+        class TaskDetails(val component: ITaskDetailsComponent) : NavHost()
         class Activity : NavHost()
         class Projects(val component: IProjectsListComponent) : NavHost()
         class Team(val component: ITeamsListComponent) : NavHost()

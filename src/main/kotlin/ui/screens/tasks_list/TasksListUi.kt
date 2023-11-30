@@ -37,7 +37,7 @@ fun TasksListUi(tasksListComponent: ITasksListComponent, fabController: IFABCont
             is EntitiesList.Grouped -> TODO()
             is EntitiesList.NotGrouped -> {
                 tasksList.items.forEach { task ->
-                    RenderTask(task, onTaskClick = { tasksListComponent.onTaskSelected(task) })
+                    RenderTask(task, onTaskClick = { tasksListComponent.onTaskClicked(task) })
                 }
             }
         }

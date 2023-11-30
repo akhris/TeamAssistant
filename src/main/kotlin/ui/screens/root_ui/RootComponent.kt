@@ -18,6 +18,7 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import ui.NavItem
 import ui.screens.projects_list.ProjectsListComponent
+import ui.screens.task_details.TaskDetailsComponent
 import ui.screens.tasks_list.TasksListComponent
 import ui.screens.teams_list.TeamsListComponent
 import ui.screens.user_details.UserDetailsComponent
@@ -129,7 +130,16 @@ class RootComponent(
         return when (config) {
             NavHostConfig.Activity -> IRootComponent.NavHost.Activity()
             NavHostConfig.Projects -> IRootComponent.NavHost.Projects(ProjectsListComponent(di, componentContext))
-            NavHostConfig.Tasks -> IRootComponent.NavHost.Tasks(TasksListComponent(di, componentContext))
+            NavHostConfig.TasksList -> IRootComponent.NavHost.TasksList(
+                TasksListComponent(
+                    di,
+                    componentContext,
+                    onTaskSelected = {
+                        //navigate to task details:
+                        navHostNav.replaceCurrent(NavHostConfig.TaskDetails(it))
+                    })
+            )
+
             NavHostConfig.Team -> IRootComponent.NavHost.Team(TeamsListComponent(di, componentContext))
             NavHostConfig.UserDetails -> IRootComponent.NavHost.UserDetails(
                 UserDetailsComponent(
@@ -137,6 +147,10 @@ class RootComponent(
                     di,
                     componentContext
                 )
+            )
+
+            is NavHostConfig.TaskDetails -> IRootComponent.NavHost.TaskDetails(
+                TaskDetailsComponent(taskID = config.task.id, di, componentContext)
             )
         }
     }
@@ -166,7 +180,7 @@ class RootComponent(
         return when (this) {
             NavItem.Activity -> NavHostConfig.Activity
             NavItem.Projects -> NavHostConfig.Projects
-            NavItem.Tasks -> NavHostConfig.Tasks
+            NavItem.Tasks -> NavHostConfig.TasksList
             NavItem.Team -> NavHostConfig.Team
             NavItem.UserDetails -> NavHostConfig.UserDetails
         }
@@ -189,7 +203,10 @@ class RootComponent(
         object UserDetails : NavHostConfig()
 
         @Parcelize
-        object Tasks : NavHostConfig()
+        object TasksList : NavHostConfig()
+
+        @Parcelize
+        class TaskDetails(val task: Task) : NavHostConfig()
 
         @Parcelize
         object Activity : NavHostConfig()

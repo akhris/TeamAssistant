@@ -13,14 +13,14 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import ui.dialogs.IDialogComponent
 import ui.dialogs.text_input_dialog.DialogTextInputComponent
-import ui.screens.teams_list.TeamsListComponent
 import utils.UserUtils
 import utils.log
 import java.time.LocalDateTime
 
 class TasksListComponent(
     di: DI,
-    componentContext: ComponentContext
+    componentContext: ComponentContext,
+    private val onTaskSelected: (Task) -> Unit
 ) : ITasksListComponent, ComponentContext by componentContext {
 
     private val scope =
@@ -76,8 +76,8 @@ class TasksListComponent(
         TODO("Not yet implemented")
     }
 
-    override fun onTaskSelected(task: Task) {
-        TODO("Not yet implemented")
+    override fun onTaskClicked(task: Task) {
+        onTaskSelected(task)
     }
 
     init {
