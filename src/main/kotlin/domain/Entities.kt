@@ -1,5 +1,6 @@
 package domain
 
+import domain.valueobjects.Attachment
 import domain.valueobjects.State
 import java.time.LocalDateTime
 import java.util.*
@@ -20,7 +21,9 @@ data class User(
     val phoneNumber: String = "",
     val roomNumber: String = "",
     val color: Int? = null,
-    val createdAt: LocalDateTime? = null
+    val createdAt: LocalDateTime? = null,
+    val avatar: String = "",
+    val lastOnline: LocalDateTime? = null
 ) : IEntity {
     override fun toString() = "$name $surname"
 
@@ -95,7 +98,8 @@ data class Task(
     val targetDate: LocalDateTime? = null,
     val state: State.Task? = null,
     val users: List<User> = listOf(),
-    val subtasks: List<SubTask> = listOf()
+    val subtasks: List<SubTask> = listOf(),
+    val attachments: List<Attachment> = listOf()
 ) : IEntity {
     override fun toString() = name
 }

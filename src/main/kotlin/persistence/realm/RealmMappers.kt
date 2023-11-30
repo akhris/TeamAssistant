@@ -1,6 +1,7 @@
 package persistence.realm
 
 import domain.*
+import domain.valueobjects.Attachment
 import io.realm.kotlin.ext.realmSetOf
 import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.ext.toRealmSet
@@ -27,7 +28,9 @@ fun RealmUser.toUser(): User =
         phoneNumber = phoneNumber,
         roomNumber = roomNumber,
         color = color,
-        createdAt = createdAt?.toLocalDateTime()
+        createdAt = createdAt?.toLocalDateTime(),
+        lastOnline = lastOnline?.toLocalDateTime(),
+        avatar = avatar
     )
 
 fun User.toRealmUser(): RealmUser =
@@ -41,6 +44,8 @@ fun User.toRealmUser(): RealmUser =
         roomNumber = this@toRealmUser.roomNumber
         color = this@toRealmUser.color
         createdAt = this@toRealmUser.createdAt?.toRealmInstant()
+        lastOnline = this@toRealmUser.lastOnline?.toRealmInstant()
+        avatar = this@toRealmUser.avatar
     }
 
 fun RealmTeam.toTeam(): Team =
@@ -102,6 +107,7 @@ fun Task.toRealmTask(): RealmTask =
         targetDate = this@toRealmTask.targetDate?.toRealmInstant()
         users = this@toRealmTask.users.map { it.toRealmUser() }.toRealmSet()
         subtasks = this@toRealmTask.subtasks.map { it.toRealmSubTask() }.toRealmSet()
+        attachments = this@toRealmTask.attachments.map { it.toRealmAttachment() }.toRealmList()
     }
 
 fun RealmTask.toTask(): Task =
@@ -115,7 +121,8 @@ fun RealmTask.toTask(): Task =
         completedAt = completedAt?.toLocalDateTime(),
         targetDate = targetDate?.toLocalDateTime(),
         users = users.map { it.toUser() },
-        subtasks = subtasks.map { it.toSubTask() }
+        subtasks = subtasks.map { it.toSubTask() },
+        attachments = attachments.map { it.toAttachment() }
     )
 
 fun SubTask.toRealmSubTask(): RealmSubTask =
@@ -137,3 +144,49 @@ fun RealmSubTask.toSubTask(): SubTask =
         targetDate = targetDate?.toLocalDateTime(),
         completedAt = completedAt?.toLocalDateTime()
     )
+
+fun RealmAttachment.toAttachment(): Attachment {
+    return when (type) {
+        Attachment.File::class.simpleName -> Attachment.File(path = dataPrimary, name = name, description = description)
+        Attachment.Folder::class.simpleName -> Attachment.Folder(path = dataPrimary, name = name, description = description)
+        Attachment.InternetLink::class.simpleName -> Attachment.InternetLink(link = dataPrimary, name = name, description = description)
+        Attachment.Email::class.simpleName -> Attachment.Email(email = dataPrimary, name = name, description = description)
+        else -> throw IllegalStateException("unknown attachment type: $type")
+    }
+}
+
+fun Attachment.toRealmAttachment(): RealmAttachment {
+    return RealmAttachment().apply {
+        when (val a = this@toRealmAttachment) {
+            is Attachment.Email -> {
+                type = Attachment.Email::class.simpleName
+                    ?: throw IllegalStateException("cannot convert $this to RealmAttachment")
+                dataPrimary = a.email
+                name = a.name
+                description = a.description
+            }
+
+            is Attachment.File -> {
+                type = Attachment.File::class.simpleName
+                    ?: throw IllegalStateException("cannot convert $this to RealmAttachment")
+                dataPrimary = a.path
+                name = a.name
+                description = a.description
+            }
+
+            is Attachment.Folder -> {
+                Attachment.Folder::class.simpleName
+                dataPrimary = a.path
+                name = a.name
+                description = a.description
+            }
+
+            is Attachment.InternetLink -> {
+                Attachment.InternetLink::class.simpleName
+                dataPrimary = a.link
+                name = a.name
+                description = a.description
+            }
+        }
+    }
+}

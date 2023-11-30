@@ -76,6 +76,10 @@ class TasksListComponent(
         TODO("Not yet implemented")
     }
 
+    override fun onTaskSelected(task: Task) {
+        TODO("Not yet implemented")
+    }
+
     init {
         componentContext
             .lifecycle

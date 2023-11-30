@@ -27,7 +27,7 @@ import ui.SideNavigationPanel
 import ui.UiSettings
 import ui.screens.activity.ActivityUi
 import ui.screens.projects_list.ProjectsUi
-import ui.screens.tasks_list.TasksUi
+import ui.screens.tasks_list.TasksListUi
 import ui.screens.teams_list.TeamsUi
 import ui.screens.user_details.UserDetailsUi
 import utils.log
@@ -178,7 +178,7 @@ fun FrameWindowScope.RootUi(
                                 when (val child = it.instance) {
                                     is IRootComponent.NavHost.Activity -> ActivityUi()
                                     is IRootComponent.NavHost.Projects -> ProjectsUi(child.component, fabController)
-                                    is IRootComponent.NavHost.Tasks -> TasksUi(child.component, fabController)
+                                    is IRootComponent.NavHost.Tasks -> TasksListUi(child.component, fabController)
                                     is IRootComponent.NavHost.Team -> TeamsUi(child.component, fabController)
                                     is IRootComponent.NavHost.UserDetails -> UserDetailsUi(child.component, fabController)
                                 }

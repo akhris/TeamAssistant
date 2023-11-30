@@ -1,29 +1,28 @@
-package ui.screens.user_details
+package ui.screens.task_details
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.lifecycle.subscribe
 import domain.IRepositoryObservable
-import domain.Project
 import domain.RepoResult
+import domain.Task
 import domain.User
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import org.kodein.di.DI
 import org.kodein.di.instance
 import ui.screens.BaseComponent
 import utils.UserUtils
 
-class UserDetailsComponent(
-    userID: String = UserUtils.getUserID(),
+class TaskDetailsComponent(
+    taskID: String,
     di: DI,
     componentContext: ComponentContext
-) : IUserDetailsComponent, BaseComponent(componentContext) {
+) : ITaskDetailsComponent, BaseComponent(componentContext) {
 
-    private val repo: IRepositoryObservable<User> by di.instance()
+    private val repo: IRepositoryObservable<Task> by di.instance()
 
-    override val user: Flow<User> = repo.getByID(userID).mapNotNull {
+    override val task: Flow<Task> = repo.getByID(taskID).mapNotNull {
         when (it) {
             is RepoResult.InitialItem -> it.item
             is RepoResult.ItemInserted -> it.item
@@ -33,11 +32,16 @@ class UserDetailsComponent(
         }
     }
 
-    override fun updateUser(user: User) {
+    override fun removeTask(task: Task) {
         scope.launch {
-            repo.update(user)
+            repo.remove(task)
         }
     }
 
+    override fun updateTask(task: Task) {
+        scope.launch {
+            repo.update(task)
+        }
+    }
 
 }

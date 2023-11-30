@@ -32,5 +32,9 @@ interface ITasksListComponent {
      */
     fun deleteTasks()
 
+    /**
+     * navigate to task details screen for selected task
+     */
+    fun onTaskSelected(task: Task)
 
 }

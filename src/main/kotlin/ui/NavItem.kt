@@ -34,7 +34,7 @@ sealed class NavItem(val pathToIcon: String, val title: String) {
 
     companion object {
         fun getMainNavigationItems() =
-            listOf<NavItem>(Tasks, Activity, Projects, Team, UserDetails)
+            listOf<NavItem>(Tasks, Projects, Team, UserDetails)
 
         val homeItem = Tasks
     }

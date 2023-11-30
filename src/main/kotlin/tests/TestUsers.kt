@@ -10,3 +10,12 @@ val testUser1 = User(
     email = "sidorov@mail.ru",
     roomNumber = "132"
 )
+
+val testUser2 = User(
+    name = "Дмитрий",
+    middleName = "Сергеевич",
+    surname = "Иванов",
+    phoneNumber = "4384",
+    email = "ivanov@mail.ru",
+    roomNumber = "133"
+)

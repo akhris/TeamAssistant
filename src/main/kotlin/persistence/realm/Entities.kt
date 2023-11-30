@@ -1,9 +1,8 @@
 package persistence.realm
 
+import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.ext.realmSetOf
-import io.realm.kotlin.types.RealmInstant
-import io.realm.kotlin.types.RealmObject
-import io.realm.kotlin.types.RealmSet
+import io.realm.kotlin.types.*
 import io.realm.kotlin.types.annotations.PrimaryKey
 import org.mongodb.kbson.ObjectId
 import java.time.LocalDateTime
@@ -21,6 +20,7 @@ class RealmTask() : RealmObject {
     var completedAt: RealmInstant? = null
     var users: RealmSet<RealmUser> = realmSetOf()
     var subtasks: RealmSet<RealmSubTask> = realmSetOf()
+    var attachments: RealmList<RealmAttachment> = realmListOf()
 }
 
 class RealmSubTask() : RealmObject {
@@ -56,7 +56,8 @@ class RealmUser : RealmObject {
     var roomNumber: String = ""
     var color: Int? = null
     var createdAt: RealmInstant? = null
-
+    var lastOnline: RealmInstant? = null
+    var avatar: String = ""
 }
 
 class RealmTeam : RealmObject {
@@ -73,3 +74,10 @@ class RealmTeam : RealmObject {
     var createdAt: RealmInstant? = null
 }
 
+class RealmAttachment : EmbeddedRealmObject {
+    var type: String = ""
+    var name: String = ""
+    var description: String = ""
+    var dataPrimary: String = ""
+    var dataSecondary: String = ""
+}

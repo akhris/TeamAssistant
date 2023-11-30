@@ -2,30 +2,26 @@ package ui.screens.tasks_list
 
 import LocalCurrentUser
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ListItem
-import androidx.compose.material.Text
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import domain.EntitiesList
 import domain.Task
-import domain.valueobjects.State
+import tests.testTask1
 import ui.FABState
 import ui.IFABController
 import ui.dialogs.IDialogComponent
 import ui.dialogs.text_input_dialog.TextInputDialogUi
 
 @Composable
-fun TasksUi(tasksListComponent: ITasksListComponent, fabController: IFABController) {
+fun TasksListUi(tasksListComponent: ITasksListComponent, fabController: IFABController) {
     val dialogSlot by remember(tasksListComponent) { tasksListComponent.dialogSlot }.subscribeAsState()
 
     val tasks by remember(tasksListComponent) { tasksListComponent.tasks }.collectAsState(EntitiesList.empty())
@@ -41,7 +37,7 @@ fun TasksUi(tasksListComponent: ITasksListComponent, fabController: IFABControll
             is EntitiesList.Grouped -> TODO()
             is EntitiesList.NotGrouped -> {
                 tasksList.items.forEach { task ->
-                    RenderTask(task)
+                    RenderTask(task, onTaskClick = { tasksListComponent.onTaskSelected(task) })
                 }
             }
         }
@@ -79,24 +75,37 @@ fun TasksUi(tasksListComponent: ITasksListComponent, fabController: IFABControll
     }
 }
 
+// https://dribbble.com/shots/6646573-To-do-list
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun RenderTask(task: Task) {
-    Card {
-        ListItem(modifier = Modifier.padding(4.dp), text = {
-            Text(text = task.description)
-        }, overlineText = {
-            Text(text = task.name)
-        }, secondaryText = task.creator?.getInitials()?.let {
-            {
-                Text(text = it)
+private fun RenderTask(task: Task, onTaskClick: () -> Unit) {
+    Card(modifier = Modifier.clickable(onClick = onTaskClick)) {
+        ListItem(
+            icon = {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .border(2.dp, Color.White, CircleShape)
+                        .padding(1.dp)
+                        .clip(CircleShape)
+                        .background(Color.DarkGray)
+                )
+            },
+            text = {
+                Text(task.name)
+            },
+            secondaryText = task.creator?.let { creator ->
+                {
+                    Text(creator.getInitials())
+
+                }
             }
-        })
+        )
     }
 }
 
 @Preview
 @Composable
 private fun PreviewTasksUi() {
-//    TasksUi(listOf(testTask1, testTask2))
+    RenderTask(testTask1, onTaskClick = {})
 }

@@ -13,7 +13,8 @@ object RealmInit {
                 RealmUser::class,
                 RealmTeam::class,
                 RealmTask::class,
-                RealmSubTask::class
+                RealmSubTask::class,
+                RealmAttachment::class
             )
         )
         return Realm.open(config)

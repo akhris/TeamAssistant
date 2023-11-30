@@ -1,11 +1,16 @@
 package ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.Colors
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
+import com.materialkolor.AnimatedDynamicMaterialTheme
+import com.materialkolor.DynamicMaterialTheme
+import com.materialkolor.PaletteStyle
+import com.materialkolor.contrast.Contrast
+import com.materialkolor.dynamicColorScheme
+import utils.log
 
 /*
 // Color theme for material3
@@ -124,10 +129,16 @@ object AppTheme {
 
 @Composable
 fun AppTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    MaterialTheme(
+        MaterialTheme(
         colors = if (darkTheme)
             darkColors(AppTheme.darkTheme)
         else lightColors(AppTheme.lightTheme),
         content = content
     )
+//    DynamicMaterialTheme(
+//        useDarkTheme = darkTheme,
+//        seedColor = Color(0xFF2C3639),
+//        style = PaletteStyle.Neutral,
+//        content = content
+//    )
 }

@@ -5,6 +5,7 @@ val kodeinVersion: String by project
 val decomposeVersion: String by project
 val SQLiteDriverVersion: String by project
 val realmVersion: String by project
+val kolorVersion: String by project
 
 plugins {
     kotlin("jvm")
@@ -49,6 +50,10 @@ dependencies {
 
     //realm:
     implementation("io.realm.kotlin:library-base:1.12.0")
+
+    //https://github.com/jordond/materialkolor
+    //generation theme from a seed color
+    implementation("com.materialkolor:material-kolor:$kolorVersion")
 
 }
 
