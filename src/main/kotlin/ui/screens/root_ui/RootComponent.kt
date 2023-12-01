@@ -17,16 +17,16 @@ import kotlinx.coroutines.flow.map
 import org.kodein.di.DI
 import org.kodein.di.instance
 import ui.NavItem
+import ui.screens.master_detail.MasterDetailsComponent
 import ui.screens.projects_list.ProjectsListComponent
 import ui.screens.task_details.TaskDetailsComponent
-import ui.screens.tasks_list.TasksListComponent
 import ui.screens.teams_list.TeamsListComponent
 import ui.screens.user_details.UserDetailsComponent
 import utils.UserUtils
 
 class RootComponent(
     private val di: DI,
-    componentContext: ComponentContext
+    componentContext: ComponentContext,
 ) : IRootComponent, ComponentContext by componentContext {
 
     private val scope =
@@ -34,6 +34,8 @@ class RootComponent(
 
     private val userID = UserUtils.getUserID()
     private val repo: IRepositoryObservable<User> by di.instance()
+    private val tasksRepo: IRepositoryObservable<Task> by di.instance()
+    private val projectsRepo: IRepositoryObservable<Project> by di.instance()
 
     private val dialogNav = StackNavigation<DialogConfig>()
     private val navHostNav = StackNavigation<NavHostConfig>()
@@ -74,24 +76,6 @@ class RootComponent(
 //            }
 
 
-    private val _navHostStack =
-        childStack(
-            source = navHostNav,
-            initialConfiguration = NavItem.homeItem.toNavHostConfig(),
-//            handleBackButton = true,
-            childFactory = ::createChild,
-            key = "navhost stack"
-        )
-
-    private val _dialogStack =
-        childStack(
-            source = dialogNav,
-            initialConfiguration = DialogConfig.None,
-//            handleBackButton = true,
-            childFactory = ::createChild,
-            key = "dialog stack"
-        )
-
 //    private val _toolbarUtilsStack =
 //        childStack(
 //            source = toolbarUtilsNav,
@@ -100,8 +84,20 @@ class RootComponent(
 //            key = "toolbar utils stack"
 //        )
 
-    override val navHostStack: Value<ChildStack<*, IRootComponent.NavHost>> = _navHostStack
-    override val dialogStack: Value<ChildStack<*, IRootComponent.Dialog>> = _dialogStack
+    override val navHostStack: Value<ChildStack<*, IRootComponent.NavHost>> = childStack(
+        source = navHostNav,
+        initialConfiguration = NavItem.homeItem.toNavHostConfig(),
+//            handleBackButton = true,
+        childFactory = ::createChild,
+        key = "navhost stack"
+    )
+    override val dialogStack: Value<ChildStack<*, IRootComponent.Dialog>> = childStack(
+        source = dialogNav,
+        initialConfiguration = DialogConfig.None,
+//            handleBackButton = true,
+        childFactory = ::createChild,
+        key = "dialog stack"
+    )
 //    override val toolbarUtilsStack: Value<ChildStack<*, IRootComponent.ToolbarUtils>> = _toolbarUtilsStack
 
 //    override fun showAddSampleTypeDialog() {
@@ -126,18 +122,25 @@ class RootComponent(
         }
     }
 
+
     private fun createChild(config: NavHostConfig, componentContext: ComponentContext): IRootComponent.NavHost {
         return when (config) {
             NavHostConfig.Activity -> IRootComponent.NavHost.Activity()
             NavHostConfig.Projects -> IRootComponent.NavHost.Projects(ProjectsListComponent(di, componentContext))
-            NavHostConfig.TasksList -> IRootComponent.NavHost.TasksList(
-                TasksListComponent(
-                    di,
-                    componentContext,
-                    onTaskSelected = {
-                        //navigate to task details:
-                        navHostNav.replaceCurrent(NavHostConfig.TaskDetails(it))
-                    })
+//            NavHostConfig.TasksList -> IRootComponent.NavHost.TasksList(
+//                TasksListComponent(
+//                    di,
+//                    componentContext,
+//                    onTaskSelected = {
+//                        //navigate to task details:
+//                        navHostNav.replaceCurrent(NavHostConfig.TaskDetails(it))
+//                    })
+//            )
+            NavHostConfig.TasksList -> IRootComponent.NavHost.TaskMasterDetail(
+                MasterDetailsComponent(
+                    repo = tasksRepo,
+                    componentContext
+                )
             )
 
             NavHostConfig.Team -> IRootComponent.NavHost.Team(TeamsListComponent(di, componentContext))
@@ -151,6 +154,13 @@ class RootComponent(
 
             is NavHostConfig.TaskDetails -> IRootComponent.NavHost.TaskDetails(
                 TaskDetailsComponent(taskID = config.task.id, di, componentContext)
+            )
+
+            NavHostConfig.ProjectsList -> IRootComponent.NavHost.ProjectMasterDetail(
+                MasterDetailsComponent(
+                    repo = projectsRepo,
+                    componentContext
+                )
             )
         }
     }
@@ -170,7 +180,7 @@ class RootComponent(
 
     override fun navigateTo(navItem: NavItem) {
         val newConf = navItem.toNavHostConfig()
-        if (newConf != null && newConf != _navHostStack.value.active.configuration) {
+        if (newConf != null && newConf != navHostStack.value.active.configuration) {
             navHostNav.replaceCurrent(newConf)
             _currentDestination.value = navItem
         }
@@ -179,7 +189,7 @@ class RootComponent(
     private fun NavItem.toNavHostConfig(): NavHostConfig {
         return when (this) {
             NavItem.Activity -> NavHostConfig.Activity
-            NavItem.Projects -> NavHostConfig.Projects
+            NavItem.Projects -> NavHostConfig.ProjectsList
             NavItem.Tasks -> NavHostConfig.TasksList
             NavItem.Team -> NavHostConfig.Team
             NavItem.UserDetails -> NavHostConfig.UserDetails
@@ -208,6 +218,8 @@ class RootComponent(
         @Parcelize
         class TaskDetails(val task: Task) : NavHostConfig()
 
+        @Parcelize
+        object ProjectsList : NavHostConfig()
         @Parcelize
         object Activity : NavHostConfig()
 

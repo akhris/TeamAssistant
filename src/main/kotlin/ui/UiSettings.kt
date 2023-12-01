@@ -34,7 +34,7 @@ object UiSettings {
     }
 
     object Screen {
-        val screenPadding = 16.dp
+        val screenPadding = 4.dp
     }
 
     object DataTable {

@@ -24,10 +24,13 @@ import kotlinx.coroutines.launch
 import ui.FABController
 import ui.FABState
 import ui.SideNavigationPanel
-import ui.UiSettings
 import ui.screens.activity.ActivityUi
+import ui.screens.master_detail.MasterDetailUi
 import ui.screens.projects_list.ProjectsUi
+import ui.screens.projects_list.RenderProject
+import ui.screens.task_details.RenderTaskDetailsNotEditable
 import ui.screens.task_details.TaskDetailsUi
+import ui.screens.tasks_list.RenderTask
 import ui.screens.tasks_list.TasksListUi
 import ui.screens.teams_list.TeamsUi
 import ui.screens.user_details.UserDetailsUi
@@ -41,7 +44,7 @@ fun FrameWindowScope.RootUi(
     isDarkTheme: Boolean,
     onThemeChanged: (isDark: Boolean) -> Unit,
     windowState: WindowState,
-    onCloseRequest: () -> Unit
+    onCloseRequest: () -> Unit,
 ) {
 
     val scope = rememberCoroutineScope()
@@ -173,7 +176,7 @@ fun FrameWindowScope.RootUi(
                                 component.navigateTo(it)
                             })
                         Box(
-                            modifier = Modifier.weight(1f).padding(UiSettings.Screen.screenPadding)
+                            modifier = Modifier.weight(1f)
                         ) {
                             Children(stack = component.navHostStack, animation = stackAnimation(fade())) {
                                 when (val child = it.instance) {
@@ -181,8 +184,30 @@ fun FrameWindowScope.RootUi(
                                     is IRootComponent.NavHost.Projects -> ProjectsUi(child.component, fabController)
                                     is IRootComponent.NavHost.TasksList -> TasksListUi(child.component, fabController)
                                     is IRootComponent.NavHost.Team -> TeamsUi(child.component, fabController)
-                                    is IRootComponent.NavHost.UserDetails -> UserDetailsUi(child.component, fabController)
+                                    is IRootComponent.NavHost.UserDetails -> UserDetailsUi(
+                                        child.component,
+                                        fabController
+                                    )
+
                                     is IRootComponent.NavHost.TaskDetails -> TaskDetailsUi(child.component)
+                                    is IRootComponent.NavHost.TaskMasterDetail -> MasterDetailUi(
+                                        component = child.component,
+                                        renderListItem = {
+                                            RenderTask(it)
+                                        }
+                                    ) {
+                                        RenderTaskDetailsNotEditable(it)
+                                    }
+
+                                    is IRootComponent.NavHost.ProjectMasterDetail -> MasterDetailUi(
+                                        component = child.component,
+                                        renderListItem = {
+                                            RenderProject(it)
+                                        }
+                                    ) {
+                                        //todo render project details here:
+                                        Text("project details for: ${it.name}")
+                                    }
                                 }
                             }
                         }
@@ -212,7 +237,7 @@ fun FrameWindowScope.RootUi(
 private fun NewUserUi(
     user: User,
     onUserChange: (User) -> Unit,
-    onUserCreate: () -> Unit
+    onUserCreate: () -> Unit,
 ) {
 
     Column(

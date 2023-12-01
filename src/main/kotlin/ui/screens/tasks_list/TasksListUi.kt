@@ -37,7 +37,7 @@ fun TasksListUi(tasksListComponent: ITasksListComponent, fabController: IFABCont
             is EntitiesList.Grouped -> TODO()
             is EntitiesList.NotGrouped -> {
                 tasksList.items.forEach { task ->
-                    RenderTask(task, onTaskClick = { tasksListComponent.onTaskClicked(task) })
+                    RenderTask(task)
                 }
             }
         }
@@ -78,8 +78,8 @@ fun TasksListUi(tasksListComponent: ITasksListComponent, fabController: IFABCont
 // https://dribbble.com/shots/6646573-To-do-list
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun RenderTask(task: Task, onTaskClick: () -> Unit) {
-    Card(modifier = Modifier.clickable(onClick = onTaskClick)) {
+fun RenderTask(task: Task) {
+    Card {
         ListItem(
             icon = {
                 Box(
@@ -107,5 +107,5 @@ private fun RenderTask(task: Task, onTaskClick: () -> Unit) {
 @Preview
 @Composable
 private fun PreviewTasksUi() {
-    RenderTask(testTask1, onTaskClick = {})
+    RenderTask(testTask1)
 }

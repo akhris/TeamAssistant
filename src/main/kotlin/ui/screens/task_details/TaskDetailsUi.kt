@@ -34,7 +34,7 @@ fun TaskDetailsUi(component: ITaskDetailsComponent) {
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalLayoutApi::class)
 @Composable
-private fun RenderTaskDetailsEditable(task: Task, onTaskUpdated: (Task) -> Unit) {
+fun RenderTaskDetailsEditable(task: Task, onTaskUpdated: (Task) -> Unit) {
     var tempTask by remember(task) { mutableStateOf(task) }
     Card {
         Column(modifier = Modifier.padding(4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -96,7 +96,7 @@ private fun RenderTaskDetailsEditable(task: Task, onTaskUpdated: (Task) -> Unit)
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalLayoutApi::class)
 @Composable
-private fun RenderTaskDetailsNotEditable(task: Task) {
+fun RenderTaskDetailsNotEditable(task: Task) {
     Card {
         Column(modifier = Modifier.padding(4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             //name
