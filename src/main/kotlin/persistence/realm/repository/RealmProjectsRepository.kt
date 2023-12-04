@@ -4,10 +4,7 @@ import domain.*
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
-import io.realm.kotlin.notifications.DeletedObject
-import io.realm.kotlin.notifications.InitialObject
-import io.realm.kotlin.notifications.PendingObject
-import io.realm.kotlin.notifications.UpdatedObject
+import io.realm.kotlin.notifications.*
 import kotlinx.coroutines.flow.*
 import persistence.realm.*
 import utils.log
@@ -64,6 +61,28 @@ class RealmProjectsRepository(private val realm: Realm) : IRepositoryObservable<
 
 
         } ?: flowOf(EntitiesList.empty())
+    }
+
+    override fun getFilterSpecs(): Flow<List<FilterSpec>> {
+        return realm
+            .query<RealmProject>()
+            .find()
+            .asFlow()
+            .map { projectResult ->
+                val projects = when (projectResult) {
+                    is InitialResults -> projectResult.list
+                    is UpdatedResults -> projectResult.list
+                }
+                projects
+                    .flatMap { task ->
+                        listOf(
+                            "teams" to task.teams?.map { it.toTeam() }
+                        )
+                    }
+                    .groupBy({ it.first }, { it.second })   //todo flatmap teams
+                    .map { FilterSpec.Values(columnName = it.key, filteredValues = it.value) }
+
+            }
     }
 
     override suspend fun insert(entity: Project) {

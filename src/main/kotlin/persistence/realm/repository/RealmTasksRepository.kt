@@ -4,18 +4,15 @@ import domain.*
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
-import io.realm.kotlin.notifications.DeletedObject
-import io.realm.kotlin.notifications.InitialObject
-import io.realm.kotlin.notifications.PendingObject
-import io.realm.kotlin.notifications.UpdatedObject
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
+import io.realm.kotlin.notifications.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.*
 import persistence.realm.*
 import utils.log
 
 class RealmTasksRepository(private val realm: Realm) : IRepositoryObservable<Task> {
+
+
     override fun getByID(id: String): Flow<RepoResult<Task>> {
         return realm
             .query<RealmTask>("_id == $0", id)
@@ -34,6 +31,30 @@ class RealmTasksRepository(private val realm: Realm) : IRepositoryObservable<Tas
 
     override suspend fun remove(specifications: List<ISpecification>) {
         TODO("Not yet implemented")
+    }
+
+
+    override fun getFilterSpecs(): Flow<List<FilterSpec>> {
+        return realm
+            .query<RealmTask>()
+            .find()
+            .asFlow()
+            .map { taskResult ->
+                val tasks = when (taskResult) {
+                    is InitialResults -> taskResult.list
+                    is UpdatedResults -> taskResult.list
+                }
+                tasks
+                    .flatMap { task ->
+                        listOf(
+                            "project" to task.project?.toProject(),
+                            "completedAt" to task.completedAt?.toLocalDateTime()
+                        )
+                    }
+                    .groupBy({ it.first }, { it.second })
+                    .map { FilterSpec.Values(columnName = it.key, filteredValues = it.value) }
+
+            }
     }
 
     override fun query(specifications: List<ISpecification>): Flow<EntitiesList<Task>> {
@@ -71,6 +92,7 @@ class RealmTasksRepository(private val realm: Realm) : IRepositoryObservable<Tas
             }
         }
     }
+
 
     override suspend fun update(entities: List<Task>) {
         entities.forEach {

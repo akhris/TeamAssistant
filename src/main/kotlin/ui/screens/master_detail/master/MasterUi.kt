@@ -1,16 +1,17 @@
 package ui.screens.master_detail.master
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import domain.EntitiesList
+import domain.FilterSpec
 import domain.IEntity
 
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun <T : IEntity> MasterUi(
     component: IMasterComponent<T>,
@@ -19,17 +20,53 @@ fun <T : IEntity> MasterUi(
 
     val items by remember(component) { component.items }.collectAsState(EntitiesList.empty())
 
+    val filterSpecs = remember(component) { component.filterSpecs }?.collectAsState(listOf())
 //    renderItemsList(items)
 
-    // TODO: Add filtering/sorting panel here
+    var showFilterPanel by remember { mutableStateOf(false) }
 
-    when (items) {
-        is EntitiesList.Grouped -> RenderGroupedItems(items as EntitiesList.Grouped<T>)
-        is EntitiesList.NotGrouped -> RenderNotGroupedItems(
-            items = items as EntitiesList.NotGrouped<T>,
-            renderListItem = renderListItem,
-            onItemClick = { component.onItemClicked(it) }
-        )
+    Column {
+        // TODO: Add filtering/sorting panel here
+        Row {
+            filterSpecs?.let {
+                IconButton(onClick = {
+                    showFilterPanel = !showFilterPanel
+                }, content = {
+                    Icon(painterResource("vector/filter_alt_black_24dp.svg"), contentDescription = "filter values")
+                })
+            }
+        }
+        if (showFilterPanel) {
+            filterSpecs?.let {
+                it
+                    .value
+                    .forEach { fSpec ->
+                        Text(text = fSpec.columnName)
+                        when (fSpec) {
+                            is FilterSpec.Range<*> -> TODO()
+                            is FilterSpec.Values -> {
+                                FlowRow {
+                                    fSpec.filteredValues.forEach { fv ->
+                                        FilterChip(
+                                            selected = false,
+                                            onClick = {},
+                                            content = { Text(fv?.toString() ?: "no value") })
+                                    }
+                                }
+                            }
+                        }
+                    }
+            }
+        }
+
+        when (items) {
+            is EntitiesList.Grouped -> RenderGroupedItems(items as EntitiesList.Grouped<T>)
+            is EntitiesList.NotGrouped -> RenderNotGroupedItems(
+                items = items as EntitiesList.NotGrouped<T>,
+                renderListItem = renderListItem,
+                onItemClick = { component.onItemClicked(it) }
+            )
+        }
     }
 }
 

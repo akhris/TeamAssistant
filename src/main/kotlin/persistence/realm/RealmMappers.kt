@@ -30,7 +30,8 @@ fun RealmUser.toUser(): User =
         color = color,
         createdAt = createdAt?.toLocalDateTime(),
         lastOnline = lastOnline?.toLocalDateTime(),
-        avatar = avatar
+        avatar = avatar,
+        isPinned = isPinned
     )
 
 fun User.toRealmUser(): RealmUser =
@@ -46,6 +47,7 @@ fun User.toRealmUser(): RealmUser =
         createdAt = this@toRealmUser.createdAt?.toRealmInstant()
         lastOnline = this@toRealmUser.lastOnline?.toRealmInstant()
         avatar = this@toRealmUser.avatar
+        isPinned = this@toRealmUser.isPinned
     }
 
 fun RealmTeam.toTeam(): Team =
@@ -57,7 +59,8 @@ fun RealmTeam.toTeam(): Team =
         admins = admins.map { it.toUser() },
         members = members.map { it.toUser() },
         createdAt = createdAt?.toLocalDateTime(),
-        childTeams = childTeams.map { it.toTeam() }
+        childTeams = childTeams.map { it.toTeam() },
+        isPinned = isPinned
     )
 
 fun Team.toRealmTeam(): RealmTeam =
@@ -70,6 +73,7 @@ fun Team.toRealmTeam(): RealmTeam =
         members = this@toRealmTeam.members.map { it.toRealmUser() }.toRealmSet()
         createdAt = this@toRealmTeam.createdAt?.toRealmInstant()
         childTeams = this@toRealmTeam.childTeams.map { it.toRealmTeam() }.toRealmSet()
+        isPinned = this@toRealmTeam.isPinned
     }
 
 fun RealmProject.toProject(): Project =
@@ -80,7 +84,8 @@ fun RealmProject.toProject(): Project =
         color = color,
         creator = creator?.toUser(),
         createdAt = createdAt?.toLocalDateTime(),
-        teams = teams.map { it.toTeam() }
+        teams = teams.map { it.toTeam() },
+        isPinned = isPinned
     )
 
 fun Project.toRealmProject(): RealmProject =
@@ -92,6 +97,7 @@ fun Project.toRealmProject(): RealmProject =
         creator = this@toRealmProject.creator?.toRealmUser()
         createdAt = this@toRealmProject.createdAt?.toRealmInstant()
         teams = this@toRealmProject.teams.map { it.toRealmTeam() }.toRealmSet()
+        isPinned = this@toRealmProject.isPinned
     }
 
 
@@ -108,6 +114,7 @@ fun Task.toRealmTask(): RealmTask =
         users = this@toRealmTask.users.map { it.toRealmUser() }.toRealmSet()
         subtasks = this@toRealmTask.subtasks.map { it.toRealmSubTask() }.toRealmSet()
         attachments = this@toRealmTask.attachments.map { it.toRealmAttachment() }.toRealmList()
+        isPinned = this@toRealmTask.isPinned
     }
 
 fun RealmTask.toTask(): Task =
@@ -122,7 +129,8 @@ fun RealmTask.toTask(): Task =
         targetDate = targetDate?.toLocalDateTime(),
         users = users.map { it.toUser() },
         subtasks = subtasks.map { it.toSubTask() },
-        attachments = attachments.map { it.toAttachment() }
+        attachments = attachments.map { it.toAttachment() },
+        isPinned = isPinned
     )
 
 fun SubTask.toRealmSubTask(): RealmSubTask =

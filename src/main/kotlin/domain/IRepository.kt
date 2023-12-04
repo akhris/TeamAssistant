@@ -30,6 +30,7 @@ interface IRepositoryObservable<ENTITY : IEntity> {
     suspend fun insert(entity: ENTITY)
     suspend fun remove(specifications: List<ISpecification>)
     fun query(specifications: List<ISpecification>): Flow<EntitiesList<ENTITY>>
+    fun getFilterSpecs(): Flow<List<FilterSpec>>?
 }
 
 

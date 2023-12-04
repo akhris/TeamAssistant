@@ -19,6 +19,8 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.stack.Children
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.fade
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimation
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
+import domain.Project
+import domain.Task
 import domain.User
 import kotlinx.coroutines.launch
 import ui.FABController
@@ -35,6 +37,7 @@ import ui.screens.tasks_list.TasksListUi
 import ui.screens.teams_list.TeamsUi
 import ui.screens.user_details.UserDetailsUi
 import utils.log
+import java.time.LocalDateTime
 
 
 @OptIn(ExperimentalDecomposeApi::class, ExperimentalFoundationApi::class)
@@ -194,20 +197,35 @@ fun FrameWindowScope.RootUi(
                                         component = child.component,
                                         renderListItem = {
                                             RenderTask(it)
+                                        }, renderItemDetails = {
+                                            RenderTaskDetailsNotEditable(it)
+                                        }, fabController = fabController,
+                                        onCreateNewItem = {
+                                            Task(
+                                                name = it,
+                                                creator = currentlyLoggedUser.user,
+                                                createdAt = LocalDateTime.now()
+                                            )
                                         }
-                                    ) {
-                                        RenderTaskDetailsNotEditable(it)
-                                    }
+                                    )
 
                                     is IRootComponent.NavHost.ProjectMasterDetail -> MasterDetailUi(
                                         component = child.component,
                                         renderListItem = {
                                             RenderProject(it)
+                                        },
+                                        renderItemDetails = {
+                                            //todo render project details here:
+                                            Text("project details for: ${it.name}")
+                                        }, fabController = fabController,
+                                        onCreateNewItem = {
+                                            Project(
+                                                name = it,
+                                                creator = currentlyLoggedUser.user,
+                                                createdAt = LocalDateTime.now()
+                                            )
                                         }
-                                    ) {
-                                        //todo render project details here:
-                                        Text("project details for: ${it.name}")
-                                    }
+                                    )
                                 }
                             }
                         }

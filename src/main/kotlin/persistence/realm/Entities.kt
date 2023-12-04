@@ -21,6 +21,7 @@ class RealmTask() : RealmObject {
     var users: RealmSet<RealmUser> = realmSetOf()
     var subtasks: RealmSet<RealmSubTask> = realmSetOf()
     var attachments: RealmList<RealmAttachment> = realmListOf()
+    var isPinned: Boolean = false
 }
 
 class RealmSubTask() : RealmObject {
@@ -43,6 +44,7 @@ class RealmProject() : RealmObject {
     var admins: RealmSet<RealmUser> = realmSetOf()
     var createdAt: RealmInstant? = null
     var teams: RealmSet<RealmTeam> = realmSetOf()
+    var isPinned: Boolean = false
 }
 
 class RealmUser : RealmObject {
@@ -58,6 +60,7 @@ class RealmUser : RealmObject {
     var createdAt: RealmInstant? = null
     var lastOnline: RealmInstant? = null
     var avatar: String = ""
+    var isPinned: Boolean = false
 }
 
 class RealmTeam : RealmObject {
@@ -72,6 +75,7 @@ class RealmTeam : RealmObject {
     var childTeams: RealmSet<RealmTeam> = realmSetOf()
     var parentTeamId: ObjectId? = null
     var createdAt: RealmInstant? = null
+    var isPinned: Boolean = false
 }
 
 class RealmAttachment : EmbeddedRealmObject {

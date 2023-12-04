@@ -40,6 +40,8 @@ class RealmUsersRepository (private val realm: Realm) : IRepositoryObservable<Us
         TODO("Not yet implemented")
     }
 
+    override fun getFilterSpecs(): Flow<List<FilterSpec>>? = null
+
     override suspend fun insert(entity: User) {
         realm.write {
             try {

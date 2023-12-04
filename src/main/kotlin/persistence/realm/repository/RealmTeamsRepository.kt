@@ -30,6 +30,8 @@ class RealmTeamsRepository(private val realm: Realm) : IRepositoryObservable<Tea
             .distinctUntilChanged()
     }
 
+    override fun getFilterSpecs(): Flow<List<FilterSpec>>? = null
+
     override suspend fun remove(specifications: List<ISpecification>) {
         TODO("Not yet implemented")
     }

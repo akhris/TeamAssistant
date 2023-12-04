@@ -23,7 +23,8 @@ data class User(
     val color: Int? = null,
     val createdAt: LocalDateTime? = null,
     val avatar: String = "",
-    val lastOnline: LocalDateTime? = null
+    val lastOnline: LocalDateTime? = null,
+    val isPinned: Boolean = false
 ) : IEntity {
     override fun toString() = "$name $surname"
 
@@ -61,7 +62,8 @@ data class Team(
     val admins: List<User> = listOf(),
     val members: List<User> = listOf(),
     val createdAt: LocalDateTime? = null,
-    val childTeams: List<Team> = listOf()
+    val childTeams: List<Team> = listOf(),
+    val isPinned: Boolean = false
 ) : IEntity {
     override fun toString() = name
 }
@@ -80,7 +82,8 @@ data class Project(
     val createdAt: LocalDateTime? = null,
     val state: State.Project? = null,
 //    val tasks: List<Task> = listOf(),
-    val teams: List<Team> = listOf()
+    val teams: List<Team> = listOf(),
+    val isPinned: Boolean = false
 ) : IEntity
 
 
@@ -99,7 +102,8 @@ data class Task(
     val state: State.Task? = null,
     val users: List<User> = listOf(),
     val subtasks: List<SubTask> = listOf(),
-    val attachments: List<Attachment> = listOf()
+    val attachments: List<Attachment> = listOf(),
+    val isPinned: Boolean = false
 ) : IEntity {
     override fun toString() = name
 }

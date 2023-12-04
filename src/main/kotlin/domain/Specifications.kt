@@ -25,7 +25,7 @@ sealed class FilterSpec {
     abstract val columnName: String
 
     data class Values(
-        val filteredValues: List<Any>,
+        val filteredValues: List<Any?>,
         override val columnName: String
     ) : FilterSpec()
 
