@@ -4,6 +4,7 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
 import domain.Project
 import domain.Task
+import domain.Team
 import domain.User
 import kotlinx.coroutines.flow.Flow
 import ui.NavItem
@@ -31,10 +32,13 @@ interface IRootComponent {
         class TasksList(val component: ITasksListComponent) : NavHost()
         class ProjectMasterDetail(val component: IMasterDetailComponent<Project>) : NavHost()
         class TaskMasterDetail(val component: IMasterDetailComponent<Task>) : NavHost()
-        class TaskDetails(val component: ITaskDetailsComponent) : NavHost()
+
+        class UserMasterDetail(val component: IMasterDetailComponent<User>) : NavHost()
+        class TeamMasterDetail(val component: IMasterDetailComponent<domain.Team>) : NavHost()
+//        class TaskDetails(val component: ITaskDetailsComponent) : NavHost()
         class Activity : NavHost()
         class Projects(val component: IProjectsListComponent) : NavHost()
-        class Team(val component: ITeamsListComponent) : NavHost()
+//        class Team(val component: ITeamsListComponent) : NavHost()
     }
 
     sealed class Dialog {
@@ -49,6 +53,6 @@ interface IRootComponent {
 
     data class UserLoggingInfo(
         val userID: String = "",
-        val user: User? = null
+        val user: User? = null,
     )
 }

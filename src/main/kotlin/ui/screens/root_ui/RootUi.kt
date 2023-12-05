@@ -19,25 +19,22 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.stack.Children
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.fade
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimation
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
-import domain.Project
-import domain.Task
 import domain.User
 import kotlinx.coroutines.launch
 import ui.FABController
 import ui.FABState
 import ui.SideNavigationPanel
 import ui.screens.activity.ActivityUi
-import ui.screens.master_detail.MasterDetailUi
-import ui.screens.projects_list.ProjectsUi
-import ui.screens.projects_list.RenderProject
-import ui.screens.task_details.RenderTaskDetailsNotEditable
+import ui.screens.master_detail.MasterDetailsUi
+import ui.screens.project_details.ProjectDetailsUi
+import ui.screens.projects_list.ProjectsListUi
 import ui.screens.task_details.TaskDetailsUi
-import ui.screens.tasks_list.RenderTask
 import ui.screens.tasks_list.TasksListUi
-import ui.screens.teams_list.TeamsUi
+import ui.screens.team_details.TeamDetailsUi
+import ui.screens.teams_list.TeamsListUi
 import ui.screens.user_details.UserDetailsUi
+import ui.screens.users_list.UsersListUi
 import utils.log
-import java.time.LocalDateTime
 
 
 @OptIn(ExperimentalDecomposeApi::class, ExperimentalFoundationApi::class)
@@ -122,6 +119,7 @@ fun FrameWindowScope.RootUi(
             }
         },
         floatingActionButton = {
+
             when (val fabSt = fabState) {
                 FABState.HIDDEN -> {
                     //show no FAB
@@ -184,46 +182,51 @@ fun FrameWindowScope.RootUi(
                             Children(stack = component.navHostStack, animation = stackAnimation(fade())) {
                                 when (val child = it.instance) {
                                     is IRootComponent.NavHost.Activity -> ActivityUi()
-                                    is IRootComponent.NavHost.Projects -> ProjectsUi(child.component, fabController)
-                                    is IRootComponent.NavHost.TasksList -> TasksListUi(child.component, fabController)
-                                    is IRootComponent.NavHost.Team -> TeamsUi(child.component, fabController)
+                                    is IRootComponent.NavHost.Projects -> ProjectsListUi(child.component)
+                                    is IRootComponent.NavHost.TasksList -> TasksListUi(child.component)
+//                                    is IRootComponent.NavHost.Team -> TeamsListUi(child.component)
                                     is IRootComponent.NavHost.UserDetails -> UserDetailsUi(
-                                        child.component,
-                                        fabController
+                                        child.component
                                     )
 
-                                    is IRootComponent.NavHost.TaskDetails -> TaskDetailsUi(child.component)
-                                    is IRootComponent.NavHost.TaskMasterDetail -> MasterDetailUi(
+//                                    is IRootComponent.NavHost.TaskDetails -> TaskDetailsUi(child.component)
+                                    is IRootComponent.NavHost.TaskMasterDetail -> MasterDetailsUi(
                                         component = child.component,
-                                        renderListItem = {
-                                            RenderTask(it)
-                                        }, renderItemDetails = {
-                                            RenderTaskDetailsNotEditable(it)
-                                        }, fabController = fabController,
-                                        onCreateNewItem = {
-                                            Task(
-                                                name = it,
-                                                creator = currentlyLoggedUser.user,
-                                                createdAt = LocalDateTime.now()
-                                            )
+                                        renderItemDetails = { c ->
+                                            TaskDetailsUi(c)
+                                        },
+                                        renderItemsList = { c ->
+                                            TasksListUi(c)
                                         }
                                     )
 
-                                    is IRootComponent.NavHost.ProjectMasterDetail -> MasterDetailUi(
+                                    is IRootComponent.NavHost.ProjectMasterDetail -> MasterDetailsUi(
                                         component = child.component,
-                                        renderListItem = {
-                                            RenderProject(it)
+                                        renderItemsList = {c->
+                                            ProjectsListUi(c)
                                         },
-                                        renderItemDetails = {
-                                            //todo render project details here:
-                                            Text("project details for: ${it.name}")
-                                        }, fabController = fabController,
-                                        onCreateNewItem = {
-                                            Project(
-                                                name = it,
-                                                creator = currentlyLoggedUser.user,
-                                                createdAt = LocalDateTime.now()
-                                            )
+                                        renderItemDetails = {c->
+                                            ProjectDetailsUi(c)
+                                        }
+                                    )
+
+                                    is IRootComponent.NavHost.TeamMasterDetail -> MasterDetailsUi(
+                                        component = child.component,
+                                        renderItemsList = {c->
+                                            TeamsListUi(c)
+                                        },
+                                        renderItemDetails = {c->
+                                            TeamDetailsUi(c)
+                                        }
+                                    )
+
+                                    is IRootComponent.NavHost.UserMasterDetail -> MasterDetailsUi(
+                                        component = child.component,
+                                        renderItemsList = {c->
+                                            UsersListUi(c)
+                                        },
+                                        renderItemDetails = {c->
+                                            UserDetailsUi(c)
                                         }
                                     )
                                 }

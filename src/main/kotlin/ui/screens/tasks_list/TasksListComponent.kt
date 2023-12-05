@@ -20,7 +20,7 @@ import java.time.LocalDateTime
 class TasksListComponent(
     di: DI,
     componentContext: ComponentContext,
-    private val onTaskSelected: (Task) -> Unit
+    private val onTaskSelected: (String) -> Unit
 ) : ITasksListComponent, ComponentContext by componentContext {
 
     private val scope =
@@ -49,7 +49,9 @@ class TasksListComponent(
             }
         }
 
-    override val tasks: Flow<EntitiesList<Task>> = repo.query(listOf(Specification.GetAllForUserID(userID)))
+    override val filterSpecs: Flow<List<FilterSpec>>? = repo.getFilterSpecs()
+
+    override val items: Flow<EntitiesList<Task>> = repo.query(listOf(Specification.GetAllForUserID(userID)))
 
     override fun createNewTaskRequest() {
         dialogNavigation.activate(DialogConfig.NewTaskDialog)
@@ -76,8 +78,8 @@ class TasksListComponent(
         TODO("Not yet implemented")
     }
 
-    override fun onTaskClicked(task: Task) {
-        onTaskSelected(task)
+    override fun onItemClicked(item: Task) {
+        onTaskSelected(item.id)
     }
 
     init {

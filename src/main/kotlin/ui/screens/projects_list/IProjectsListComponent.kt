@@ -1,21 +1,11 @@
 package ui.screens.projects_list
 
-import com.arkivanov.decompose.router.slot.ChildSlot
-import com.arkivanov.decompose.value.Value
-import domain.EntitiesList
 import domain.Project
 import domain.User
-import kotlinx.coroutines.flow.Flow
-import ui.dialogs.IDialogComponent
+import ui.screens.master_detail.IMasterComponent
 
-interface IProjectsListComponent {
-    val dialogSlot: Value<ChildSlot<*, IDialogComponent>>
-
-    /**
-     * projects available for user
-     * (created by user or with user as a member)
-     */
-    val projects: Flow<EntitiesList<Project>>
+interface IProjectsListComponent : IMasterComponent<Project> {
+//    val dialogSlot: Value<ChildSlot<*, IDialogComponent>>
 
     /**
      * Show a dialog for creating new project

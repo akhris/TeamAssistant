@@ -1,7 +1,5 @@
-package ui.screens.master_detail.details
+package ui.screens.master_detail
 
-import domain.IEntity
-import domain.Task
 import kotlinx.coroutines.flow.Flow
 
 interface IDetailsComponent<T> {

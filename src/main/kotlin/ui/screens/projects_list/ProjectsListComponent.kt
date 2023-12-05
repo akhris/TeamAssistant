@@ -21,7 +21,8 @@ import java.time.LocalDateTime
 
 class ProjectsListComponent(
     di: DI,
-    componentContext: ComponentContext
+    componentContext: ComponentContext,
+    private val onItemSelected: (String) -> Unit,
 ) : IProjectsListComponent, ComponentContext by componentContext {
 
     private val scope =
@@ -33,27 +34,34 @@ class ProjectsListComponent(
 
     private val repo: IRepositoryObservable<Project> by di.instance()
 
-    override val dialogSlot: Value<ChildSlot<*, IDialogComponent>> =
-        childSlot(
-            source = dialogNavigation,
-            // persistent = false, // Disable navigation state saving, if needed
-            handleBackButton = true, // Close the dialog on back button press
-        ) { config, childComponentContext ->
-            when (config) {
-                DialogConfig.NewProjectDialog ->
-                    DialogTextInputComponent(
-                        componentContext = childComponentContext,
-                        hint = "имя нового проекта",
-                        title = "добавить проект",
-                        OKButtonText = "добавить",
-                        onDismissed = dialogNavigation::dismiss
-                    )
-            }
-        }
-    override val projects: Flow<EntitiesList<Project>> = repo.query(listOf(Specification.GetAllForUserID(userID)))
+    override val filterSpecs: Flow<List<FilterSpec>>? = repo.getFilterSpecs()
+
+    //
+//    override val dialogSlot: Value<ChildSlot<*, IDialogComponent>> =
+//        childSlot(
+//            source = dialogNavigation,
+//            // persistent = false, // Disable navigation state saving, if needed
+//            handleBackButton = true, // Close the dialog on back button press
+//        ) { config, childComponentContext ->
+//            when (config) {
+//                DialogConfig.NewProjectDialog ->
+//                    DialogTextInputComponent(
+//                        componentContext = childComponentContext,
+//                        hint = "имя нового проекта",
+//                        title = "добавить проект",
+//                        OKButtonText = "добавить",
+//                        onDismissed = dialogNavigation::dismiss
+//                    )
+//            }
+//        }
+    override val items: Flow<EntitiesList<Project>> = repo.query(listOf(Specification.GetAllForUserID(userID)))
 
     override fun createNewProjectRequest() {
         dialogNavigation.activate(DialogConfig.NewProjectDialog)
+    }
+
+    override fun onItemClicked(item: Project) {
+        onItemSelected(item.id)
     }
 
     override fun createNewProject(name: String, creator: User?) {

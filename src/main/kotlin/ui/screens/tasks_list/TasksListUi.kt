@@ -1,7 +1,5 @@
 package ui.screens.tasks_list
 
-import LocalCurrentUser
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -11,21 +9,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import domain.EntitiesList
 import domain.Task
-import tests.testTask1
-import ui.FABState
-import ui.IFABController
-import ui.dialogs.IDialogComponent
-import ui.dialogs.text_input_dialog.TextInputDialogUi
+import ui.screens.master_detail.IMasterComponent
 
 @Composable
-fun TasksListUi(tasksListComponent: ITasksListComponent, fabController: IFABController) {
-    val dialogSlot by remember(tasksListComponent) { tasksListComponent.dialogSlot }.subscribeAsState()
+fun TasksListUi(component: IMasterComponent<Task>) {
 
-    val tasks by remember(tasksListComponent) { tasksListComponent.tasks }.collectAsState(EntitiesList.empty())
-    val user = LocalCurrentUser.current
+    val tasks by remember(component) { component.items }.collectAsState(EntitiesList.empty())
 
     val scrollstate = rememberScrollState()
 
@@ -37,49 +28,24 @@ fun TasksListUi(tasksListComponent: ITasksListComponent, fabController: IFABCont
             is EntitiesList.Grouped -> TODO()
             is EntitiesList.NotGrouped -> {
                 tasksList.items.forEach { task ->
-                    RenderTask(task)
+                    RenderTask(task, onTaskClicked = {
+                        component.onItemClicked(task)
+                    })
                 }
             }
         }
 
     }
 
-    dialogSlot.child?.instance?.also { comp ->
-        when (comp) {
-            is IDialogComponent.ITextInputDialogComponent -> {
-                TextInputDialogUi(
-                    component = comp,
-                    onOkClicked = { taskName ->
-                        tasksListComponent.createNewTask(taskName, user)
-                    }
-                )
-            }
-        }
-
-    }
-
-
-    LaunchedEffect(fabController) {
-        fabController.setFABState(
-            FABState.VISIBLE(
-                iconPath = "vector/add_black_24dp.svg",
-                text = "добавить задачу",
-                description = "добавить новую задачу"
-            )
-        )
-        fabController
-            .clicks
-            .collect {
-                tasksListComponent.createNewTaskRequest()
-            }
-    }
 }
 
 // https://dribbble.com/shots/6646573-To-do-list
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun RenderTask(task: Task) {
-    Card {
+fun RenderTask(task: Task, onTaskClicked: () -> Unit) {
+    Card(modifier = Modifier.clickable {
+        onTaskClicked()
+    }) {
         ListItem(
             icon = {
                 Box(
@@ -104,8 +70,3 @@ fun RenderTask(task: Task) {
     }
 }
 
-@Preview
-@Composable
-private fun PreviewTasksUi() {
-    RenderTask(testTask1)
-}

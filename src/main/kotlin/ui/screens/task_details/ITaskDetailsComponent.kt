@@ -1,12 +1,9 @@
 package ui.screens.task_details
 
 import domain.Task
-import domain.User
-import kotlinx.coroutines.flow.Flow
+import ui.screens.master_detail.IDetailsComponent
 
-interface ITaskDetailsComponent {
+interface ITaskDetailsComponent : IDetailsComponent<Task> {
     fun updateTask(task: Task)
     fun removeTask(task: Task)
-
-    val task: Flow<Task>
 }

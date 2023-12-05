@@ -17,10 +17,10 @@ import kotlinx.coroutines.flow.map
 import org.kodein.di.DI
 import org.kodein.di.instance
 import ui.NavItem
-import ui.screens.master_detail.MasterDetailsComponent
-import ui.screens.projects_list.ProjectsListComponent
-import ui.screens.task_details.TaskDetailsComponent
-import ui.screens.teams_list.TeamsListComponent
+import ui.screens.master_detail.projects.ProjectsMasterDetailsComponent
+import ui.screens.master_detail.tasks.TasksMasterDetailsComponent
+import ui.screens.master_detail.teams.TeamsMasterDetailsComponent
+import ui.screens.master_detail.users.UsersMasterDetailsComponent
 import ui.screens.user_details.UserDetailsComponent
 import utils.UserUtils
 
@@ -33,9 +33,11 @@ class RootComponent(
         CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     private val userID = UserUtils.getUserID()
-    private val repo: IRepositoryObservable<User> by di.instance()
+
+    private val usersRepo: IRepositoryObservable<User> by di.instance()
     private val tasksRepo: IRepositoryObservable<Task> by di.instance()
     private val projectsRepo: IRepositoryObservable<Project> by di.instance()
+    private val teamsRepo: IRepositoryObservable<Team> by di.instance()
 
     private val dialogNav = StackNavigation<DialogConfig>()
     private val navHostNav = StackNavigation<NavHostConfig>()
@@ -46,7 +48,7 @@ class RootComponent(
 
     //    override val userLoggingInfo: Value<IRootComponent.UserLoggingInfo> = _userLoggingInfo
 
-    override val userLoggingInfo: Flow<IRootComponent.UserLoggingInfo> = repo
+    override val userLoggingInfo: Flow<IRootComponent.UserLoggingInfo> = usersRepo
         .getByID(userID)
         .map { result ->
             when (result) {
@@ -107,7 +109,7 @@ class RootComponent(
     override fun createNewUser(user: User) {
         scope.launch {
             //make insert user usecase
-            repo.insert(user)
+            usersRepo.insert(user)
         }
     }
 
@@ -126,41 +128,27 @@ class RootComponent(
     private fun createChild(config: NavHostConfig, componentContext: ComponentContext): IRootComponent.NavHost {
         return when (config) {
             NavHostConfig.Activity -> IRootComponent.NavHost.Activity()
-            NavHostConfig.Projects -> IRootComponent.NavHost.Projects(ProjectsListComponent(di, componentContext))
-//            NavHostConfig.TasksList -> IRootComponent.NavHost.TasksList(
-//                TasksListComponent(
-//                    di,
-//                    componentContext,
-//                    onTaskSelected = {
-//                        //navigate to task details:
-//                        navHostNav.replaceCurrent(NavHostConfig.TaskDetails(it))
-//                    })
-//            )
+//            NavHostConfig.Projects -> IRootComponent.NavHost.Projects(ProjectsListComponent(di, componentContext, {}))
+
             NavHostConfig.TasksList -> IRootComponent.NavHost.TaskMasterDetail(
-                MasterDetailsComponent(
-                    repo = tasksRepo,
-                    componentContext
-                )
+                TasksMasterDetailsComponent(di = di, componentContext = componentContext)
             )
 
-            NavHostConfig.Team -> IRootComponent.NavHost.Team(TeamsListComponent(di, componentContext))
-            NavHostConfig.UserDetails -> IRootComponent.NavHost.UserDetails(
-                UserDetailsComponent(
-                    userID = userID,
-                    di,
-                    componentContext
-                )
+//            NavHostConfig.Team -> IRootComponent.NavHost.Team(TeamsListComponent(di, componentContext))
+            NavHostConfig.UsersList -> IRootComponent.NavHost.UserMasterDetail(
+                UsersMasterDetailsComponent(di = di, componentContext = componentContext)
             )
 
-            is NavHostConfig.TaskDetails -> IRootComponent.NavHost.TaskDetails(
-                TaskDetailsComponent(taskID = config.task.id, di, componentContext)
-            )
+//            is NavHostConfig.TaskDetails -> IRootComponent.NavHost.TaskDetails(
+//                TaskDetailsComponent(taskID = config.task.id, di = di, componentContext = componentContext)
+//            )
 
             NavHostConfig.ProjectsList -> IRootComponent.NavHost.ProjectMasterDetail(
-                MasterDetailsComponent(
-                    repo = projectsRepo,
-                    componentContext
-                )
+                ProjectsMasterDetailsComponent(di = di, componentContext = componentContext)
+            )
+
+            NavHostConfig.TeamsList -> IRootComponent.NavHost.TeamMasterDetail(
+                TeamsMasterDetailsComponent(di = di, componentContext = componentContext)
             )
         }
     }
@@ -191,8 +179,8 @@ class RootComponent(
             NavItem.Activity -> NavHostConfig.Activity
             NavItem.Projects -> NavHostConfig.ProjectsList
             NavItem.Tasks -> NavHostConfig.TasksList
-            NavItem.Team -> NavHostConfig.Team
-            NavItem.UserDetails -> NavHostConfig.UserDetails
+            NavItem.Team -> NavHostConfig.TeamsList
+            NavItem.UserDetails -> NavHostConfig.UsersList
         }
     }
 
@@ -210,24 +198,28 @@ class RootComponent(
     @Parcelize
     private sealed class NavHostConfig : Parcelable {
         @Parcelize
-        object UserDetails : NavHostConfig()
+        object UsersList : NavHostConfig()
 
         @Parcelize
         object TasksList : NavHostConfig()
 
+//        @Parcelize
+//        class TaskDetails(val task: Task) : NavHostConfig()
+
         @Parcelize
-        class TaskDetails(val task: Task) : NavHostConfig()
+        object TeamsList : NavHostConfig()
 
         @Parcelize
         object ProjectsList : NavHostConfig()
+
         @Parcelize
         object Activity : NavHostConfig()
 
-        @Parcelize
-        object Projects : NavHostConfig()
+//        @Parcelize
+//        object Projects : NavHostConfig()
 
-        @Parcelize
-        object Team : NavHostConfig()
+//        @Parcelize
+//        object Team : NavHostConfig()
 
     }
 

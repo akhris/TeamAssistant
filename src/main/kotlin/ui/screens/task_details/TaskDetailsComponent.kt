@@ -22,7 +22,7 @@ class TaskDetailsComponent(
 
     private val repo: IRepositoryObservable<Task> by di.instance()
 
-    override val task: Flow<Task> = repo.getByID(taskID).mapNotNull {
+    override val item: Flow<Task> = repo.getByID(taskID).mapNotNull {
         when (it) {
             is RepoResult.InitialItem -> it.item
             is RepoResult.ItemInserted -> it.item

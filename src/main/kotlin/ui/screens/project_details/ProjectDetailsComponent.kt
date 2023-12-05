@@ -1,22 +1,25 @@
-package ui.screens.master_detail.details
+package ui.screens.project_details
 
 import com.arkivanov.decompose.ComponentContext
-import domain.IEntity
 import domain.IRepositoryObservable
+import domain.Project
 import domain.RepoResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 import org.kodein.di.DI
 import org.kodein.di.instance
-import kotlin.reflect.KClass
+import ui.screens.BaseComponent
 
-class DetailsComponent<T : IEntity>(
-    repo: IRepositoryObservable<T>,
-    entityID: String,
+class ProjectDetailsComponent(
+    projectID: String,
+    di: DI,
     componentContext: ComponentContext,
-) : IDetailsComponent<T>, ComponentContext by componentContext {
+) : IProjectDetailsComponent, BaseComponent(componentContext) {
 
-    override val item: Flow<T> = repo.getByID(entityID).mapNotNull {
+    private val repo: IRepositoryObservable<Project> by di.instance()
+
+
+    override val item: Flow<Project> = repo.getByID(projectID).mapNotNull {
         when (it) {
             is RepoResult.InitialItem -> it.item
             is RepoResult.ItemInserted -> it.item

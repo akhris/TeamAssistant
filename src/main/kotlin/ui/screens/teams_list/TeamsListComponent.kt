@@ -15,6 +15,7 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import ui.dialogs.IDialogComponent
 import ui.dialogs.text_input_dialog.DialogTextInputComponent
+import ui.screens.BaseComponent
 import utils.UserUtils
 import utils.log
 import java.time.LocalDateTime
@@ -22,17 +23,17 @@ import java.time.LocalDateTime
 
 class TeamsListComponent(
     di: DI,
-    componentContext: ComponentContext
-) : ITeamsListComponent, ComponentContext by componentContext {
+    componentContext: ComponentContext,
+    private val onItemSelected: (String) -> Unit,
+) : ITeamsListComponent, BaseComponent(componentContext) {
 
-    private val scope =
-        CoroutineScope(Dispatchers.Default + SupervisorJob())
-
-    private val dialogNavigation = SlotNavigation<DialogConfig>()
+//    private val dialogNavigation = SlotNavigation<DialogConfig>()
 
     private val userID = UserUtils.getUserID()
 
     private val repo: IRepositoryObservable<Team> by di.instance()
+
+    override val filterSpecs: Flow<List<FilterSpec>>? = repo.getFilterSpecs()
 
 
 //        realm
@@ -52,29 +53,33 @@ class TeamsListComponent(
 //        }
 
 
-    override val dialogSlot: Value<ChildSlot<*, IDialogComponent>> =
-        childSlot(
-            source = dialogNavigation,
-            // persistent = false, // Disable navigation state saving, if needed
-            handleBackButton = true, // Close the dialog on back button press
-        ) { config, childComponentContext ->
-            when (config) {
-                DialogConfig.NewTeamDialog ->
-                    DialogTextInputComponent(
-                        componentContext = childComponentContext,
-                        hint = "имя новой команды",
-                        title = "добавить команду",
-                        OKButtonText = "добавить",
-                        onDismissed = dialogNavigation::dismiss
-                    )
-            }
-        }
+//    override val dialogSlot: Value<ChildSlot<*, IDialogComponent>> =
+//        childSlot(
+//            source = dialogNavigation,
+//            // persistent = false, // Disable navigation state saving, if needed
+//            handleBackButton = true, // Close the dialog on back button press
+//        ) { config, childComponentContext ->
+//            when (config) {
+//                DialogConfig.NewTeamDialog ->
+//                    DialogTextInputComponent(
+//                        componentContext = childComponentContext,
+//                        hint = "имя новой команды",
+//                        title = "добавить команду",
+//                        OKButtonText = "добавить",
+//                        onDismissed = dialogNavigation::dismiss
+//                    )
+//            }
+//        }
 
-    override val teams: Flow<EntitiesList<Team>> = repo.query(listOf(Specification.GetAllForUserID(userID)))
+    override val items: Flow<EntitiesList<Team>> = repo.query(listOf(Specification.GetAllForUserID(userID)))
 
+
+    override fun onItemClicked(item: Team) {
+        onItemSelected(item.id)
+    }
 
     override fun createNewTeamRequest() {
-        dialogNavigation.activate(DialogConfig.NewTeamDialog)
+//        dialogNavigation.activate(DialogConfig.NewTeamDialog)
     }
 
     override fun createNewTeam(name: String, creator: User?) {
@@ -100,15 +105,6 @@ class TeamsListComponent(
     }
 
 
-    init {
-        componentContext
-            .lifecycle
-            .subscribe(onDestroy = {
-                scope.coroutineContext.cancelChildren()
-            })
-
-
-    }
 
 
     private sealed class DialogConfig() : Parcelable {

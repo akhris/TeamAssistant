@@ -23,7 +23,7 @@ class UserDetailsComponent(
 
     private val repo: IRepositoryObservable<User> by di.instance()
 
-    override val user: Flow<User> = repo.getByID(userID).mapNotNull {
+    override val item: Flow<User> = repo.getByID(userID).mapNotNull {
         when (it) {
             is RepoResult.InitialItem -> it.item
             is RepoResult.ItemInserted -> it.item

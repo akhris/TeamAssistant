@@ -16,13 +16,14 @@ import tests.testUser1
 import ui.FABController
 import ui.FABState
 import ui.UiSettings
+import ui.screens.master_detail.IDetailsComponent
 import utils.log
 
 
 @Composable
-fun UserDetailsUi(component: IUserDetailsComponent, fabController: FABController) {
+fun UserDetailsUi(component: IDetailsComponent<User>) {
 
-    val user by remember(component) { component.user }.collectAsState(null)
+    val user by remember(component) { component.item }.collectAsState(null)
 
     var tempUser by remember(user) { mutableStateOf(user) }
 
@@ -36,29 +37,6 @@ fun UserDetailsUi(component: IUserDetailsComponent, fabController: FABController
 //                component.updateUser(editedUser)
                 }
             )
-        }
-    }
-
-
-
-    LaunchedEffect(fabController, tempUser) {
-        if (tempUser == user) {
-            fabController.setFABState(FABState.HIDDEN)
-        } else {
-            fabController.setFABState(
-                FABState.VISIBLE(
-                    iconPath = "vector/save_black_24dp.svg",
-                    text = "сохранить",
-                    description = "сохранить изменения"
-                )
-            )
-        }
-
-
-        fabController.clicks.collect {
-            if (tempUser != user) {
-                tempUser?.let { it1 -> component.updateUser(it1) }
-            }
         }
     }
 

@@ -8,26 +8,23 @@ import io.realm.kotlin.notifications.DeletedObject
 import io.realm.kotlin.notifications.InitialObject
 import io.realm.kotlin.notifications.PendingObject
 import io.realm.kotlin.notifications.UpdatedObject
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.*
 import persistence.realm.*
 import utils.log
 
-class RealmUsersRepository (private val realm: Realm) : IRepositoryObservable<User> {
+class RealmUsersRepository(private val realm: Realm) : IRepositoryObservable<User> {
     override fun getByID(id: String): Flow<RepoResult<User>> {
         return realm
             .query<RealmUser>("_id == $0", id)
             .first()
             .asFlow()
             .map { result ->
-                    when (result) {
-                        is DeletedObject -> RepoResult.ItemRemoved(result.obj?.toUser())
-                        is InitialObject -> RepoResult.InitialItem(result.obj.toUser())
-                        is UpdatedObject -> RepoResult.ItemUpdated(result.obj.toUser())
-                        is PendingObject -> RepoResult.PendindObject()
-                    }
+                when (result) {
+                    is DeletedObject -> RepoResult.ItemRemoved(result.obj?.toUser())
+                    is InitialObject -> RepoResult.InitialItem(result.obj.toUser())
+                    is UpdatedObject -> RepoResult.ItemUpdated(result.obj.toUser())
+                    is PendingObject -> RepoResult.PendindObject()
+                }
             }
             .distinctUntilChanged()
     }
@@ -37,7 +34,22 @@ class RealmUsersRepository (private val realm: Realm) : IRepositoryObservable<Us
     }
 
     override fun query(specifications: List<ISpecification>): Flow<EntitiesList<User>> {
-        TODO("Not yet implemented")
+        return (specifications
+            .find { it is Specification.QueryAll } as? Specification.QueryAll)
+            ?.let { s ->
+                realm
+                    .query<RealmUser>()
+                    .find()
+                    .asFlow()
+                    .map {
+                        EntitiesList.NotGrouped(
+                            it
+                                .list
+                                .map { it.toUser() }
+                        )
+                    }
+                    .distinctUntilChanged()
+            } ?: flowOf(EntitiesList.empty())
     }
 
     override fun getFilterSpecs(): Flow<List<FilterSpec>>? = null

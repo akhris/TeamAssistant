@@ -1,21 +1,17 @@
 package ui.screens.teams_list
 
-import com.arkivanov.decompose.router.slot.ChildSlot
-import com.arkivanov.decompose.value.Value
-import domain.EntitiesList
 import domain.Team
 import domain.User
-import kotlinx.coroutines.flow.Flow
-import ui.dialogs.IDialogComponent
+import ui.screens.master_detail.IMasterComponent
 
-interface ITeamsListComponent {
+interface ITeamsListComponent : IMasterComponent<Team> {
 
-    val dialogSlot: Value<ChildSlot<*, IDialogComponent>>
+//    val dialogSlot: Value<ChildSlot<*, IDialogComponent>>
     /**
      * teams available for user
      * (created by user or with user as a member)
      */
-    val teams: Flow<EntitiesList<Team>>
+//    val teams: Flow<EntitiesList<Team>>
 
     /**
      * Show a dialog for creating new team

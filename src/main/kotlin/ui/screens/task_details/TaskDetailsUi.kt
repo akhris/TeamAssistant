@@ -15,10 +15,11 @@ import domain.SubTask
 import domain.Task
 import domain.valueobjects.Attachment
 import tests.testTask1
+import ui.screens.master_detail.IDetailsComponent
 
 @Composable
-fun TaskDetailsUi(component: ITaskDetailsComponent) {
-    val task by remember(component) { component.task }.collectAsState(null)
+fun TaskDetailsUi(component: IDetailsComponent<Task>) {
+    val task by remember(component) { component.item }.collectAsState(null)
     val user = LocalCurrentUser.current ?: return
     task?.let {
         if (listOfNotNull(it.creator).contains(user)) {
@@ -88,7 +89,7 @@ fun RenderTaskDetailsEditable(task: Task, onTaskUpdated: (Task) -> Unit) {
             task.subtasks.forEach {
                 RenderSubTask(subTask = it, onClick = {})
             }
-            OutlinedButton(onClick = {},content = { Text("Добавить подзадачу") })
+            OutlinedButton(onClick = {}, content = { Text("Добавить подзадачу") })
 
         }
     }

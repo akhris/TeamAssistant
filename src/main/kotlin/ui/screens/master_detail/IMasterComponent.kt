@@ -1,9 +1,7 @@
-package ui.screens.master_detail.master
+package ui.screens.master_detail
 
 import domain.EntitiesList
 import domain.FilterSpec
-import domain.IEntity
-import domain.Task
 import kotlinx.coroutines.flow.Flow
 
 interface IMasterComponent<T> {
