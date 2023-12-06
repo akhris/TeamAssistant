@@ -3,6 +3,7 @@ package ui.screens.task_details
 import LocalCurrentUser
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
@@ -15,40 +16,53 @@ import domain.SubTask
 import domain.Task
 import domain.valueobjects.Attachment
 import tests.testTask1
+import ui.dialogs.DatePickerDialog
+import ui.dialogs.TimePickerDialog
+import ui.fields.DateTimeChip
+import ui.fields.EditableTextField
 import ui.screens.master_detail.IDetailsComponent
+import utils.DateTimeConverter
+import utils.withDate
 
 @Composable
 fun TaskDetailsUi(component: IDetailsComponent<Task>) {
     val task by remember(component) { component.item }.collectAsState(null)
     val user = LocalCurrentUser.current ?: return
     task?.let {
-        if (listOfNotNull(it.creator).contains(user)) {
-            //only creator can edit the task
-            RenderTaskDetailsEditable(it, onTaskUpdated = {
 
-            })
-        } else {
-            RenderTaskDetailsNotEditable(it)
-        }
+        //only creator can edit the task
+        RenderTaskDetails(
+            it,
+            isEditable = listOfNotNull(it.creator).contains(user),
+            onTaskUpdated = {
+
+            }
+        )
+
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalLayoutApi::class)
 @Composable
-fun RenderTaskDetailsEditable(task: Task, onTaskUpdated: (Task) -> Unit) {
+fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (Task) -> Unit) {
     var tempTask by remember(task) { mutableStateOf(task) }
+
     Card {
         Column(modifier = Modifier.padding(4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             //name
-            TextField(value = tempTask.name, onValueChange = {
-                tempTask = tempTask.copy(name = it)
-            }, textStyle = MaterialTheme.typography.h4, label = { Text("название") })
+            EditableTextField(
+                text = tempTask.name,
+                isEditable = isEditable,
+                textStyle = MaterialTheme.typography.h4,
+                onTextEdited = {
+                    tempTask = tempTask.copy(name = it)
+                }
+            )
 
-            Chip(onClick = {
-                //show date/time picker
-            }) {
-                Text("date and time")
-            }
+            DateTimeChip(
+                dateTime = tempTask.targetDate,
+                label = "срок выполнения",
+                onDateTimeChanged = {tempTask = tempTask.copy(targetDate = it)})
             //users:
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 task.users.forEach {
@@ -93,64 +107,9 @@ fun RenderTaskDetailsEditable(task: Task, onTaskUpdated: (Task) -> Unit) {
 
         }
     }
+
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalLayoutApi::class)
-@Composable
-fun RenderTaskDetailsNotEditable(task: Task) {
-    Card {
-        Column(modifier = Modifier.padding(4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            //name
-            Text(text = task.name, style = MaterialTheme.typography.h4)
-
-
-            Chip(onClick = {}) {
-                Text("date and time")
-            }
-
-            if (task.users.isNotEmpty()) {
-//                Text(text = "исполнители", style = MaterialTheme.typography.caption)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    task.users.forEach {
-                        Chip(onClick = {}, content = {
-                            Text(it.getInitials())
-                        }, leadingIcon = {
-                            Icon(painterResource("vector/person_black_24dp.svg"), contentDescription = "person icon")
-                        })
-                    }
-                }
-                Divider(modifier = Modifier.fillMaxWidth().height(1.dp))
-            }
-
-            //attachments
-            if (task.attachments.isNotEmpty()) {
-//                Text(text = "вложения", style = MaterialTheme.typography.caption)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    task.attachments.forEach {
-                        RenderAttachment(it, onClick = {})
-                    }
-                }
-                Divider(modifier = Modifier.fillMaxWidth().height(1.dp))
-            }
-
-            //description
-            if (task.description.isNotEmpty()) {
-//                Text(text = "описание", style = MaterialTheme.typography.caption)
-
-                Text(text = task.description, style = MaterialTheme.typography.body1)
-            }
-
-            //subtasks
-            if (task.subtasks.isNotEmpty()) {
-                task.subtasks.forEach {
-                    RenderSubTask(subTask = it, onClick = {})
-                }
-            }
-
-        }
-
-    }
-}
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -186,8 +145,3 @@ private fun RenderSubTask(subTask: SubTask, onClick: () -> Unit) {
     })
 }
 
-@Preview
-@Composable
-private fun PreviewTasksUi() {
-    RenderTaskDetailsNotEditable(testTask1)
-}
