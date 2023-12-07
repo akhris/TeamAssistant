@@ -1,9 +1,7 @@
 package ui.screens.task_details
 
 import LocalCurrentUser
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
@@ -15,14 +13,9 @@ import androidx.compose.ui.unit.dp
 import domain.SubTask
 import domain.Task
 import domain.valueobjects.Attachment
-import tests.testTask1
-import ui.dialogs.DatePickerDialog
-import ui.dialogs.TimePickerDialog
 import ui.fields.DateTimeChip
 import ui.fields.EditableTextField
 import ui.screens.master_detail.IDetailsComponent
-import utils.DateTimeConverter
-import utils.withDate
 
 @Composable
 fun TaskDetailsUi(component: IDetailsComponent<Task>) {
@@ -51,10 +44,10 @@ fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (Task) -> 
         Column(modifier = Modifier.padding(4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             //name
             EditableTextField(
-                text = tempTask.name,
+                value = tempTask.name,
                 isEditable = isEditable,
                 textStyle = MaterialTheme.typography.h4,
-                onTextEdited = {
+                onValueChange = {
                     tempTask = tempTask.copy(name = it)
                 }
             )
@@ -62,7 +55,9 @@ fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (Task) -> 
             DateTimeChip(
                 dateTime = tempTask.targetDate,
                 label = "срок выполнения",
-                onDateTimeChanged = {tempTask = tempTask.copy(targetDate = it)})
+                isEditable = isEditable,
+                onDateTimeChanged = { tempTask = tempTask.copy(targetDate = it) })
+
             //users:
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 task.users.forEach {
@@ -93,10 +88,18 @@ fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (Task) -> 
             }
             Divider(modifier = Modifier.fillMaxWidth().height(1.dp))
 
-            //description
-            TextField(value = tempTask.description, onValueChange = {
-                tempTask = tempTask.copy(description = it)
-            }, textStyle = MaterialTheme.typography.body1, label = { Text("описание") })
+            if (isEditable || tempTask.description.isNotEmpty()) {
+                //description
+                EditableTextField(
+                    value = tempTask.description,
+                    onValueChange = {
+                        tempTask = tempTask.copy(description = it)
+                    },
+                    textStyle = MaterialTheme.typography.body1,
+                    label = "описание",
+                    isEditable = isEditable
+                )
+            }
 
 
             //subtasks
