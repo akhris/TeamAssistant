@@ -1,18 +1,17 @@
 package ui.screens.users_list
 
+import LocalCurrentUser
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Card
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ListItem
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import domain.EntitiesList
 import domain.Team
@@ -25,10 +24,14 @@ import ui.screens.master_detail.IMasterComponent
 @Composable
 fun UsersListUi(component: IMasterComponent<User>) {
     val users by remember(component) { component.items }.collectAsState(EntitiesList.empty())
+    val currentUserID = LocalCurrentUser.current?.id
+    val currentUserColor = MaterialTheme.colors.primary
 
     EntitiesListUi(
         users,
-        selectableMode = SelectableMode.NonSelectable,
+        selectableMode = SelectableMode.NonSelectable(onItemClicked = {
+            component.onItemClicked(it)
+        }),
         itemRenderer = object : ItemRenderer<User> {
             override fun getPrimaryText(item: User) = item.getInitials()
 
@@ -36,17 +39,12 @@ fun UsersListUi(component: IMasterComponent<User>) {
 
             override fun getOverlineText(item: User) = ""
 
+            override fun getIconPath(item: User): String = "vector/person_black_24dp.svg"
+
+            override fun getIconTint(item: User): Color? = if (item.id == currentUserID) {
+                currentUserColor
+            } else null
         }
     )
 
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun RenderUserItem(user: User, onTeamClick: () -> Unit) {
-    Card(modifier = Modifier.clickable { onTeamClick() }) {
-        ListItem(modifier = Modifier.padding(4.dp), text = {
-            Text(text = user.name)
-        })
-    }
 }

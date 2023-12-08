@@ -10,49 +10,37 @@ import androidx.compose.material.ListItem
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import domain.EntitiesList
 import domain.Project
+import domain.Team
+import ui.EntitiesListUi
+import ui.ItemRenderer
+import ui.SelectableMode
 import ui.screens.master_detail.IMasterComponent
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ProjectsListUi(projectsListComponent: IMasterComponent<Project>) {
+fun ProjectsListUi(component: IMasterComponent<Project>) {
+    val projects by remember(component) { component.items }.collectAsState(EntitiesList.empty())
 
+    EntitiesListUi(
+        projects,
+        selectableMode = SelectableMode.NonSelectable(onItemClicked = {
+            component.onItemClicked(it)
+        }),
+        itemRenderer = object : ItemRenderer<Project> {
+            override fun getPrimaryText(item: Project) = item.name
 
-    val projects by remember(projectsListComponent) { projectsListComponent.items }.collectAsState(EntitiesList.empty())
+            override fun getSecondaryText(item: Project) = item.creator?.getInitials() ?: ""
 
+            override fun getOverlineText(item: Project) = null
 
-    Column(
-        modifier = Modifier.padding(4.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        when (val projectsList = projects) {
-            is EntitiesList.Grouped -> TODO()
-            is EntitiesList.NotGrouped -> {
-                projectsList.items.forEach { project ->
-                    RenderProject(project) {
-                        projectsListComponent.onItemClicked(project)
-                    }
-                }
-            }
+            override fun getIconPath(item: Project): String = "vector/rocket_black_24dp.svg"
+
+            override fun getIconTint(item: Project): Color? = item.color?.let { Color(it) }
+
         }
-
-    }
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun RenderProject(project: Project, onProjectClicked: () -> Unit) {
-    Card(modifier = Modifier.clickable { onProjectClicked() }) {
-        ListItem(modifier = Modifier.padding(4.dp), text = {
-            Text(text = project.description)
-        }, overlineText = {
-            Text(text = project.name)
-        }, secondaryText = project.creator?.getInitials()?.let {
-            {
-                Text(text = it)
-            }
-        })
-    }
+    )
 }

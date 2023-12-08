@@ -10,7 +10,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import domain.EntitiesList
+import domain.Project
 import domain.Task
+import ui.EntitiesListUi
+import ui.ItemRenderer
+import ui.SelectableMode
 import ui.screens.master_detail.IMasterComponent
 
 @Composable
@@ -20,22 +24,25 @@ fun TasksListUi(component: IMasterComponent<Task>) {
 
     val scrollstate = rememberScrollState()
 
-    Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(state = scrollstate),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        when (val tasksList = tasks) {
-            is EntitiesList.Grouped -> TODO()
-            is EntitiesList.NotGrouped -> {
-                tasksList.items.forEach { task ->
-                    RenderTask(task, onTaskClicked = {
-                        component.onItemClicked(task)
-                    })
-                }
-            }
-        }
 
-    }
+    EntitiesListUi(
+        tasks,
+        selectableMode = SelectableMode.NonSelectable(onItemClicked = {
+            component.onItemClicked(it)
+        }),
+        itemRenderer = object : ItemRenderer<Task> {
+            override fun getPrimaryText(item: Task) = item.name
+
+            override fun getSecondaryText(item: Task) = item.creator?.getInitials() ?: ""
+
+            override fun getOverlineText(item: Task) = null
+
+            override fun getIconPath(item: Task): String = "vector/circle_black_24dp.svg"
+
+            override fun getIconTint(item: Task): Color? = item.project?.color?.let { Color(it) }
+
+        }
+    )
 
 }
 

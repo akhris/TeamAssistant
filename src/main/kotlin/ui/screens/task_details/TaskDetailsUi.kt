@@ -2,6 +2,8 @@ package ui.screens.task_details
 
 import LocalCurrentUser
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
@@ -40,77 +42,113 @@ fun TaskDetailsUi(component: IDetailsComponent<Task>) {
 fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (Task) -> Unit) {
     var tempTask by remember(task) { mutableStateOf(task) }
 
-    Card {
-        Column(modifier = Modifier.padding(4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            //name
-            EditableTextField(
-                value = tempTask.name,
-                isEditable = isEditable,
-                textStyle = MaterialTheme.typography.h4,
-                onValueChange = {
-                    tempTask = tempTask.copy(name = it)
-                }
-            )
+    LazyVerticalStaggeredGrid(
+        modifier = Modifier.fillMaxSize(),
+        columns = StaggeredGridCells.Adaptive(300.dp),
+        verticalItemSpacing = 4.dp,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        //main card
+        item {
+            Card {
+                Column(modifier = Modifier.padding(4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    //name
+                    EditableTextField(
+                        value = tempTask.name,
+                        isEditable = isEditable,
+                        textStyle = MaterialTheme.typography.h4,
+                        onValueChange = {
+                            tempTask = tempTask.copy(name = it)
+                        }
+                    )
 
-            DateTimeChip(
-                dateTime = tempTask.targetDate,
-                label = "срок выполнения",
-                isEditable = isEditable,
-                onDateTimeChanged = { tempTask = tempTask.copy(targetDate = it) })
+                    DateTimeChip(
+                        dateTime = tempTask.targetDate,
+                        label = "срок выполнения",
+                        isEditable = isEditable,
+                        onDateTimeChanged = { tempTask = tempTask.copy(targetDate = it) })
 
-            //users:
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                task.users.forEach {
-                    Chip(onClick = {}, content = {
-                        Text(it.getInitials())
-                    }, leadingIcon = {
-                        Icon(
-                            painterResource("vector/person_remove_black_24dp.svg"),
-                            contentDescription = "remove user from task"
-                        )
-                    })
                 }
-                Chip(onClick = {}) {
-                    Icon(
-                        painterResource("vector/person_add_black_24dp.svg"),
-                        contentDescription = "add users to task"
+            }
+        }
+
+        //description card:
+        if (isEditable || tempTask.description.isNotEmpty()) {
+            item {
+                Card {
+                    //description
+                    EditableTextField(
+                        value = tempTask.description,
+                        onValueChange = {
+                            tempTask = tempTask.copy(description = it)
+                        },
+                        textStyle = MaterialTheme.typography.body1,
+                        label = "описание",
+                        isEditable = isEditable
                     )
                 }
             }
-            Divider(modifier = Modifier.fillMaxWidth().height(1.dp))
+        }
 
-            //attachments
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                task.attachments.forEach {
-                    RenderAttachment(it, onClick = {})
+        //users card:
+        item {
+            Card {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    task.users.forEach {
+                        Chip(onClick = {}, content = {
+                            Text(it.getInitials())
+                        }, leadingIcon = {
+                            Icon(
+                                painterResource("vector/person_remove_black_24dp.svg"),
+                                contentDescription = "remove user from task"
+                            )
+                        })
+                    }
+                    Chip(onClick = {}) {
+                        Icon(
+                            painterResource("vector/person_add_black_24dp.svg"),
+                            contentDescription = "add users to task"
+                        )
+                    }
                 }
-                Chip(onClick = {}) { Icon(Icons.Rounded.Add, contentDescription = "add attachment to task") }
             }
-            Divider(modifier = Modifier.fillMaxWidth().height(1.dp))
+        }
 
-            if (isEditable || tempTask.description.isNotEmpty()) {
-                //description
-                EditableTextField(
-                    value = tempTask.description,
-                    onValueChange = {
-                        tempTask = tempTask.copy(description = it)
-                    },
-                    textStyle = MaterialTheme.typography.body1,
-                    label = "описание",
-                    isEditable = isEditable
-                )
+        //attachments card:
+        item {
+            Card {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    task.attachments.forEach {
+                        RenderAttachment(it, onClick = {})
+                    }
+                    Chip(onClick = {}) {
+                        Icon(
+                            painterResource("vector/attach_file_black_24dp.svg"),
+                            contentDescription = "add attachment to task"
+                        )
+                    }
+                }
             }
+        }
 
 
-            //subtasks
-            task.subtasks.forEach {
-                RenderSubTask(subTask = it, onClick = {})
+        //subtasks
+        item {
+            Card {
+                Column {
+                    task.subtasks.forEach {
+                        RenderSubTask(subTask = it, onClick = {})
+                    }
+                    Chip(onClick = {}) {
+                        Icon(
+                            painterResource("vector/add_task_black_24dp.svg"),
+                            contentDescription = "добавить подзадачу"
+                        )
+                    }
+                }
             }
-            OutlinedButton(onClick = {}, content = { Text("Добавить подзадачу") })
-
         }
     }
-
 }
 
 
