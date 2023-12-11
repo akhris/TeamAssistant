@@ -18,12 +18,14 @@ fun TextInputDialogUi(
     component: IDialogComponent.ITextInputDialogComponent,
     onOkClicked: (edittext: String) -> Unit
 ) {
-    val initialText = remember { component.initialText }
+
+
+    val initialText = remember(component) { component.properties.initialText }
     var editedText by remember { mutableStateOf(initialText) }
 
-    val hint = remember(component) { component.hint }
-    val okButtonText = remember(component) { component.OKButtonText }
-    val title = remember(component) { component.title }
+    val hint = remember(component) { component.properties.hint }
+    val okButtonText = remember(component) { component.properties.OKButtonText }
+    val title = remember(component) { component.properties.title }
     AlertDialog(
         modifier = Modifier.onKeyEvent {
             if (it.key == Key.Enter) {

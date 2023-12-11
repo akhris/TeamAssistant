@@ -39,8 +39,8 @@ fun ProjectsListUi(component: IMasterComponent<Project>) {
 
             override fun getIconPath(item: Project): String = "vector/rocket_black_24dp.svg"
 
-            override fun getIconTint(item: Project): Color? = item.color?.let { Color(it) }
-
-        }
+    }
     )
+
+
 }

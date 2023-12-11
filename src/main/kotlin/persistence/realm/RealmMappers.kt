@@ -115,6 +115,7 @@ fun Task.toRealmTask(): RealmTask =
         subtasks = this@toRealmTask.subtasks.map { it.toRealmSubTask() }.toRealmSet()
         attachments = this@toRealmTask.attachments.map { it.toRealmAttachment() }.toRealmList()
         isPinned = this@toRealmTask.isPinned
+        priority = this@toRealmTask.priority
     }
 
 fun RealmTask.toTask(): Task =
@@ -130,7 +131,8 @@ fun RealmTask.toTask(): Task =
         users = users.map { it.toUser() },
         subtasks = subtasks.map { it.toSubTask() },
         attachments = attachments.map { it.toAttachment() },
-        isPinned = isPinned
+        isPinned = isPinned,
+        priority = priority
     )
 
 fun SubTask.toRealmSubTask(): RealmSubTask =

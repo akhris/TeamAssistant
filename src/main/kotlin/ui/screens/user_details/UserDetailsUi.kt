@@ -16,6 +16,7 @@ import tests.testUser1
 import ui.FABController
 import ui.FABState
 import ui.UiSettings
+import ui.fields.EditableTextField
 import ui.screens.master_detail.IDetailsComponent
 import utils.log
 
@@ -60,27 +61,27 @@ fun RenderUserCard(
                 contentDescription = "user icon"
             )
             //2. Name/surname fields
-            RenderUserDetailsTextField(
+            EditableTextField(
                 value = tempUser.name,
                 onValueChange = { tempUser = tempUser.copy(name = it) },
                 isEditable = isEditable,
                 label = "имя"
             )
-            RenderUserDetailsTextField(
+            EditableTextField(
                 value = tempUser.middleName,
                 onValueChange = { tempUser = tempUser.copy(middleName = it) },
                 isEditable = isEditable,
                 label = "отчество"
 
             )
-            RenderUserDetailsTextField(
+            EditableTextField(
                 value = tempUser.surname,
                 onValueChange = { tempUser = tempUser.copy(surname = it) },
                 isEditable = isEditable,
                 label = "фамилия"
             )
             //3. Room
-            RenderUserDetailsTextField(
+            EditableTextField(
                 value = tempUser.roomNumber,
                 onValueChange = { tempUser = tempUser.copy(roomNumber = it) },
                 isEditable = isEditable,
@@ -88,14 +89,14 @@ fun RenderUserCard(
 
             )
             //4. Phone number
-            RenderUserDetailsTextField(
+            EditableTextField(
                 value = tempUser.phoneNumber,
                 onValueChange = { tempUser = tempUser.copy(phoneNumber = it) },
                 isEditable = isEditable,
                 label = "телефон"
             )
             //5. Email
-            RenderUserDetailsTextField(
+            EditableTextField(
                 value = tempUser.email,
                 onValueChange = { tempUser = tempUser.copy(email = it) },
                 isEditable = isEditable,

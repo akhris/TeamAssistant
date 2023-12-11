@@ -4,12 +4,25 @@ sealed interface IDialogComponent {
 
     fun onDismiss()
 
-    val title: String
-    val message: String
-    val OKButtonText: String
-    val initialText: String
+    val properties: DialogProperties
+
     interface ITextInputDialogComponent : IDialogComponent {
-        val hint: String
+
+    }
+
+    object NONE : IDialogComponent{
+        override fun onDismiss() {
+
+        }
+
+        override val properties: DialogProperties = DialogProperties()
     }
 }
 
+data class DialogProperties(
+    val initialText: String = "",
+    val title: String = "",
+    val message: String = "",
+    val OKButtonText: String = "ok",
+    val hint: String = "",
+)

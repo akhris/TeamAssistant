@@ -1,10 +1,8 @@
 package ui.screens.root_ui
 
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.decompose.router.stack.ChildStack
-import com.arkivanov.decompose.router.stack.StackNavigation
-import com.arkivanov.decompose.router.stack.childStack
-import com.arkivanov.decompose.router.stack.replaceCurrent
+import com.arkivanov.decompose.router.slot.*
+import com.arkivanov.decompose.router.stack.*
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.lifecycle.subscribe
@@ -17,10 +15,14 @@ import kotlinx.coroutines.flow.map
 import org.kodein.di.DI
 import org.kodein.di.instance
 import ui.NavItem
+import ui.dialogs.DialogProperties
+import ui.dialogs.IDialogComponent
+import ui.dialogs.text_input_dialog.DialogTextInputComponent
 import ui.screens.master_detail.projects.ProjectsMasterDetailsComponent
 import ui.screens.master_detail.tasks.TasksMasterDetailsComponent
 import ui.screens.master_detail.teams.TeamsMasterDetailsComponent
 import ui.screens.master_detail.users.UsersMasterDetailsComponent
+import ui.screens.tasks_list.TasksListComponent
 import ui.screens.user_details.UserDetailsComponent
 import utils.UserUtils
 
@@ -39,9 +41,64 @@ class RootComponent(
     private val projectsRepo: IRepositoryObservable<Project> by di.instance()
     private val teamsRepo: IRepositoryObservable<Team> by di.instance()
 
-    private val dialogNav = StackNavigation<DialogConfig>()
+//    private val dialogNav = SlotNavigation<DialogConfig>()
     private val navHostNav = StackNavigation<NavHostConfig>()
 //    private val toolbarUtilsNav = StackNavigation<ToolbarUtilsConfig>()
+
+//    override val dialogSlot: Value<ChildSlot<*, IDialogComponent>> =
+//        childSlot(
+//            source = dialogNav,
+//            // persistent = false, // Disable navigation state saving, if needed
+//            handleBackButton = true, // Close the dialog on back button press
+//        ) { config, childComponentContext ->
+//            when (config) {
+//                DialogConfig.None -> IDialogComponent.NONE
+//                is DialogConfig.CreateNewEntityDialog -> getEntityDialog(childComponentContext, config.entityClass)
+//                    ?: IDialogComponent.NONE
+//            }
+//        }
+
+//    private fun getEntityDialog(
+//        componentContext: ComponentContext,
+//        entityClass: Class<out IEntity>,
+//    ): IDialogComponent? {
+//
+//        val props = when (entityClass) {
+//            Project::class.java -> DialogProperties(
+//                title = "добавить проект",
+//                hint = "имя проекта",
+//                OKButtonText = "добавить"
+//            )
+//
+//            Task::class.java -> DialogProperties(
+//                title = "добавить задачу",
+//                hint = "имя задачи",
+//                OKButtonText = "добавить"
+//            )
+//
+//            Team::class.java -> DialogProperties(
+//                title = "добавить команду",
+//                hint = "имя команды",
+//                OKButtonText = "добавить"
+//            )
+//
+//            User::class.java -> DialogProperties(
+//                title = "добавить пользователя",
+//                hint = "имя пользователя",
+//                OKButtonText = "добавить"
+//            )
+//
+//            else -> null
+//        }
+//
+//        return props?.let {
+//            DialogTextInputComponent(
+//                componentContext = componentContext,
+//                properties = it,
+//                onDismissed = dialogNav::dismiss
+//            )
+//        }
+//    }
 
     private val _currentDestination = MutableValue<NavItem>(NavItem.homeItem)
     override val currentDestination: Value<NavItem> = _currentDestination
@@ -63,28 +120,6 @@ class RootComponent(
             IRootComponent.UserLoggingInfo(userID = userID, user = it)
         }
 
-//        realm
-//            .query<RealmUser>("_id == $0", userID)
-//            .first()
-//            .asFlow()
-//            .map {
-//                val user = when (it) {
-//                    is DeletedObject -> it.obj
-//                    is InitialObject -> it.obj
-//                    is UpdatedObject -> it.obj
-//                    is PendingObject -> it.obj
-//                }?.toUser()
-//                IRootComponent.UserLoggingInfo(userID = userID, user = user)
-//            }
-
-
-//    private val _toolbarUtilsStack =
-//        childStack(
-//            source = toolbarUtilsNav,
-//            initialConfiguration = ToolbarUtilsConfig.SampleTypesSelector,
-//            childFactory = ::createChild,
-//            key = "toolbar utils stack"
-//        )
 
     override val navHostStack: Value<ChildStack<*, IRootComponent.NavHost>> = childStack(
         source = navHostNav,
@@ -93,18 +128,7 @@ class RootComponent(
         childFactory = ::createChild,
         key = "navhost stack"
     )
-    override val dialogStack: Value<ChildStack<*, IRootComponent.Dialog>> = childStack(
-        source = dialogNav,
-        initialConfiguration = DialogConfig.None,
-//            handleBackButton = true,
-        childFactory = ::createChild,
-        key = "dialog stack"
-    )
-//    override val toolbarUtilsStack: Value<ChildStack<*, IRootComponent.ToolbarUtils>> = _toolbarUtilsStack
 
-//    override fun showAddSampleTypeDialog() {
-//        dialogNav.replaceCurrent(DialogConfig.AddSampleType)
-//    }
 
     override fun createNewUser(user: User) {
         scope.launch {
@@ -113,16 +137,19 @@ class RootComponent(
         }
     }
 
-    override fun dismissDialog() {
-        dialogNav.replaceCurrent(DialogConfig.None)
-    }
 
-
-    private fun createChild(config: DialogConfig, componentContext: ComponentContext): IRootComponent.Dialog {
-        return when (config) {
-            DialogConfig.None -> IRootComponent.Dialog.None
-        }
-    }
+//    override fun createNewEntityDialog() {
+//        val newEntityClass = when (navHostStack.active.instance) {
+//            is IRootComponent.NavHost.Activity -> null
+//            is IRootComponent.NavHost.ProjectMasterDetail -> Project::class.java
+//            is IRootComponent.NavHost.TaskMasterDetail -> Task::class.java
+//            is IRootComponent.NavHost.TeamMasterDetail -> Team::class.java
+//            is IRootComponent.NavHost.UserMasterDetail -> User::class.java
+//        }
+//        newEntityClass?.let {
+//            dialogNav.activate(DialogConfig.CreateNewEntityDialog(it))
+//        }
+//    }
 
 
     private fun createChild(config: NavHostConfig, componentContext: ComponentContext): IRootComponent.NavHost {
@@ -189,6 +216,9 @@ class RootComponent(
 //
 //        @Parcelize
 //        object AddSampleType : DialogConfig()
+
+        @Parcelize
+        data class CreateNewEntityDialog(val entityClass: Class<out IEntity>) : DialogConfig()
 
         @Parcelize
         object None : DialogConfig()

@@ -14,7 +14,7 @@ import androidx.compose.ui.text.TextStyle
 fun EditableTextField(
     value: String,
     isEditable: Boolean,
-    textStyle: TextStyle,
+    textStyle: TextStyle = LocalTextStyle.current,
     label: String = "",
     onValueChange: (String) -> Unit,
 ) {

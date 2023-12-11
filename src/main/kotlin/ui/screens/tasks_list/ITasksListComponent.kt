@@ -8,7 +8,7 @@ import ui.dialogs.IDialogComponent
 import ui.screens.master_detail.IMasterComponent
 
 interface ITasksListComponent : IMasterComponent<Task> {
-    val dialogSlot: Value<ChildSlot<*, IDialogComponent>>
+//    val dialogSlot: Value<ChildSlot<*, IDialogComponent>>
 
     /**
      * Show a dialog for creating new team

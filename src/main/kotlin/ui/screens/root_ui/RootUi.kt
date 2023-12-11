@@ -17,13 +17,17 @@ import androidx.compose.ui.window.WindowState
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.Children
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.fade
+import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.slide
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimation
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import domain.User
 import kotlinx.coroutines.launch
 import ui.FABController
 import ui.FABState
+import ui.NavItem
 import ui.SideNavigationPanel
+import ui.dialogs.IDialogComponent
+import ui.dialogs.text_input_dialog.TextInputDialogUi
 import ui.screens.activity.ActivityUi
 import ui.screens.master_detail.MasterDetailsUi
 import ui.screens.project_details.ProjectDetailsUi
@@ -47,9 +51,12 @@ fun FrameWindowScope.RootUi(
     onCloseRequest: () -> Unit,
 ) {
 
+
     val scope = rememberCoroutineScope()
 //    val sampleTypes by remember(component) { component.sampleTypes }.subscribeAsState()
     val currentlyLoggedUser by remember(component) { component.userLoggingInfo }.collectAsState(IRootComponent.UserLoggingInfo())
+
+
 
     log("currentlyLoggedUser: $currentlyLoggedUser")
 
@@ -182,52 +189,48 @@ fun FrameWindowScope.RootUi(
                             Children(stack = component.navHostStack, animation = stackAnimation(fade())) {
                                 when (val child = it.instance) {
                                     is IRootComponent.NavHost.Activity -> ActivityUi()
-                                    is IRootComponent.NavHost.Projects -> ProjectsListUi(child.component)
-                                    is IRootComponent.NavHost.TasksList -> TasksListUi(child.component)
-//                                    is IRootComponent.NavHost.Team -> TeamsListUi(child.component)
-                                    is IRootComponent.NavHost.UserDetails -> UserDetailsUi(
-                                        child.component
-                                    )
-
-//                                    is IRootComponent.NavHost.TaskDetails -> TaskDetailsUi(child.component)
-                                    is IRootComponent.NavHost.TaskMasterDetail -> MasterDetailsUi(
+                                   is IRootComponent.NavHost.TaskMasterDetail -> MasterDetailsUi(
                                         component = child.component,
                                         renderItemDetails = { c ->
                                             TaskDetailsUi(c)
                                         },
                                         renderItemsList = { c ->
                                             TasksListUi(c)
-                                        }
+                                        },
+                                       fabController = fabController
                                     )
 
                                     is IRootComponent.NavHost.ProjectMasterDetail -> MasterDetailsUi(
                                         component = child.component,
-                                        renderItemsList = {c->
+                                        renderItemsList = { c ->
                                             ProjectsListUi(c)
                                         },
-                                        renderItemDetails = {c->
+                                        renderItemDetails = { c ->
                                             ProjectDetailsUi(c)
-                                        }
+                                        },
+                                        fabController = fabController
                                     )
 
                                     is IRootComponent.NavHost.TeamMasterDetail -> MasterDetailsUi(
                                         component = child.component,
-                                        renderItemsList = {c->
+                                        renderItemsList = { c ->
                                             TeamsListUi(c)
                                         },
-                                        renderItemDetails = {c->
+                                        renderItemDetails = { c ->
                                             TeamDetailsUi(c)
-                                        }
+                                        },
+                                        fabController = fabController
                                     )
 
                                     is IRootComponent.NavHost.UserMasterDetail -> MasterDetailsUi(
                                         component = child.component,
-                                        renderItemsList = {c->
+                                        renderItemsList = { c ->
                                             UsersListUi(c)
                                         },
-                                        renderItemDetails = {c->
+                                        renderItemDetails = { c ->
                                             UserDetailsUi(c)
-                                        }
+                                        },
+                                        fabController = fabController
                                     )
                                 }
                             }
@@ -240,15 +243,6 @@ fun FrameWindowScope.RootUi(
 
         }
     )
-
-//    Children(stack = component.dialogStack, animation = stackAnimation(slide())) {
-//        when (val child = it.instance) {
-//            IRootComponent.Dialog.None -> {}
-//            is IRootComponent.Dialog.AddSampleTypeDialog -> AddSampleTypeDialogUi(child.component, onDismiss = {
-//                component.dismissDialog()
-//            })
-//        }
-//    }
 
 
 }

@@ -22,6 +22,7 @@ class RealmTask() : RealmObject {
     var subtasks: RealmSet<RealmSubTask> = realmSetOf()
     var attachments: RealmList<RealmAttachment> = realmListOf()
     var isPinned: Boolean = false
+    var priority: Int = 1
 }
 
 class RealmSubTask() : RealmObject {

@@ -103,7 +103,8 @@ data class Task(
     val users: List<User> = listOf(),
     val subtasks: List<SubTask> = listOf(),
     val attachments: List<Attachment> = listOf(),
-    val isPinned: Boolean = false
+    val isPinned: Boolean = false,
+    val priority: Int = 1
 ) : IEntity {
     override fun toString() = name
 }
