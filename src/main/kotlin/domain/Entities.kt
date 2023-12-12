@@ -81,7 +81,6 @@ data class Project(
     val creator: User? = null,
     val createdAt: LocalDateTime? = null,
     val state: State.Project? = null,
-//    val tasks: List<Task> = listOf(),
     val teams: List<Team> = listOf(),
     val isPinned: Boolean = false
 ) : IEntity

@@ -11,12 +11,14 @@ import androidx.compose.material.icons.rounded.Check
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import domain.SubTask
 import domain.Task
 import domain.valueobjects.Attachment
 import ui.fields.DateTimeChip
 import ui.fields.EditableTextField
+import ui.fields.TitledCard
 import ui.screens.master_detail.IDetailsComponent
 
 @Composable
@@ -39,7 +41,7 @@ fun TaskDetailsUi(component: IDetailsComponent<Task>) {
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalLayoutApi::class)
 @Composable
-fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (Task) -> Unit) {
+private fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (Task) -> Unit) {
     var tempTask by remember(task) { mutableStateOf(task) }
 
     LazyVerticalStaggeredGrid(
@@ -50,7 +52,7 @@ fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (Task) -> 
     ) {
         //main card
         item {
-            Card {
+            TitledCard {
                 Column(modifier = Modifier.padding(4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     //name
                     EditableTextField(
@@ -59,7 +61,8 @@ fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (Task) -> 
                         textStyle = MaterialTheme.typography.h4,
                         onValueChange = {
                             tempTask = tempTask.copy(name = it)
-                        }
+                        },
+                        label = if (tempTask.name.isEmpty()) "имя задачи" else ""
                     )
 
                     DateTimeChip(
@@ -75,24 +78,28 @@ fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (Task) -> 
         //description card:
         if (isEditable || tempTask.description.isNotEmpty()) {
             item {
-                Card {
-                    //description
-                    EditableTextField(
-                        value = tempTask.description,
-                        onValueChange = {
-                            tempTask = tempTask.copy(description = it)
-                        },
-                        textStyle = MaterialTheme.typography.body1,
-                        label = "описание",
-                        isEditable = isEditable
-                    )
-                }
+                TitledCard(
+                    title = {
+                        Text("описание")
+                    },
+                    content = {
+                        EditableTextField(
+                            value = tempTask.description,
+                            onValueChange = {
+                                tempTask = tempTask.copy(description = it)
+                            },
+                            textStyle = MaterialTheme.typography.body1,
+//                            label = "описание",
+                            isEditable = isEditable
+                        )
+                    }
+                )
             }
         }
 
         //users card:
         item {
-            Card {
+            TitledCard(title={ Text("участники") }) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     task.users.forEach {
                         Chip(onClick = {}, content = {
@@ -116,7 +123,7 @@ fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (Task) -> 
 
         //attachments card:
         item {
-            Card {
+            TitledCard(title={ Text("вложения") }) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     task.attachments.forEach {
                         RenderAttachment(it, onClick = {})
@@ -124,7 +131,7 @@ fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (Task) -> 
                     Chip(onClick = {}) {
                         Icon(
                             painterResource("vector/attach_file_black_24dp.svg"),
-                            contentDescription = "add attachment to task"
+                            contentDescription = "добавить вложение к задаче"
                         )
                     }
                 }
@@ -134,7 +141,7 @@ fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (Task) -> 
 
         //subtasks
         item {
-            Card {
+            TitledCard(title = { Text("подзадачи") }) {
                 Column {
                     task.subtasks.forEach {
                         RenderSubTask(subTask = it, onClick = {})
@@ -150,6 +157,7 @@ fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (Task) -> 
         }
     }
 }
+
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -185,4 +193,5 @@ private fun RenderSubTask(subTask: SubTask, onClick: () -> Unit) {
         Text(subTask.description)
     })
 }
+
 
