@@ -1,12 +1,11 @@
 package ui.screens.project_details
 
 import LocalCurrentUser
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.onClick
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
@@ -15,10 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import domain.Project
-import domain.Task
+import ui.dialogs.IconsPickerDialog
 import ui.fields.EditableTextField
 import ui.fields.TitledCard
 import ui.screens.master_detail.IDetailsComponent
+import utils.ResourcesUtils
 
 @Composable
 fun ProjectDetailsUi(component: IDetailsComponent<Project>) {
@@ -35,12 +35,13 @@ fun ProjectDetailsUi(component: IDetailsComponent<Project>) {
 }
 
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjectUpdated: (Project) -> Unit) {
 
     var tempProject by remember(project) { mutableStateOf(project) }
 
+    var showIconPicker by remember { mutableStateOf(false) }
 
     LazyVerticalStaggeredGrid(
         modifier = Modifier.fillMaxSize(),
@@ -51,15 +52,27 @@ private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjec
         //main card
         item {
             TitledCard {
-                EditableTextField(
-                    value = tempProject.name,
-                    isEditable = isEditable,
-                    textStyle = MaterialTheme.typography.h4,
-                    onValueChange = {
-                        tempProject = tempProject.copy(name = it)
-                    },
-                    label = if (tempProject.name.isEmpty()) "имя проекта" else ""
-                )
+                Column {
+
+                    Icon(
+                        modifier = Modifier
+                            .onClick {
+                            showIconPicker = true
+                        },
+                        painter = painterResource(tempProject.icon.ifEmpty { "vector/broken_image_black_24dp.svg" }),
+                        contentDescription = "иконка проекта"
+                    )
+
+                    EditableTextField(
+                        value = tempProject.name,
+                        isEditable = isEditable,
+                        textStyle = MaterialTheme.typography.h4,
+                        onValueChange = {
+                            tempProject = tempProject.copy(name = it)
+                        },
+                        label = if (tempProject.name.isEmpty()) "имя проекта" else ""
+                    )
+                }
             }
         }
 
@@ -85,5 +98,14 @@ private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjec
                 }
             }
         }
+    }
+
+    if (showIconPicker) {
+        IconsPickerDialog(
+            iconsFolder = ResourcesUtils.ResourcesFolder.ProjectIcons,
+            initialSelection = tempProject.icon,
+            onIconPicked = { tempProject = tempProject.copy(icon = it) },
+            onDismiss = { showIconPicker = false }
+        )
     }
 }

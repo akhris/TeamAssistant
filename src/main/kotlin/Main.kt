@@ -7,6 +7,7 @@ import ui.screens.root_ui.IRootComponent
 import ui.screens.root_ui.RootComponent
 import ui.screens.root_ui.RootUi
 import ui.theme.AppTheme
+import utils.ResourcesUtils
 import utils.UserUtils
 import utils.log
 

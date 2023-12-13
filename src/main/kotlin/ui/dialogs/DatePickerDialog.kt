@@ -24,6 +24,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogWindow
+import androidx.compose.ui.window.DialogWindowScope
 import androidx.compose.ui.window.rememberDialogState
 import ui.theme.AppTheme
 import ui.theme.DialogSettings
@@ -65,12 +67,11 @@ fun DatePickerDialog(
             height = DialogSettings.DatePickerSettings.defaultPickerHeight
         )
     )
-    Dialog(
+    DialogWindow(onCloseRequest = onDismiss,
         state = dialogState,
-        onCloseRequest = onDismiss,
         undecorated = true,
-        resizable = false,
         transparent = true,
+        resizable = false,
         content = {
             DatePickerDialogContent(
                 initialSelection = initialSelection,
@@ -80,8 +81,7 @@ fun DatePickerDialog(
                     onDismiss()
                 }
             )
-        }
-    )
+        })
 
 }
 

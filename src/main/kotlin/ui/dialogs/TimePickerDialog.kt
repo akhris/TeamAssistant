@@ -16,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import kotlinx.coroutines.delay
 import ui.theme.DialogSettings
@@ -41,7 +42,7 @@ fun TimePickerDialog(
         )
     )
 
-    Dialog(
+    DialogWindow(
         state = dialogState,
         onCloseRequest = onDismiss,
         undecorated = true,

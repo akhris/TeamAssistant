@@ -1,20 +1,9 @@
 package ui.screens.projects_list
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ListItem
-import androidx.compose.material.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import domain.EntitiesList
 import domain.Project
-import domain.Team
 import ui.EntitiesListUi
 import ui.ItemRenderer
 import ui.SelectableMode
@@ -37,7 +26,7 @@ fun ProjectsListUi(component: IMasterComponent<Project>) {
 
             override fun getOverlineText(item: Project) = null
 
-            override fun getIconPath(item: Project): String = "vector/rocket_black_24dp.svg"
+            override fun getIconPath(item: Project): String = "vector/projects/rocket_black_24dp.svg"
 
     }
     )

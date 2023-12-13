@@ -85,7 +85,8 @@ fun RealmProject.toProject(): Project =
         creator = creator?.toUser(),
         createdAt = createdAt?.toLocalDateTime(),
         teams = teams.map { it.toTeam() },
-        isPinned = isPinned
+        isPinned = isPinned,
+        icon = icon
     )
 
 fun Project.toRealmProject(): RealmProject =
@@ -98,6 +99,7 @@ fun Project.toRealmProject(): RealmProject =
         createdAt = this@toRealmProject.createdAt?.toRealmInstant()
         teams = this@toRealmProject.teams.map { it.toRealmTeam() }.toRealmSet()
         isPinned = this@toRealmProject.isPinned
+        icon = this@toRealmProject.icon
     }
 
 
