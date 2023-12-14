@@ -10,6 +10,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -52,18 +53,9 @@ private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjec
         //main card
         item {
             TitledCard {
-                Column {
-
-                    Icon(
-                        modifier = Modifier
-                            .onClick {
-                            showIconPicker = true
-                        },
-                        painter = painterResource(tempProject.icon.ifEmpty { "vector/broken_image_black_24dp.svg" }),
-                        contentDescription = "иконка проекта"
-                    )
-
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     EditableTextField(
+                        modifier = Modifier.weight(1f),
                         value = tempProject.name,
                         isEditable = isEditable,
                         textStyle = MaterialTheme.typography.h4,
@@ -71,6 +63,15 @@ private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjec
                             tempProject = tempProject.copy(name = it)
                         },
                         label = if (tempProject.name.isEmpty()) "имя проекта" else ""
+                    )
+                    Icon(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .onClick {
+                                showIconPicker = true
+                            },
+                        painter = painterResource(tempProject.icon.ifEmpty { "vector/broken_image_black_24dp.svg" }),
+                        contentDescription = "иконка проекта"
                     )
                 }
             }

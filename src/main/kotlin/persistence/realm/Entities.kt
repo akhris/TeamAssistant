@@ -47,6 +47,7 @@ class RealmProject() : RealmObject {
     var teams: RealmSet<RealmTeam> = realmSetOf()
     var isPinned: Boolean = false
     var icon: String = ""
+    var tags: RealmSet<String> = realmSetOf()
 }
 
 class RealmUser : RealmObject {

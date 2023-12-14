@@ -8,13 +8,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import domain.Project
 import domain.Team
 import ui.fields.EditableTextField
 import ui.fields.TitledCard
@@ -76,7 +73,7 @@ private fun RenderTeamDetails(team: Team, isEditable: Boolean, onTeamUpdated: (T
                             } else {
                                 {
                                     Icon(
-                                        painterResource("vector/person_black_24dp.svg"),
+                                        painterResource("vector/users/person_black_24dp.svg"),
                                         contentDescription = "член команды"
                                     )
                                 }

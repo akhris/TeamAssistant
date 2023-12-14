@@ -86,7 +86,8 @@ fun RealmProject.toProject(): Project =
         createdAt = createdAt?.toLocalDateTime(),
         teams = teams.map { it.toTeam() },
         isPinned = isPinned,
-        icon = icon
+        icon = icon,
+        tags = tags.toSet()
     )
 
 fun Project.toRealmProject(): RealmProject =
@@ -100,6 +101,7 @@ fun Project.toRealmProject(): RealmProject =
         teams = this@toRealmProject.teams.map { it.toRealmTeam() }.toRealmSet()
         isPinned = this@toRealmProject.isPinned
         icon = this@toRealmProject.icon
+        tags = this@toRealmProject.tags.toRealmSet()
     }
 
 
@@ -160,9 +162,24 @@ fun RealmSubTask.toSubTask(): SubTask =
 fun RealmAttachment.toAttachment(): Attachment {
     return when (type) {
         Attachment.File::class.simpleName -> Attachment.File(path = dataPrimary, name = name, description = description)
-        Attachment.Folder::class.simpleName -> Attachment.Folder(path = dataPrimary, name = name, description = description)
-        Attachment.InternetLink::class.simpleName -> Attachment.InternetLink(link = dataPrimary, name = name, description = description)
-        Attachment.Email::class.simpleName -> Attachment.Email(email = dataPrimary, name = name, description = description)
+        Attachment.Folder::class.simpleName -> Attachment.Folder(
+            path = dataPrimary,
+            name = name,
+            description = description
+        )
+
+        Attachment.InternetLink::class.simpleName -> Attachment.InternetLink(
+            link = dataPrimary,
+            name = name,
+            description = description
+        )
+
+        Attachment.Email::class.simpleName -> Attachment.Email(
+            email = dataPrimary,
+            name = name,
+            description = description
+        )
+
         else -> throw IllegalStateException("unknown attachment type: $type")
     }
 }

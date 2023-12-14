@@ -7,6 +7,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import utils.applyTextStyle
 
 
 @Composable
@@ -28,15 +29,3 @@ fun TitledCard(title: @Composable (() -> Unit)? = null, content: @Composable () 
     }
 }
 
-private fun applyTextStyle(
-    textStyle: TextStyle,
-    contentAlpha: Float,
-    icon: @Composable (() -> Unit)?,
-): @Composable (() -> Unit)? {
-    if (icon == null) return null
-    return {
-        CompositionLocalProvider(LocalContentAlpha provides contentAlpha) {
-            ProvideTextStyle(textStyle, icon)
-        }
-    }
-}

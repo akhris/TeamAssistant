@@ -1,20 +1,13 @@
 package ui.screens.users_list
 
 import LocalCurrentUser
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import domain.EntitiesList
-import domain.Team
 import domain.User
 import ui.EntitiesListUi
 import ui.ItemRenderer
@@ -39,7 +32,7 @@ fun UsersListUi(component: IMasterComponent<User>) {
 
             override fun getOverlineText(item: User) = ""
 
-            override fun getIconPath(item: User): String = "vector/person_black_24dp.svg"
+            override fun getIconPath(item: User): String = "vector/users/person_black_24dp.svg"
 
             override fun getIconTint(item: User): Color? = if (item.id == currentUserID) {
                 currentUserColor

@@ -8,7 +8,7 @@ package ui
 sealed class NavItem(val pathToIcon: String, val title: String) {
 
     object UserDetails : NavItem(
-        pathToIcon = "vector/person_black_24dp.svg",
+        pathToIcon = "vector/users/person_black_24dp.svg",
         title = "Пользователь"
     )
 

@@ -24,7 +24,7 @@ data class User(
     val createdAt: LocalDateTime? = null,
     val avatar: String = "",
     val lastOnline: LocalDateTime? = null,
-    val isPinned: Boolean = false
+    val isPinned: Boolean = false,
 ) : IEntity {
     override fun toString() = "$name $surname"
 
@@ -63,7 +63,7 @@ data class Team(
     val members: List<User> = listOf(),
     val createdAt: LocalDateTime? = null,
     val childTeams: List<Team> = listOf(),
-    val isPinned: Boolean = false
+    val isPinned: Boolean = false,
 ) : IEntity {
     override fun toString() = name
 }
@@ -83,7 +83,8 @@ data class Project(
     val state: State.Project? = null,
     val teams: List<Team> = listOf(),
     val isPinned: Boolean = false,
-    val icon: String = ""
+    val icon: String = "",
+    val tags: Set<String> = setOf(),
 ) : IEntity
 
 
@@ -104,7 +105,7 @@ data class Task(
     val subtasks: List<SubTask> = listOf(),
     val attachments: List<Attachment> = listOf(),
     val isPinned: Boolean = false,
-    val priority: Int = 1
+    val priority: Int = 1,
 ) : IEntity {
     override fun toString() = name
 }
@@ -116,6 +117,6 @@ data class SubTask(
     val description: String = "",
     val createdAt: LocalDateTime? = null,
     val targetDate: LocalDateTime? = null,
-    val completedAt: LocalDateTime? = null
+    val completedAt: LocalDateTime? = null,
 ) : IEntity
 

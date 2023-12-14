@@ -8,17 +8,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import domain.User
 import kotlinx.coroutines.delay
 import tests.testUser1
-import ui.FABController
-import ui.FABState
 import ui.UiSettings
 import ui.fields.EditableTextField
 import ui.screens.master_detail.IDetailsComponent
-import utils.log
 
 
 @Composable
@@ -57,7 +53,7 @@ fun RenderUserCard(
             //1. User Icon
             Icon(
                 modifier = Modifier.size(128.dp),
-                painter = painterResource("vector/person_black_24dp.svg"),
+                painter = painterResource("vector/users/person_black_24dp.svg"),
                 contentDescription = "user icon"
             )
             //2. Name/surname fields

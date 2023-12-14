@@ -37,6 +37,10 @@ object UiSettings {
         val screenPadding = 4.dp
     }
 
+    object DetailsScreen {
+        val rightPanelWidth = 64.dp
+    }
+
     object DataTable {
         const val cellTextSize: Float = 10f
         val headerStateIconsSize: Dp = 18.dp
