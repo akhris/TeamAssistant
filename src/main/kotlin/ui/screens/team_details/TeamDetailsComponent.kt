@@ -4,6 +4,7 @@ import com.arkivanov.decompose.ComponentContext
 import domain.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 import ui.screens.BaseComponent
@@ -18,6 +19,12 @@ class TeamDetailsComponent(teamID: String, di: DI, componentContext: ComponentCo
             is RepoResult.ItemRemoved -> it.item
             is RepoResult.ItemUpdated -> it.item
             is RepoResult.PendindObject -> it.item
+        }
+    }
+
+    override fun updateItem(item: Team) {
+        scope.launch {
+            repo.update(item)
         }
     }
 }

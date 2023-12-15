@@ -62,12 +62,16 @@ fun FilePickerUi(component: IFilePicker, onDismiss: () -> Unit) {
 
 fun fileChooserDialog(
     title: String?,
-    filters: List<FileNameExtensionFilter> = listOf()
+    filters: List<FileNameExtensionFilter> = listOf(),
+    folderSelection: Boolean = false
 ): String {
     val fileChooser = JFileChooser(FileSystemView.getFileSystemView())
     fileChooser.currentDirectory = File(System.getProperty("user.dir"))
     fileChooser.dialogTitle = title
-    fileChooser.fileSelectionMode = JFileChooser.FILES_AND_DIRECTORIES
+    fileChooser.fileSelectionMode = when(folderSelection){
+        true -> JFileChooser.DIRECTORIES_ONLY
+        false -> JFileChooser.FILES_AND_DIRECTORIES
+    }
     filters.forEach { fileChooser.addChoosableFileFilter(it) }
     fileChooser.isAcceptAllFileFilterUsed = false
     fileChooser.selectedFile = null

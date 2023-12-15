@@ -1,26 +1,35 @@
 package ui.screens.task_details
 
 import LocalCurrentUser
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import domain.SubTask
 import domain.Task
 import domain.valueobjects.Attachment
+import kotlinx.coroutines.delay
+import ui.UiSettings
+import ui.dialogs.EditAttachmentDialog
 import ui.dialogs.DatePickerDialog
 import ui.fields.CircleIconButton
+import ui.fields.DateTimeChip
 import ui.fields.EditableTextField
 import ui.screens.BaseDetailsScreen
 import ui.screens.master_detail.IDetailsComponent
+import java.time.DayOfWeek
 
 @Composable
 fun TaskDetailsUi(component: IDetailsComponent<Task>) {
@@ -32,8 +41,8 @@ fun TaskDetailsUi(component: IDetailsComponent<Task>) {
         RenderTaskDetails(
             it,
             isEditable = listOfNotNull(it.creator).contains(user),
-            onTaskUpdated = {
-
+            onTaskUpdated = { updatedTask->
+                component.updateItem(updatedTask)
             }
         )
 
@@ -42,7 +51,7 @@ fun TaskDetailsUi(component: IDetailsComponent<Task>) {
 
 
 // https://dribbble.com/shots/5541961-Projecto-Desktop-Task-Management-App
-@OptIn(ExperimentalMaterialApi::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (Task) -> Unit) {
     var tempTask by remember(task) { mutableStateOf(task) }
@@ -53,7 +62,7 @@ private fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (T
         mainTag = tempTask.project?.let { p ->
             {
                 Chip(
-                    shape = MaterialTheme.shapes.small,
+                    shape = UiSettings.DetailsScreen.tagsShape,
                     onClick = {},
                     content = { Text(p.name) },
                     colors = ChipDefaults.chipColors(
@@ -62,6 +71,27 @@ private fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (T
                     )
                 )
             }
+        },
+        secondaryTag = if (tempTask.targetDate != null || isEditable) {
+            {
+                if (tempTask.targetDate == null) {
+                    TextButton(onClick = { showDatePicker = true }, content = { Text("установить срок выполнения") })
+                } else
+                    DateTimeChip(
+                        dateTime = tempTask.targetDate,
+                        label = "срок выполнения",
+                        isEditable = isEditable,
+                        shape = UiSettings.DetailsScreen.tagsShape,
+                        onDateTimeChanged = { tempTask = tempTask.copy(targetDate = it) })
+            }
+        } else null,
+        attachments = {
+            RenderAttachments(
+                attachments = tempTask.attachments,
+                isEditable = isEditable,
+                onAttachmentsEdited = {
+                    tempTask = tempTask.copy(attachments = it)
+                })
         },
         title = {
             EditableTextField(
@@ -75,18 +105,20 @@ private fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (T
                 label = if (tempTask.name.isEmpty()) "имя задачи" else ""
             )
         },
-        description = {
-            EditableTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = tempTask.description,
-                onValueChange = {
-                    tempTask = tempTask.copy(description = it)
-                },
-                textStyle = MaterialTheme.typography.body1,
-                label = if (tempTask.description.isEmpty()) "описание" else "",
-                isEditable = isEditable
-            )
-        },
+        description = if (tempTask.description.isNotEmpty() || isEditable) {
+            {
+                EditableTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = tempTask.description,
+                    onValueChange = {
+                        tempTask = tempTask.copy(description = it)
+                    },
+                    textStyle = MaterialTheme.typography.body1,
+                    label = if (tempTask.description.isEmpty()) "описание" else "",
+                    isEditable = isEditable
+                )
+            }
+        } else null,
         rightPanel = {
             listOfNotNull(task.creator).plus(task.users).forEach { user ->
                 CircleIconButton(
@@ -247,21 +279,99 @@ private fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (T
             },
             onDateSelected = { newDate ->
                 tempTask = tempTask.copy(targetDate = newDate.atTime(0, 0, 0))
-            }
+            },
+            firstWeekDay = DayOfWeek.MONDAY
 
         )
     }
+
+    LaunchedEffect(tempTask) {
+        if (tempTask == task)
+            return@LaunchedEffect
+
+        delay(UiSettings.Debounce.debounceTime)
+        onTaskUpdated(tempTask)
+    }
 }
 
-
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun RenderAttachment(attachment: Attachment, onClick: () -> Unit) {
-    // TODO: add description tooltip
+private fun RenderAttachments(
+    attachments: List<Attachment>,
+    isEditable: Boolean,
+    onAttachmentsEdited: (List<Attachment>) -> Unit,
+) {
+    var editAttachmentIndex by remember { mutableStateOf(-1) }
+    var addAttachment by remember { mutableStateOf(false) }
+    FlowRow(modifier = Modifier.fillMaxWidth()) {
+        attachments.forEachIndexed { index, attachment ->
+            RenderAttachment(
+                attachment,
+                onAttachmentClick = {
+
+                },
+                isEditable = isEditable,
+                onAttachmentEdit = {
+                    editAttachmentIndex = index
+                },
+                onAttachmentRemove = {
+                    onAttachmentsEdited(attachments.toMutableList().apply { removeAt(index) })
+                }
+            )
+        }
+    }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        if (isEditable)
+            TextButton(onClick = { addAttachment = true }, content = { Text("добавить вложение") })
+    }
+
+    if (editAttachmentIndex >= 0) {
+        EditAttachmentDialog(
+            initialAttachment = attachments[editAttachmentIndex],
+            onAttachmentPicked = { editedAttachment ->
+                onAttachmentsEdited(attachments.toMutableList().apply { this[editAttachmentIndex] = editedAttachment })
+            },
+            onDismiss = { editAttachmentIndex = -1 })
+    }
+
+    if (addAttachment) {
+        EditAttachmentDialog(
+            initialAttachment = Attachment.File(),
+            onAttachmentPicked = { addedAttachment ->
+                onAttachmentsEdited(attachments.plus(addedAttachment))
+            },
+            onDismiss = { addAttachment = false })
+    }
+
+}
+
+@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
+@Composable
+private fun RenderAttachment(
+    attachment: Attachment,
+    isEditable: Boolean,
+    onAttachmentClick: () -> Unit,
+    onAttachmentEdit: () -> Unit,
+    onAttachmentRemove: () -> Unit,
+
+    ) {
+
+    var isHovered by remember { mutableStateOf(false) }
+
     Chip(
-        onClick = onClick,
+        modifier = Modifier
+            .onPointerEvent(PointerEventType.Enter) { isHovered = true }
+            .onPointerEvent(PointerEventType.Exit) { isHovered = false },
+        onClick = onAttachmentClick,
         content = {
             Text(attachment.name)
+            if (isHovered && isEditable) {
+                IconButton(onClick = onAttachmentEdit,
+                    content = { Icon(imageVector = Icons.Rounded.Edit, contentDescription = "edit attachment") })
+                IconButton(onClick = onAttachmentRemove,
+                    content = { Icon(imageVector = Icons.Rounded.Delete, contentDescription = "delete attachment") })
+            }
         },
         leadingIcon = {
             val iconPath = when (attachment) {

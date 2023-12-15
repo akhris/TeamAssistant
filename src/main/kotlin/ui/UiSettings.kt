@@ -1,5 +1,6 @@
 package ui
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
@@ -39,6 +40,8 @@ object UiSettings {
 
     object DetailsScreen {
         val rightPanelWidth = 64.dp
+        val mainPanelPadding = 32.dp
+        val tagsShape = RoundedCornerShape(4.dp)
     }
 
     object DataTable {

@@ -2,6 +2,7 @@ package ui.fields
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Clear
@@ -10,12 +11,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import ui.dialogs.DatePickerDialog
 import ui.dialogs.TimePickerDialog
 import utils.DateTimeConverter
 import utils.withDate
+import java.time.DayOfWeek
 import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
@@ -24,6 +27,7 @@ fun DateTimeChip(
     dateTime: LocalDateTime?,
     label: String,
     isEditable: Boolean,
+    shape: Shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
     onDateTimeChanged: (LocalDateTime?) -> Unit,
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
@@ -33,6 +37,7 @@ fun DateTimeChip(
     Chip(modifier = Modifier
         .onPointerEvent(PointerEventType.Enter) { isHovered = true }
         .onPointerEvent(PointerEventType.Exit) { isHovered = false },
+        shape = shape,
         onClick = {
             showDatePicker = true
             //show date/time picker
@@ -70,8 +75,8 @@ fun DateTimeChip(
             },
             onDateSelected = { newDate ->
                 onDateTimeChanged(dateTime?.withDate(newDate) ?: newDate.atTime(0, 0, 0))
-            }
-
+            },
+            firstWeekDay = DayOfWeek.MONDAY
         )
     }
 

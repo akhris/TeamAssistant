@@ -96,7 +96,7 @@ fun EditableTextField(
                         Text(text = label)
                     }
                 } else null,
-                trailingIcon = if (withClearIcon && value.isNotEmpty()) {
+                trailingIcon = if (withClearIcon && value.isNotEmpty() && isEditable) {
                     {
                         Icon(
                             modifier = Modifier.clickable {

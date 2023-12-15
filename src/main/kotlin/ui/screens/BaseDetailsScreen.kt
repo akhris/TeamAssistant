@@ -14,6 +14,8 @@ import utils.applyTextStyle
 @Composable
 fun BaseDetailsScreen(
     mainTag: @Composable (() -> Unit)? = null,
+    secondaryTag: @Composable (() -> Unit)? = null,
+    attachments: @Composable (() -> Unit)? = null,
     title: @Composable (() -> Unit)? = null,
     description: @Composable (() -> Unit)? = null,
     comments: @Composable (BoxScope.() -> Unit)? = null,
@@ -21,12 +23,13 @@ fun BaseDetailsScreen(
 ) {
 
     val styledMaintag = applyTextStyle(textStyle = MaterialTheme.typography.overline, text = mainTag)
+    val styledSecondaryTag = applyTextStyle(textStyle = MaterialTheme.typography.body2, text = secondaryTag)
     val styledTitle = applyTextStyle(textStyle = MaterialTheme.typography.h5, text = title)
     val styledDescription = applyTextStyle(textStyle = MaterialTheme.typography.caption, text = description)
 
     BaseDetailsScreenPattern(
         mainContent = {
-            Column(modifier = Modifier.fillMaxWidth().padding(4.dp)) {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.weight(1f)) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         // main tag
@@ -35,11 +38,11 @@ fun BaseDetailsScreen(
                         styledTitle?.invoke()
                         // description
                         styledDescription?.invoke()
+                        //secondary tags:
+                        styledSecondaryTag?.invoke()
+                        //attachments:
+                        attachments?.invoke()
                     }
-
-                    // due-date tag
-
-                    // attachments
                 }
                 comments?.let { com ->
                     Box(modifier = Modifier.weight(1f)) {
@@ -69,7 +72,12 @@ private fun BaseDetailsScreenPattern(
     additionalContent: @Composable (BoxScope.() -> Unit)? = null,
 ) {
     Row(modifier = Modifier.fillMaxSize()) {
-        Box(modifier = Modifier.weight(1f).background(MaterialTheme.colors.surface)) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .background(MaterialTheme.colors.surface)
+                .padding(UiSettings.DetailsScreen.mainPanelPadding)
+        ) {
             //main content
             mainContent()
         }

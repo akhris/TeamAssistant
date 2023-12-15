@@ -57,6 +57,7 @@ import java.util.*
 @Composable
 fun DatePickerDialog(
     initialSelection: LocalDate? = null,
+    firstWeekDay: DayOfWeek? = null,
     onDismiss: () -> Unit,
     onDateSelected: (LocalDate) -> Unit
 ) {
@@ -73,13 +74,17 @@ fun DatePickerDialog(
         transparent = true,
         resizable = false,
         content = {
+            val firstDayOfWeek: DayOfWeek =
+                remember(firstWeekDay) { firstWeekDay ?: WeekFields.of(Locale.getDefault()).firstDayOfWeek }
+
             DatePickerDialogContent(
                 initialSelection = initialSelection,
                 onCancelClick = onDismiss,
                 onOkClick = {
                     onDateSelected(it)
                     onDismiss()
-                }
+                },
+                firstWeekDay = firstDayOfWeek
             )
         })
 
@@ -90,8 +95,12 @@ fun DatePickerDialog(
 private fun DatePickerDialogContent(
     initialSelection: LocalDate? = null,
     onCancelClick: (() -> Unit)? = null,
-    onOkClick: ((LocalDate) -> Unit)? = null
+    onOkClick: ((LocalDate) -> Unit)? = null,
+    firstWeekDay: DayOfWeek? = null,
 ) {
+
+    val firstDayOfWeek: DayOfWeek =
+        remember(firstWeekDay) { firstWeekDay ?: WeekFields.of(Locale.getDefault()).firstDayOfWeek }
 
     var yearMonth by remember(initialSelection) { mutableStateOf(initialSelection?.yearMonth ?: YearMonth.now()) }
     var selectedDate by remember(initialSelection) { mutableStateOf<LocalDate?>(initialSelection) }
@@ -123,7 +132,8 @@ private fun DatePickerDialogContent(
                     selectedDate = selectedDate,
                     onDayClick = {
                         selectedDate = it
-                    }
+                    },
+                    firstWeekDay = firstDayOfWeek
                 )
             }
 
@@ -200,8 +210,12 @@ private fun MainContent(
     yearMonth: YearMonth,
     selectedDate: LocalDate?,
     onYearMonthChange: (YearMonth) -> Unit,
-    onDayClick: ((LocalDate) -> Unit)?
+    onDayClick: ((LocalDate) -> Unit)?,
+    firstWeekDay: DayOfWeek? = null,
 ) {
+
+    val firstDayOfWeek: DayOfWeek =
+        remember(firstWeekDay) { firstWeekDay ?: WeekFields.of(Locale.getDefault()).firstDayOfWeek }
 
     var pickerState by remember { mutableStateOf<DatePickerState>(DatePickerState.DateSelectorState) }
 
@@ -261,7 +275,13 @@ private fun MainContent(
         }
 
         when (pickerState) {
-            DatePickerState.DateSelectorState -> DateSelectorContent(yearMonth, selectedDate, onDayClick)
+            DatePickerState.DateSelectorState -> DateSelectorContent(
+                ym = yearMonth,
+                firstWeekDay = firstDayOfWeek,
+                selectedDate = selectedDate,
+                onDayClick = onDayClick
+            )
+
             DatePickerState.YearSelectorState -> YearSelectorContent(yearMonth.year, onYearChanged = {
                 onYearMonthChange(yearMonth.withYear(it))
                 pickerState = DatePickerState.DateSelectorState
@@ -332,16 +352,26 @@ private fun YearCell(year: Int, isSelected: Boolean, onYearClick: (Int) -> Unit)
 }
 
 @Composable
-private fun DateSelectorContent(ym: YearMonth, selectedDate: LocalDate?, onDayClick: ((LocalDate) -> Unit)?) {
+private fun DateSelectorContent(
+    ym: YearMonth,
+    firstWeekDay: DayOfWeek? = null,
+    selectedDate: LocalDate?,
+    onDayClick: ((LocalDate) -> Unit)?,
+) {
+    val firstDayOfWeek: DayOfWeek =
+        remember(firstWeekDay) { firstWeekDay ?: WeekFields.of(Locale.getDefault()).firstDayOfWeek }
+
     val datesLines: List<List<LocalDate?>> =
-        remember(ym) { ym.getDates(withPreviousNextDays = false).windowed(size = 7, step = 7) }
+        remember(ym) {
+            ym.getDates(firstDayOfWeek = firstDayOfWeek, withPreviousNextDays = false).windowed(size = 7, step = 7)
+        }
     Column(
         modifier =
         Modifier
             .fillMaxWidth()
 //        .border(width = Dp.Hairline, color = Color.DarkGray)
     ) {
-        HeaderRow()
+        HeaderRow(firstDayOfWeek)
         datesLines.forEach { weekLine ->
             WeekRow(dates = weekLine, selectedDate = selectedDate, onDayClick = onDayClick)
         }
@@ -350,8 +380,9 @@ private fun DateSelectorContent(ym: YearMonth, selectedDate: LocalDate?, onDayCl
 
 
 @Composable
-fun HeaderRow() {
-    val firstDayOfWeek: DayOfWeek = remember { WeekFields.of(Locale.getDefault()).firstDayOfWeek }
+fun HeaderRow(firstWeekDay: DayOfWeek? = null) {
+    val firstDayOfWeek: DayOfWeek =
+        remember(firstWeekDay) { firstWeekDay ?: WeekFields.of(Locale.getDefault()).firstDayOfWeek }
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         for (i in 0 until 7) {
             Box(modifier = Modifier.size(defaultDateCellSize)) {
@@ -371,7 +402,7 @@ fun HeaderRow() {
 fun WeekRow(
     dates: List<LocalDate?>,
     selectedDate: LocalDate? = null,
-    onDayClick: ((LocalDate) -> Unit)? = null
+    onDayClick: ((LocalDate) -> Unit)? = null,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -387,7 +418,7 @@ fun WeekRow(
 fun DayCell(
     date: LocalDate?,
     isSelected: Boolean = false,
-    onDayClick: ((LocalDate) -> Unit)? = null
+    onDayClick: ((LocalDate) -> Unit)? = null,
 ) {
 
     val modifier = Modifier

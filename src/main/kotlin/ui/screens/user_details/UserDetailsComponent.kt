@@ -33,9 +33,9 @@ class UserDetailsComponent(
         }
     }
 
-    override fun updateUser(user: User) {
+    override fun updateItem(item: User) {
         scope.launch {
-            repo.update(user)
+            repo.update(item)
         }
     }
 

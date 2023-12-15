@@ -38,9 +38,9 @@ class TaskDetailsComponent(
         }
     }
 
-    override fun updateTask(task: Task) {
+    override fun updateItem(item: Task) {
         scope.launch {
-            repo.update(task)
+            repo.update(item)
         }
     }
 

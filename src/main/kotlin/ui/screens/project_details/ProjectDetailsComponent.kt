@@ -6,6 +6,7 @@ import domain.Project
 import domain.RepoResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 import ui.screens.BaseComponent
@@ -26,6 +27,12 @@ class ProjectDetailsComponent(
             is RepoResult.ItemRemoved -> it.item
             is RepoResult.ItemUpdated -> it.item
             is RepoResult.PendindObject -> it.item
+        }
+    }
+
+    override fun updateItem(item: Project) {
+        scope.launch {
+            repo.update(item)
         }
     }
 }
