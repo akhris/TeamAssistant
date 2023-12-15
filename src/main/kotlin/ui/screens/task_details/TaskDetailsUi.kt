@@ -1,10 +1,7 @@
 package ui.screens.task_details
 
 import LocalCurrentUser
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
@@ -17,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import domain.SubTask
 import domain.Task
 import domain.valueobjects.Attachment
@@ -303,7 +301,7 @@ private fun RenderAttachments(
 ) {
     var editAttachmentIndex by remember { mutableStateOf(-1) }
     var addAttachment by remember { mutableStateOf(false) }
-    FlowRow(modifier = Modifier.fillMaxWidth()) {
+    FlowRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         attachments.forEachIndexed { index, attachment ->
             RenderAttachment(
                 attachment,

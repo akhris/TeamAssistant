@@ -65,7 +65,7 @@ fun EditAttachmentDialog(
 
             var showTypeDropDown by remember { mutableStateOf(false) }
 
-            Column {
+            Column(modifier = Modifier.padding(horizontal = 8.dp)) {
                 ListItem(
                     modifier = Modifier.clickable {
                         showTypeDropDown = !showTypeDropDown

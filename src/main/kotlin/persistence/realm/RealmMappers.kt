@@ -204,14 +204,16 @@ fun Attachment.toRealmAttachment(): RealmAttachment {
             }
 
             is Attachment.Folder -> {
-                Attachment.Folder::class.simpleName
+                type = Attachment.Folder::class.simpleName ?:
+                        throw IllegalStateException("cannot convert $this to RealmAttachment")
                 dataPrimary = a.path
                 name = a.name
                 description = a.description
             }
 
             is Attachment.InternetLink -> {
-                Attachment.InternetLink::class.simpleName
+                type = Attachment.InternetLink::class.simpleName?:
+                        throw IllegalStateException("cannot convert $this to RealmAttachment")
                 dataPrimary = a.link
                 name = a.name
                 description = a.description
