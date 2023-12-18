@@ -49,6 +49,20 @@ data class User(
         }
         return builder.toString()
     }
+
+    fun getFirstLetters(): String {
+        val builder = StringBuilder()
+        if (name.isNotEmpty()) {
+            builder.append(name.first().uppercase())
+        }
+        if (middleName.isNotEmpty()) {
+            builder.append(middleName.first().uppercase())
+        }
+        if (surname.isNotEmpty()) {
+            builder.append(surname.first().uppercase())
+        }
+        return builder.toString()
+    }
 }
 
 /**
@@ -118,5 +132,6 @@ data class SubTask(
     val createdAt: LocalDateTime? = null,
     val targetDate: LocalDateTime? = null,
     val completedAt: LocalDateTime? = null,
+    val completedBy: User? = null
 ) : IEntity
 

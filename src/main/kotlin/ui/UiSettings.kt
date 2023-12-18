@@ -42,6 +42,8 @@ object UiSettings {
         val rightPanelWidth = 64.dp
         val mainPanelPadding = 32.dp
         val tagsShape = RoundedCornerShape(4.dp)
+        val chipsHorizontalSpacing = 4.dp
+        val chipsVerticalSpacing = 4.dp
     }
 
     object DataTable {

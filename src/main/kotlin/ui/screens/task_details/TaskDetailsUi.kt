@@ -4,9 +4,9 @@ import LocalCurrentUser
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Star
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -17,17 +17,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import domain.SubTask
 import domain.Task
+import domain.User
 import domain.valueobjects.Attachment
 import kotlinx.coroutines.delay
 import ui.UiSettings
 import ui.dialogs.EditAttachmentDialog
 import ui.dialogs.DatePickerDialog
+import ui.dialogs.text_input_dialog.RenderTextInputDialog
 import ui.fields.CircleIconButton
 import ui.fields.DateTimeChip
 import ui.fields.EditableTextField
 import ui.screens.BaseDetailsScreen
 import ui.screens.master_detail.IDetailsComponent
 import java.time.DayOfWeek
+import java.time.LocalDateTime
 
 @Composable
 fun TaskDetailsUi(component: IDetailsComponent<Task>) {
@@ -39,7 +42,7 @@ fun TaskDetailsUi(component: IDetailsComponent<Task>) {
         RenderTaskDetails(
             it,
             isEditable = listOfNotNull(it.creator).contains(user),
-            onTaskUpdated = { updatedTask->
+            onTaskUpdated = { updatedTask ->
                 component.updateItem(updatedTask)
             }
         )
@@ -55,6 +58,11 @@ private fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (T
     var tempTask by remember(task) { mutableStateOf(task) }
 
     var showDatePicker by remember { mutableStateOf(false) }
+
+    var showForum by remember { mutableStateOf(false) }
+
+    val bottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+
 
     BaseDetailsScreen(
         mainTag = tempTask.project?.let { p ->
@@ -90,6 +98,13 @@ private fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (T
                 onAttachmentsEdited = {
                     tempTask = tempTask.copy(attachments = it)
                 })
+            RenderSubTasks(
+                subtasks = tempTask.subtasks,
+                isEditable = isEditable,
+                onSubtasksEdited = {
+                    tempTask = tempTask.copy(subtasks = it)
+                }
+            )
         },
         title = {
             EditableTextField(
@@ -116,13 +131,13 @@ private fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (T
                     isEditable = isEditable
                 )
             }
-        } else null,
-        rightPanel = {
+        } else null, rightPanel = {
             listOfNotNull(task.creator).plus(task.users).forEach { user ->
-                CircleIconButton(
-                    iconRes = user.avatar.ifEmpty { "vector/users/person_black_24dp.svg" },
-                    isSelected = task.creator?.id == user.id
+                RenderUserListItem(
+                    user = user,
+                    isCreator = task.creator?.id == user.id
                 )
+
             }
             CircleIconButton(
                 iconRes = "vector/add_circle_black_24dp.svg",
@@ -130,145 +145,35 @@ private fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (T
                     //add user to the task
                 }
             )
-        }
-    )
-    /*
-        LazyVerticalStaggeredGrid(
-            modifier = Modifier.fillMaxSize(),
-            columns = StaggeredGridCells.Adaptive(300.dp),
-            verticalItemSpacing = 4.dp,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            //main card
-            item {
-                TitledCard {
-                    Column(modifier = Modifier.padding(4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        //name
-                        EditableTextField(
-                            value = tempTask.name,
-                            isEditable = isEditable,
-                            textStyle = MaterialTheme.typography.h4,
-                            onValueChange = {
-                                tempTask = tempTask.copy(name = it)
-                            },
-                            label = if (tempTask.name.isEmpty()) "имя задачи" else ""
-                        )
-                        if (tempTask.targetDate != null)
-                            DateTimeChip(
-                                dateTime = tempTask.targetDate,
-                                label = "срок выполнения",
-                                isEditable = isEditable,
-                                onDateTimeChanged = { tempTask = tempTask.copy(targetDate = it) })
-
+            Spacer(modifier = Modifier.weight(1f))
+            BadgedBox(
+                modifier = Modifier.padding(12.dp),
+                badge = {
+                    Badge(
+                        backgroundColor = MaterialTheme.colors.background
+                    ) {
+                        //if there are new messages - show badge here
                     }
-                }
-            }
-
-            //description card:
-            if (tempTask.description.isNotEmpty()) {
-                item {
-                    TitledCard(
-                        title = {
-                            Text("описание")
-                        },
-                        content = {
-                            EditableTextField(
-                                value = tempTask.description,
-                                onValueChange = {
-                                    tempTask = tempTask.copy(description = it)
-                                },
-                                textStyle = MaterialTheme.typography.body1,
-    //                            label = "описание",
-                                isEditable = isEditable
-                            )
-                        }
+                }) {
+                IconButton(onClick = {
+                    //open chat screen
+                    showForum = !showForum
+                }) {
+                    Icon(
+                        painterResource(resourcePath = "vector/forum_black_24dp.svg"),
+                        contentDescription = "open chat screen",
+                        tint = LocalContentColor.current.copy(alpha = if (showForum) ContentAlpha.high else ContentAlpha.medium)
                     )
                 }
             }
+        },
+        bottomSheetContent = {
 
-            if (task.users.isNotEmpty())
-            //users card:
-                item {
-                    TitledCard(title = { Text("участники") }) {
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            task.users.forEach {
-                                Chip(onClick = {}, content = {
-                                    Text(it.getInitials())
-                                }, leadingIcon = {
-                                    Icon(
-                                        painterResource("vector/person_remove_black_24dp.svg"),
-                                        contentDescription = "remove user from task"
-                                    )
-                                })
-                            }
-                            Chip(onClick = {}) {
-                                Icon(
-                                    painterResource("vector/person_add_black_24dp.svg"),
-                                    contentDescription = "add users to task"
-                                )
-                            }
-                        }
-                    }
-                }
+            Text("bottom sheet")
+        },
+        bottomSheetState = bottomSheetState
+    )
 
-            if (task.attachments.isNotEmpty())
-            //attachments card:
-                item {
-                    TitledCard(title = { Text("вложения") }) {
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            task.attachments.forEach {
-                                RenderAttachment(it, onClick = {})
-                            }
-                            Chip(onClick = {}) {
-                                Icon(
-                                    painterResource("vector/attach_file_black_24dp.svg"),
-                                    contentDescription = "добавить вложение к задаче"
-                                )
-                            }
-                        }
-                    }
-                }
-
-
-            if (task.subtasks.isNotEmpty())
-            //subtasks
-                item {
-                    TitledCard(title = { Text("подзадачи") }) {
-                        Column {
-                            task.subtasks.forEach {
-                                RenderSubTask(subTask = it, onClick = {})
-                            }
-                            Chip(onClick = {}) {
-                                Icon(
-                                    painterResource("vector/add_task_black_24dp.svg"),
-                                    contentDescription = "добавить подзадачу"
-                                )
-                            }
-                        }
-                    }
-                }
-            if (isEditable) {
-                item {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        //add date button:
-                        if (tempTask.targetDate == null)
-                            TextButton(onClick = { showDatePicker = true }, content = { Text("добавить срок выполнения") })
-                        //add users button:
-                        if (task.users.isEmpty())
-                            TextButton(onClick = { }, content = { Text("добавить участников") })
-                        //add attachments button:
-                        if (task.attachments.isEmpty())
-                            TextButton(onClick = { }, content = { Text("добавить вложения") })
-                        //add subtask button:
-                        if (task.subtasks.isEmpty())
-                            TextButton(onClick = { }, content = { Text("добавить подзадачу") })
-                    }
-                }
-            }
-        }
-
-
-     */
     if (showDatePicker) {
         DatePickerDialog(
             initialSelection = tempTask.targetDate?.toLocalDate(),
@@ -283,6 +188,14 @@ private fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (T
         )
     }
 
+    LaunchedEffect(showForum){
+        if(showForum){
+            bottomSheetState.show()
+        } else {
+            bottomSheetState.hide()
+        }
+    }
+
     LaunchedEffect(tempTask) {
         if (tempTask == task)
             return@LaunchedEffect
@@ -292,16 +205,45 @@ private fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (T
     }
 }
 
+@Composable
+private fun RenderUserListItem(user: User, isCreator: Boolean = false) {
+    BadgedBox(
+        modifier = Modifier.padding(12.dp),
+        badge = {
+            Badge(
+                backgroundColor = MaterialTheme.colors.background
+            ) {
+                if (isCreator) {
+                    Icon(
+                        imageVector = Icons.Rounded.Star,
+                        contentDescription = "task creator"
+                    )
+                }
+            }
+        }) {
+        IconButton(onClick = {
+
+        }) {
+            Text(text = user.getFirstLetters(), style = MaterialTheme.typography.caption)
+        }
+    }
+
+}
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun RenderAttachments(
+private fun ColumnScope.RenderAttachments(
     attachments: List<Attachment>,
     isEditable: Boolean,
     onAttachmentsEdited: (List<Attachment>) -> Unit,
 ) {
     var editAttachmentIndex by remember { mutableStateOf(-1) }
     var addAttachment by remember { mutableStateOf(false) }
-    FlowRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(UiSettings.DetailsScreen.chipsHorizontalSpacing),
+        verticalArrangement = Arrangement.spacedBy(UiSettings.DetailsScreen.chipsVerticalSpacing)
+    ) {
         attachments.forEachIndexed { index, attachment ->
             RenderAttachment(
                 attachment,
@@ -319,10 +261,10 @@ private fun RenderAttachments(
         }
     }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
-        if (isEditable)
-            TextButton(onClick = { addAttachment = true }, content = { Text("добавить вложение") })
-    }
+
+    if (isEditable)
+        TextButton(onClick = { addAttachment = true }, content = { Text("добавить вложение") })
+
 
     if (editAttachmentIndex >= 0) {
         EditAttachmentDialog(
@@ -383,17 +325,73 @@ private fun RenderAttachment(
     )
 }
 
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterialApi::class)
+@Composable
+private fun ColumnScope.RenderSubTasks(
+    subtasks: List<SubTask>,
+    isEditable: Boolean,
+    onSubtasksEdited: (List<SubTask>) -> Unit,
+) {
+
+    var addSubtask by remember { mutableStateOf(false) }
+
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(UiSettings.DetailsScreen.chipsHorizontalSpacing),
+        verticalArrangement = Arrangement.spacedBy(UiSettings.DetailsScreen.chipsVerticalSpacing)
+    ) {
+        subtasks.forEachIndexed { index, subtask ->
+            val currentUser = LocalCurrentUser.current
+            RenderSubTask(subtask = subtask, onClick = {
+                val editedCompleteTime = if (subtask.completedAt == null) {
+                    LocalDateTime.now()
+                } else null
+                val editedUser = if (editedCompleteTime == null) {
+                    null
+                } else currentUser
+                onSubtasksEdited(subtasks.toMutableList().apply {
+                    this[index] = subtask.copy(completedAt = editedCompleteTime, completedBy = editedUser)
+                })
+            })
+        }
+    }
+
+    if (isEditable)
+        TextButton(onClick = { addSubtask = true }, content = { Text("добавить подзадачу") })
+
+    if (addSubtask) {
+        RenderTextInputDialog(
+            title = "добавить подзадачу",
+            hint = "описание",
+            onDismiss = {
+                addSubtask = false
+            },
+            onTextEdited = { text ->
+                onSubtasksEdited(
+                    subtasks.plus(SubTask(name = text, createdAt = LocalDateTime.now()))
+                )
+            }
+        )
+    }
+}
+
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun RenderSubTask(subTask: SubTask, onClick: () -> Unit) {
-    ListItem(icon = {
-        Icon(imageVector = Icons.Rounded.Check, contentDescription = "отметка выполнения подзадачи")
-    }, text = {
-        Text(subTask.name)
-    }, secondaryText = {
-        Text(subTask.description)
-    })
+private fun RenderSubTask(subtask: SubTask, onClick: () -> Unit) {
+    Chip(
+        onClick = onClick,
+        leadingIcon = {
+            val iconRes = remember(subtask) {
+                if (subtask.completedAt == null) {
+                    "vector/radio_button_unchecked_black_24dp.svg"
+                } else "vector/check_circle_black_24dp.svg"
+            }
+            Icon(painter = painterResource(iconRes), contentDescription = null)
+        }
+    ) {
+        Text(subtask.name)
+    }
 }
 
 

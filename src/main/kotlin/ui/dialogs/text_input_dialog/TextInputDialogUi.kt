@@ -11,42 +11,67 @@ import androidx.compose.ui.input.key.onKeyEvent
 import kotlinx.coroutines.delay
 import ui.UiSettings
 import ui.dialogs.IDialogComponent
-import utils.log
 
 @Composable
 fun TextInputDialogUi(
     component: IDialogComponent.ITextInputDialogComponent,
-    onOkClicked: (edittext: String) -> Unit
+    onOkClicked: (edittext: String) -> Unit,
 ) {
 
 
-    val initialText = remember(component) { component.properties.initialText }
-    var editedText by remember { mutableStateOf(initialText) }
+    var text by remember(component) { mutableStateOf(component.properties.initialText) }
 
     val hint = remember(component) { component.properties.hint }
     val okButtonText = remember(component) { component.properties.OKButtonText }
     val title = remember(component) { component.properties.title }
+
+    RenderTextInputDialog(
+        title = title,
+        hint = hint,
+        okButtonText = okButtonText,
+        initialValue = text,
+        onTextEdited = {
+            text = it
+            onOkClicked(it)
+        },
+        onDismiss = { component.onDismiss() }
+    )
+
+}
+
+@Composable
+fun RenderTextInputDialog(
+    title: String = "",
+    hint: String = "",
+    okButtonText: String = "ок",
+    initialValue: String = "",
+    onDismiss: () -> Unit,
+    onTextEdited: (String) -> Unit,
+) {
+    var tempText by remember(initialValue) { mutableStateOf(initialValue) }
+
     AlertDialog(
         modifier = Modifier.onKeyEvent {
             if (it.key == Key.Enter) {
-                onOkClicked(editedText)
-                component.onDismiss()
+                if (tempText != initialValue) {
+                    onTextEdited(tempText)
+                }
+                onDismiss()
                 true
             } else false
         },
-        onDismissRequest = { component.onDismiss() },
+        onDismissRequest = { onDismiss() },
         text = {
-            RenderEditText(initialValue = initialText, onValueChanged = {
-                log("text edited: $it")
-                editedText = it
+            RenderEditText(initialValue = tempText, onValueChanged = {
+                tempText = it
             }, hint = hint)
         },
         confirmButton = {
             Button(onClick = {
-                if (editedText != initialText) {
-                    onOkClicked(editedText)
+                if (tempText != initialValue) {
+                    onTextEdited(tempText)
                 }
-                component.onDismiss()
+                onDismiss()
             }, content = { Text(okButtonText) })
         },
         title = {
@@ -54,7 +79,6 @@ fun TextInputDialogUi(
         },
         shape = MaterialTheme.shapes.medium
     )
-
 }
 
 @Composable

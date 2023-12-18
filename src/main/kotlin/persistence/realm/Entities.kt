@@ -33,6 +33,7 @@ class RealmSubTask() : RealmObject {
     var createdAt: RealmInstant? = null
     var targetDate: RealmInstant? = null
     var completedAt: RealmInstant? = null
+    var completedBy: RealmUser? = null
 }
 
 class RealmProject() : RealmObject {

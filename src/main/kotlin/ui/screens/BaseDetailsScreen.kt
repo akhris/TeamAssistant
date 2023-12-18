@@ -2,24 +2,27 @@ package ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ui.FABState
 import ui.UiSettings
 import utils.applyTextStyle
 
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun BaseDetailsScreen(
-    mainTag: @Composable (() -> Unit)? = null,
-    secondaryTag: @Composable (() -> Unit)? = null,
-    attachments: @Composable (() -> Unit)? = null,
-    title: @Composable (() -> Unit)? = null,
-    description: @Composable (() -> Unit)? = null,
-    comments: @Composable (BoxScope.() -> Unit)? = null,
-    rightPanel: @Composable (ColumnScope.() -> Unit)? = null,
+    mainTag: @Composable() (() -> Unit)? = null,
+    secondaryTag: @Composable() (() -> Unit)? = null,
+    attachments: @Composable() (ColumnScope.() -> Unit)? = null,
+    title: @Composable() (() -> Unit)? = null,
+    description: @Composable() (() -> Unit)? = null,
+    rightPanel: @Composable() (ColumnScope.() -> Unit)? = null,
+    bottomSheetContent: @Composable (ColumnScope.() -> Unit)? = null,
+    bottomSheetState: ModalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
 ) {
 
     val styledMaintag = applyTextStyle(textStyle = MaterialTheme.typography.overline, text = mainTag)
@@ -41,18 +44,12 @@ fun BaseDetailsScreen(
                         //secondary tags:
                         styledSecondaryTag?.invoke()
                         //attachments:
-                        attachments?.invoke()
-                    }
-                }
-                comments?.let { com ->
-                    Box(modifier = Modifier.weight(1f)) {
-                        // comments
-                        com()
+                        attachments?.invoke(this)
                     }
                 }
             }
         },
-        additionalContent = rightPanel?.let { rp ->
+        rightPanelContent = rightPanel?.let { rp ->
             {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -62,26 +59,53 @@ fun BaseDetailsScreen(
                     rp()
                 }
             }
-        }
+        },
+        bottomSheetContent = bottomSheetContent,
+        bottomSheetState = bottomSheetState
     )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun BaseDetailsScreenPattern(
     mainContent: @Composable BoxScope.() -> Unit,
-    additionalContent: @Composable (BoxScope.() -> Unit)? = null,
+    rightPanelContent: @Composable (BoxScope.() -> Unit)? = null,
+    bottomSheetContent: @Composable (ColumnScope.() -> Unit)? = null,
+    bottomSheetState: ModalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
 ) {
     Row(modifier = Modifier.fillMaxSize()) {
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .background(MaterialTheme.colors.surface)
-                .padding(UiSettings.DetailsScreen.mainPanelPadding)
-        ) {
-            //main content
-            mainContent()
+        if(bottomSheetContent!=null){
+            ModalBottomSheetLayout(
+                modifier = Modifier.weight(1f),
+                sheetState = bottomSheetState,
+                sheetContent = {
+                    bottomSheetContent()
+                }
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(MaterialTheme.colors.surface)
+                        .padding(UiSettings.DetailsScreen.mainPanelPadding)
+                ) {
+                    //main content
+                    mainContent()
+                }
+            }
+        } else {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .background(MaterialTheme.colors.surface)
+                    .padding(UiSettings.DetailsScreen.mainPanelPadding)
+            ) {
+                //main content
+                mainContent()
+            }
         }
-        additionalContent?.let { ac ->
+
+
+        rightPanelContent?.let { ac ->
             Box(
                 modifier = Modifier
                     .width(UiSettings.DetailsScreen.rightPanelWidth)

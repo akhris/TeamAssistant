@@ -40,11 +40,13 @@ class TasksMasterDetailsComponent(private val di: DI, componentContext: Componen
         )
 
     override val fabState: Value<FABState> = MutableValue(
-        FABState.VISIBLE(
-            iconPath = "vector/add_black_24dp.svg",
-            text = "добавить задачу",
-            description = ""
-        )
+        FABState.HIDDEN
+//
+//        FABState.VISIBLE(
+//            iconPath = "vector/add_black_24dp.svg",
+//            text = "добавить задачу",
+//            description = ""
+//        )
     )
 
     override fun onDialogOKClicked(text: String, user: User) {

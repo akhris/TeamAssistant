@@ -147,6 +147,7 @@ fun SubTask.toRealmSubTask(): RealmSubTask =
         createdAt = this@toRealmSubTask.createdAt?.toRealmInstant()
         targetDate = this@toRealmSubTask.targetDate?.toRealmInstant()
         completedAt = this@toRealmSubTask.completedAt?.toRealmInstant()
+        completedBy = this@toRealmSubTask.completedBy?.toRealmUser()
     }
 
 fun RealmSubTask.toSubTask(): SubTask =
@@ -156,7 +157,8 @@ fun RealmSubTask.toSubTask(): SubTask =
         description = description,
         createdAt = createdAt?.toLocalDateTime(),
         targetDate = targetDate?.toLocalDateTime(),
-        completedAt = completedAt?.toLocalDateTime()
+        completedAt = completedAt?.toLocalDateTime(),
+        completedBy = completedBy?.toUser()
     )
 
 fun RealmAttachment.toAttachment(): Attachment {
