@@ -78,25 +78,17 @@ class TeamsListComponent(
         onItemSelected(item.id)
     }
 
-    override fun createNewTeamRequest() {
-//        dialogNavigation.activate(DialogConfig.NewTeamDialog)
-    }
-
-    override fun createNewTeam(name: String, creator: User?) {
+    override fun onAddNewItem(item: Team) {
         scope.launch {
-            val newTeam = Team(
-                name = name,
-                createdAt = LocalDateTime.now(),
-                creator = creator
-            )
             try {
-                repo.insert(newTeam)
+                repo.insert(item)
             } catch (e: Throwable) {
                 log("error during saving new team: ")
                 log(e.localizedMessage)
             }
         }
     }
+
 
     override fun deleteTeam() {
         scope.launch {

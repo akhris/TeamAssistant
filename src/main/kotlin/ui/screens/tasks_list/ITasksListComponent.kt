@@ -11,16 +11,6 @@ interface ITasksListComponent : IMasterComponent<Task> {
 //    val dialogSlot: Value<ChildSlot<*, IDialogComponent>>
 
     /**
-     * Show a dialog for creating new team
-     */
-    fun createNewTaskRequest()
-
-    /**
-     * Create new team and store it in database
-     */
-    fun createNewTask(name: String, creator: User?)
-
-    /**
      * delete the team (if user is a team creator)
      */
     fun deleteTasks()

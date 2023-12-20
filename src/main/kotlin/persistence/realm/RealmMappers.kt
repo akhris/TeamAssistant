@@ -2,15 +2,14 @@ package persistence.realm
 
 import domain.*
 import domain.valueobjects.Attachment
-import io.realm.kotlin.ext.realmSetOf
+import domain.valueobjects.TaskMessage
+import io.realm.kotlin.ext.toRealmDictionary
 import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.ext.toRealmSet
 import io.realm.kotlin.types.RealmInstant
-import io.realm.kotlin.types.RealmSet
 import org.mongodb.kbson.ObjectId
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.util.*
 
 fun RealmInstant.toLocalDateTime(): LocalDateTime =
     LocalDateTime.ofEpochSecond(epochSeconds, nanosecondsOfSecond, ZoneOffset.UTC)
@@ -120,6 +119,9 @@ fun Task.toRealmTask(): RealmTask =
         attachments = this@toRealmTask.attachments.map { it.toRealmAttachment() }.toRealmList()
         isPinned = this@toRealmTask.isPinned
         priority = this@toRealmTask.priority
+        messages = this@toRealmTask.messages.map { it.toRealmTaskMessage() }.toRealmList()
+        usersLastOnline =
+            this@toRealmTask.usersLastOnline.map { it.key to it.value.toRealmInstant() }.toRealmDictionary()
     }
 
 fun RealmTask.toTask(): Task =
@@ -136,7 +138,9 @@ fun RealmTask.toTask(): Task =
         subtasks = subtasks.map { it.toSubTask() },
         attachments = attachments.map { it.toAttachment() },
         isPinned = isPinned,
-        priority = priority
+        priority = priority,
+        messages = messages.map { it.toTaskMessage() },
+        usersLastOnline = usersLastOnline.map { it.key to it.value.toLocalDateTime() }.toMap()
     )
 
 fun SubTask.toRealmSubTask(): RealmSubTask =
@@ -206,20 +210,38 @@ fun Attachment.toRealmAttachment(): RealmAttachment {
             }
 
             is Attachment.Folder -> {
-                type = Attachment.Folder::class.simpleName ?:
-                        throw IllegalStateException("cannot convert $this to RealmAttachment")
+                type = Attachment.Folder::class.simpleName
+                    ?: throw IllegalStateException("cannot convert $this to RealmAttachment")
                 dataPrimary = a.path
                 name = a.name
                 description = a.description
             }
 
             is Attachment.InternetLink -> {
-                type = Attachment.InternetLink::class.simpleName?:
-                        throw IllegalStateException("cannot convert $this to RealmAttachment")
+                type = Attachment.InternetLink::class.simpleName
+                    ?: throw IllegalStateException("cannot convert $this to RealmAttachment")
                 dataPrimary = a.link
                 name = a.name
                 description = a.description
             }
         }
+    }
+}
+
+fun RealmTaskMessage.toTaskMessage(): TaskMessage {
+    return TaskMessage(
+        text = text,
+        createdAt = createdAt?.toLocalDateTime(),
+        user = user?.toUser(),
+        attachments = attachments.map { it.toAttachment() }
+    )
+}
+
+fun TaskMessage.toRealmTaskMessage(): RealmTaskMessage {
+    return RealmTaskMessage().apply {
+        text = this@toRealmTaskMessage.text
+        user = this@toRealmTaskMessage.user?.toRealmUser()
+        createdAt = this@toRealmTaskMessage.createdAt?.toRealmInstant()
+        attachments = this@toRealmTaskMessage.attachments.map { it.toRealmAttachment() }.toRealmList()
     }
 }

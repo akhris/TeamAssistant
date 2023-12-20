@@ -53,20 +53,11 @@ class TasksListComponent(
 
     override val items: Flow<EntitiesList<Task>> = repo.query(listOf(Specification.GetAllForUserID(userID)))
 
-    override fun createNewTaskRequest() {
-        dialogNavigation.activate(DialogConfig.NewTaskDialog)
-    }
 
-    override fun createNewTask(name: String, creator: User?) {
+    override fun onAddNewItem(item: Task) {
         scope.launch {
-            val newTask = Task(
-                name = name,
-                createdAt = LocalDateTime.now(),
-                creator = creator
-            )
-
             try {
-                repo.insert(newTask)
+                repo.insert(item)
             } catch (e: Throwable) {
                 log("error during saving new team: ")
                 log(e.localizedMessage)

@@ -1,11 +1,11 @@
 package persistence.realm
 
+import io.realm.kotlin.ext.realmDictionaryOf
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.ext.realmSetOf
 import io.realm.kotlin.types.*
 import io.realm.kotlin.types.annotations.PrimaryKey
 import org.mongodb.kbson.ObjectId
-import java.time.LocalDateTime
 import java.util.*
 
 class RealmTask() : RealmObject {
@@ -23,6 +23,8 @@ class RealmTask() : RealmObject {
     var attachments: RealmList<RealmAttachment> = realmListOf()
     var isPinned: Boolean = false
     var priority: Int = 1
+    var messages: RealmList<RealmTaskMessage> = realmListOf()
+    var usersLastOnline: RealmDictionary<RealmInstant> = realmDictionaryOf()
 }
 
 class RealmSubTask() : RealmObject {
@@ -88,4 +90,11 @@ class RealmAttachment : EmbeddedRealmObject {
     var description: String = ""
     var dataPrimary: String = ""
     var dataSecondary: String = ""
+}
+
+class RealmTaskMessage : EmbeddedRealmObject {
+    var text: String = ""
+    var user: RealmUser? = null
+    var createdAt: RealmInstant? = null
+    var attachments: RealmList<RealmAttachment> = realmListOf()
 }

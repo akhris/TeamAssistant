@@ -25,19 +25,6 @@ fun <T> MasterDetailsUi(
     val currentUser = LocalCurrentUser.current
 
     BaseMasterDetailsUi(
-        renderItemDetails = {
-            Children(stack = component.detailsStack, animation = stackAnimation(fade())) {
-                when (val child = it.instance) {
-                    is IMasterDetailComponent.Details.ItemDetails -> {
-                        renderItemDetails(child.component)
-                    }
-
-                    is IMasterDetailComponent.Details.None -> {
-                        //show nothing or maybe some icon?
-                    }
-                }
-            }
-        },
         renderMaster = {
             Children(stack = component.masterStack, animation = stackAnimation(fade())) {
                 when (val child = it.instance) {
@@ -48,7 +35,19 @@ fun <T> MasterDetailsUi(
             }
 
         }
-    )
+    ) {
+        Children(stack = component.detailsStack, animation = stackAnimation(fade())) {
+            when (val child = it.instance) {
+                is IMasterDetailComponent.Details.ItemDetails -> {
+                    renderItemDetails(child.component)
+                }
+
+                is IMasterDetailComponent.Details.None -> {
+                    //show nothing or maybe some icon?
+                }
+            }
+        }
+    }
 
     val dialogSlotValue = remember(component) { component.dialogSlot }
     dialogSlotValue?.let { dsv ->

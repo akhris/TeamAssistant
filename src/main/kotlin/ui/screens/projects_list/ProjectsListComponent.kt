@@ -56,29 +56,22 @@ class ProjectsListComponent(
 //        }
     override val items: Flow<EntitiesList<Project>> = repo.query(listOf(Specification.GetAllForUserID(userID)))
 
-    override fun createNewProjectRequest() {
-        dialogNavigation.activate(DialogConfig.NewProjectDialog)
-    }
 
     override fun onItemClicked(item: Project) {
         onItemSelected(item.id)
     }
 
-    override fun createNewProject(name: String, creator: User?) {
+    override fun onAddNewItem(item: Project) {
         scope.launch {
-            val newProject = Project(
-                name = name,
-                createdAt = LocalDateTime.now(),
-                creator = creator
-            )
             try {
-                repo.insert(newProject)
+                repo.insert(item)
             } catch (e: Throwable) {
                 log("error during saving new team: ")
                 log(e.localizedMessage)
             }
         }
     }
+
 
     override fun deleteProject() {
         TODO("Not yet implemented")

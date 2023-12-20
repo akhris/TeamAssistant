@@ -1,5 +1,6 @@
 package ui.screens.tasks_list
 
+import LocalCurrentUser
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -15,7 +16,10 @@ import domain.Task
 import ui.EntitiesListUi
 import ui.ItemRenderer
 import ui.SelectableMode
+import ui.dialogs.text_input_dialog.DialogTextInputComponent
+import ui.dialogs.text_input_dialog.RenderTextInputDialog
 import ui.screens.master_detail.IMasterComponent
+import java.time.LocalDateTime
 
 @Composable
 fun TasksListUi(component: IMasterComponent<Task>) {
@@ -24,6 +28,9 @@ fun TasksListUi(component: IMasterComponent<Task>) {
 
     val scrollstate = rememberScrollState()
 
+    var showAddNewTaskDialog by remember { mutableStateOf(false) }
+
+    val currentUser = LocalCurrentUser.current
 
     EntitiesListUi(
         tasks,
@@ -41,8 +48,33 @@ fun TasksListUi(component: IMasterComponent<Task>) {
 
             override fun getIconTint(item: Task): Color? = item.project?.color?.let { Color(it) }
 
+        },
+        onAddItemClick = {
+            showAddNewTaskDialog = true
         }
     )
+
+    if (showAddNewTaskDialog) {
+        RenderTextInputDialog(
+            title = "новая задача",
+            hint = "название задачи",
+            initialValue = "",
+            onTextEdited = { text ->
+                if (text.isNotEmpty()) {
+                    component.onAddNewItem(
+                        item = Task(
+                            creator = currentUser,
+                            createdAt = LocalDateTime.now(),
+                            name = text
+                        )
+                    )
+                }
+            },
+            onDismiss = {
+                showAddNewTaskDialog = false
+            }
+        )
+    }
 
 }
 

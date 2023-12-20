@@ -1,17 +1,20 @@
 package ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
 import domain.EntitiesList
 
 @Composable
@@ -19,28 +22,58 @@ fun <T> EntitiesListUi(
     list: EntitiesList<T>,
     selectableMode: SelectableMode<T> = SelectableMode.NonSelectable(),
     itemRenderer: ItemRenderer<T>,
+    onAddItemClick: (() -> Unit)? = null,
 ) {
-    when (list) {
-        is EntitiesList.Grouped -> renderGroupedList(list, selectableMode, itemRenderer)
-        is EntitiesList.NotGrouped -> renderNotGroupedList(list, selectableMode, itemRenderer)
+
+    var filterPanelSize by remember { mutableStateOf(IntSize(0, 0)) }
+
+    Box {
+        RenderFilterPanel(modifier = Modifier.onSizeChanged {
+            filterPanelSize = it
+        }, onAddItemClick = onAddItemClick)
+        when (list) {
+            is EntitiesList.Grouped -> RenderGroupedList(list, selectableMode, itemRenderer)
+            is EntitiesList.NotGrouped -> RenderNotGroupedList(list, selectableMode, itemRenderer, filterPanelSize)
+        }
     }
 }
 
 @Composable
-private fun <T> renderGroupedList(
+private fun RenderFilterPanel(
+    modifier: Modifier = Modifier,
+    onAddItemClick: (() -> Unit)? = null,
+) {
+    Surface(modifier = modifier.fillMaxWidth(), color = MaterialTheme.colors.background) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Spacer(modifier = Modifier.weight(1f))
+            onAddItemClick?.let { oaiClick ->
+                Icon(
+                    modifier = Modifier.clickable { oaiClick() },
+                    imageVector = Icons.Rounded.Add,
+                    contentDescription = "add item"
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun <T> RenderGroupedList(
     list: EntitiesList.Grouped<T>,
     selectableMode: SelectableMode<T>,
     itemRenderer: ItemRenderer<T>,
+    topOffset: IntSize? = null,
 ) {
 
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun <T> renderNotGroupedList(
+private fun <T> RenderNotGroupedList(
     list: EntitiesList.NotGrouped<T>,
     selectableMode: SelectableMode<T>,
     itemRenderer: ItemRenderer<T>,
+    topOffset: IntSize? = null,
 ) {
     var selection by remember(selectableMode) {
         mutableStateOf(
@@ -59,8 +92,15 @@ private fun <T> renderNotGroupedList(
             }
         )
     }
-
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    val modifier = remember(topOffset) {
+        topOffset?.let {
+            Modifier.padding(top = it.height.dp)
+        } ?: Modifier
+    }
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
         list.items.forEach { item ->
 
             val iconRes =
@@ -99,7 +139,7 @@ private fun <T> renderNotGroupedList(
                 ListItem(
                     modifier = Modifier.padding(4.dp),
                     text = {
-                        Text(text = itemRenderer.getPrimaryText(item)?:"")
+                        Text(text = itemRenderer.getPrimaryText(item) ?: "")
                     }, secondaryText = itemRenderer.getSecondaryText(item)?.let {
                         if (it.isEmpty()) {
                             null

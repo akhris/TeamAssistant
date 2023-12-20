@@ -14,16 +14,6 @@ interface ITeamsListComponent : IMasterComponent<Team> {
 //    val teams: Flow<EntitiesList<Team>>
 
     /**
-     * Show a dialog for creating new team
-     */
-    fun createNewTeamRequest()
-
-    /**
-     * Create new team and store it in database
-     */
-    fun createNewTeam(name: String, creator: User?)
-
-    /**
      * delete the team (if user is a team creator)
      */
     fun deleteTeam()

@@ -8,16 +8,6 @@ interface IProjectsListComponent : IMasterComponent<Project> {
 //    val dialogSlot: Value<ChildSlot<*, IDialogComponent>>
 
     /**
-     * Show a dialog for creating new project
-     */
-    fun createNewProjectRequest()
-
-    /**
-     * Create new project and store it in database
-     */
-    fun createNewProject(name: String, creator: User?)
-
-    /**
      * delete the project (if user is a team creator)
      */
     fun deleteProject()

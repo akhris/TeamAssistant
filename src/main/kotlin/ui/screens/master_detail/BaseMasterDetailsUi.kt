@@ -12,8 +12,8 @@ import ui.UiSettings
  */
 @Composable
 internal fun BaseMasterDetailsUi(
-    renderMaster: @Composable BoxScope.() -> Unit,
-    renderItemDetails: @Composable BoxScope.() -> Unit,
+    renderMaster: @Composable() (BoxScope.() -> Unit),
+    renderItemDetails: @Composable() (BoxScope.() -> Unit),
 ) {
 
     Row {
@@ -23,8 +23,7 @@ internal fun BaseMasterDetailsUi(
                 .weight(1 / 3f)
                 .padding(UiSettings.Screen.screenPadding)
         ) {
-            //items list:
-            renderMaster()
+           renderMaster()
         }
         Box(
             modifier = Modifier

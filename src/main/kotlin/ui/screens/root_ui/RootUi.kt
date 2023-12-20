@@ -125,6 +125,7 @@ fun FrameWindowScope.RootUi(
                 }
             }
         },
+
         floatingActionButton = {
 
             when (val fabSt = fabState) {

@@ -2,6 +2,7 @@ package domain
 
 import domain.valueobjects.Attachment
 import domain.valueobjects.State
+import domain.valueobjects.TaskMessage
 import java.time.LocalDateTime
 import java.util.*
 
@@ -120,6 +121,8 @@ data class Task(
     val attachments: List<Attachment> = listOf(),
     val isPinned: Boolean = false,
     val priority: Int = 1,
+    val messages: List<TaskMessage> = listOf(),
+    val usersLastOnline: Map<String, LocalDateTime> = mapOf(),
 ) : IEntity {
     override fun toString() = name
 }
@@ -132,6 +135,8 @@ data class SubTask(
     val createdAt: LocalDateTime? = null,
     val targetDate: LocalDateTime? = null,
     val completedAt: LocalDateTime? = null,
-    val completedBy: User? = null
+    val completedBy: User? = null,
 ) : IEntity
+
+
 
