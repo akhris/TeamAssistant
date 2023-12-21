@@ -7,5 +7,5 @@ data class TaskMessage(
     val text: String = "",
     val user: User? = null,
     val createdAt: LocalDateTime? = null,
-    val attachments: List<Attachment>
+    val attachments: List<Attachment> = listOf()
 )

@@ -39,9 +39,10 @@ object UiSettings {
     }
 
     object DetailsScreen {
-        val rightPanelWidth = 64.dp
+        val rightPanelWidth = 128.dp
         val mainPanelPadding = 32.dp
         val tagsShape = RoundedCornerShape(4.dp)
+        val bottomSheetShape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
         val chipsHorizontalSpacing = 4.dp
         val chipsVerticalSpacing = 4.dp
     }

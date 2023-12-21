@@ -6,19 +6,24 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import domain.SubTask
 import domain.Task
 import domain.User
 import domain.valueobjects.Attachment
+import domain.valueobjects.TaskMessage
 import kotlinx.coroutines.delay
 import ui.UiSettings
 import ui.dialogs.EditAttachmentDialog
@@ -115,7 +120,8 @@ private fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (T
                 onValueChange = {
                     tempTask = tempTask.copy(name = it)
                 },
-                label = if (tempTask.name.isEmpty()) "имя задачи" else ""
+                label = if (tempTask.name.isEmpty()) "имя задачи" else "",
+                withClearIcon = false
             )
         },
         description = if (tempTask.description.isNotEmpty() || isEditable) {
@@ -131,7 +137,8 @@ private fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (T
                     isEditable = isEditable
                 )
             }
-        } else null, rightPanel = {
+        } else null,
+        rightPanel = {
             listOfNotNull(task.creator).plus(task.users).forEach { user ->
                 RenderUserListItem(
                     user = user,
@@ -168,8 +175,10 @@ private fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (T
             }
         },
         bottomSheetContent = {
-
-            Text("bottom sheet")
+            Text(modifier = Modifier.padding(8.dp), text = "обсуждение:", style = MaterialTheme.typography.h6)
+            RenderForum(task = tempTask, onMessageAdded = { message ->
+                tempTask = tempTask.copy(messages = tempTask.messages.plus(message))
+            })
         },
         bottomSheetState = bottomSheetState
     )
@@ -188,8 +197,8 @@ private fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (T
         )
     }
 
-    LaunchedEffect(showForum){
-        if(showForum){
+    LaunchedEffect(showForum) {
+        if (showForum) {
             bottomSheetState.show()
         } else {
             bottomSheetState.hide()
@@ -228,6 +237,67 @@ private fun RenderUserListItem(user: User, isCreator: Boolean = false) {
         }
     }
 
+}
+
+@Composable
+private fun ColumnScope.RenderForum(task: Task, onMessageAdded: (TaskMessage) -> Unit) {
+    if (task.messages.isEmpty()) {
+        Card(modifier = Modifier.align(Alignment.CenterHorizontally).padding(16.dp)) {
+            Text(
+                modifier = Modifier.padding(32.dp),
+                text = "сообщений пока нет",
+                style = MaterialTheme.typography.caption
+            )
+        }
+    }
+    task.messages.forEach {
+        RenderMessage(it)
+    }
+    val currentUser = LocalCurrentUser.current
+    currentUser?.let { user ->
+
+        var tempMessage by remember { mutableStateOf("") }
+
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            RenderUserIcon(user = user)
+            EditableTextField(
+                modifier = Modifier.weight(1f),
+                value = tempMessage,
+                onValueChange = { tempMessage = it },
+                label = if (tempMessage.isEmpty()) "введите комментарий..." else "",
+                withClearIcon = false
+            )
+            IconButton(onClick = {
+                onMessageAdded(
+                    TaskMessage(text = tempMessage, user = user, createdAt = LocalDateTime.now())
+                )
+            }, enabled = tempMessage.isNotEmpty()) {
+                Icon(Icons.Rounded.Send, contentDescription = "отправить сообщение")
+            }
+        }
+    }
+}
+
+@Composable
+private fun ColumnScope.RenderMessage(taskMessage: TaskMessage) {
+
+    taskMessage.user?.let { user ->
+        val currentUser = LocalCurrentUser.current
+        CompositionLocalProvider(LocalLayoutDirection provides if (user.id == currentUser?.id) LayoutDirection.Ltr else LayoutDirection.Rtl) {
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                RenderUserIcon(user = user)
+                Text(modifier = Modifier.padding(8.dp), text = taskMessage.text)
+            }
+        }
+    }
+
+}
+
+@Composable
+private fun RenderUserIcon(user: User, onClick: (() -> Unit)? = null) {
+    IconButton(modifier = Modifier.padding(8.dp), onClick = { onClick?.invoke() }) {
+        Text(text = user.getFirstLetters(), style = MaterialTheme.typography.caption)
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)

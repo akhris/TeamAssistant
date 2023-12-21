@@ -2,6 +2,7 @@ package ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,7 +23,7 @@ fun BaseDetailsScreen(
     description: @Composable() (() -> Unit)? = null,
     rightPanel: @Composable() (ColumnScope.() -> Unit)? = null,
     bottomSheetContent: @Composable (ColumnScope.() -> Unit)? = null,
-    bottomSheetState: ModalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    bottomSheetState: ModalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden),
 ) {
 
     val styledMaintag = applyTextStyle(textStyle = MaterialTheme.typography.overline, text = mainTag)
@@ -71,13 +72,14 @@ private fun BaseDetailsScreenPattern(
     mainContent: @Composable BoxScope.() -> Unit,
     rightPanelContent: @Composable (BoxScope.() -> Unit)? = null,
     bottomSheetContent: @Composable (ColumnScope.() -> Unit)? = null,
-    bottomSheetState: ModalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    bottomSheetState: ModalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden),
 ) {
     Row(modifier = Modifier.fillMaxSize()) {
-        if(bottomSheetContent!=null){
+        if (bottomSheetContent != null) {
             ModalBottomSheetLayout(
                 modifier = Modifier.weight(1f),
                 sheetState = bottomSheetState,
+                sheetShape = UiSettings.DetailsScreen.bottomSheetShape,
                 sheetContent = {
                     bottomSheetContent()
                 }

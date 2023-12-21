@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.AddCircle
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
@@ -43,13 +45,13 @@ private fun RenderFilterPanel(
     modifier: Modifier = Modifier,
     onAddItemClick: (() -> Unit)? = null,
 ) {
-    Surface(modifier = modifier.fillMaxWidth(), color = MaterialTheme.colors.background) {
-        Row(modifier = Modifier.fillMaxWidth()) {
+    Surface(modifier = modifier.fillMaxWidth().padding(8.dp), color = MaterialTheme.colors.background) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Spacer(modifier = Modifier.weight(1f))
             onAddItemClick?.let { oaiClick ->
                 Icon(
                     modifier = Modifier.clickable { oaiClick() },
-                    imageVector = Icons.Rounded.Add,
+                    imageVector = Icons.Rounded.AddCircle,
                     contentDescription = "add item"
                 )
             }
@@ -128,16 +130,24 @@ private fun <T> RenderNotGroupedList(
                     }
                 }
 
-            Card(
-                modifier = Modifier.clickable(
-                    onClick = {
-                        selectableMode.onItemClicked?.invoke(item)
-                    },
-                    enabled = selectableMode.onItemClicked != null
-                )
-            ) {
+//            Card(
+//                modifier = Modifier.clickable(
+//                    onClick = {
+//                        selectableMode.onItemClicked?.invoke(item)
+//                    },
+//                    enabled = selectableMode.onItemClicked != null
+//                )
+//            ) {
                 ListItem(
-                    modifier = Modifier.padding(4.dp),
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .clickable(
+                            onClick = {
+                                selectableMode.onItemClicked?.invoke(item)
+                            },
+                            enabled = selectableMode.onItemClicked != null
+                        )
+                    ,
                     text = {
                         Text(text = itemRenderer.getPrimaryText(item) ?: "")
                     }, secondaryText = itemRenderer.getSecondaryText(item)?.let {
@@ -162,7 +172,8 @@ private fun <T> RenderNotGroupedList(
                             )
                         }
                     })
-            }
+            Divider(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colors.onBackground.copy(alpha = 0.12f))
+//            }
         }
     }
 }

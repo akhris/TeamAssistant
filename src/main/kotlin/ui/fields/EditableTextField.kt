@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 fun EditableTextField(
     modifier: Modifier = Modifier,
     value: String,
-    isEditable: Boolean,
+    isEditable: Boolean = true,
     textStyle: TextStyle = LocalTextStyle.current,
     label: String = "",
     onValueChange: (String) -> Unit,
