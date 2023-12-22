@@ -11,7 +11,7 @@ import domain.EntitiesList
 import domain.User
 import ui.EntitiesListUi
 import ui.ItemRenderer
-import ui.SelectableMode
+import ui.SelectionMode
 import ui.screens.master_detail.IMasterComponent
 
 @Composable
@@ -22,7 +22,7 @@ fun UsersListUi(component: IMasterComponent<User>) {
 
     EntitiesListUi(
         users,
-        selectableMode = SelectableMode.NonSelectable(onItemClicked = {
+        selectionMode = SelectionMode.NonSelectable(onItemClicked = {
             component.onItemClicked(it)
         }),
         itemRenderer = object : ItemRenderer<User> {

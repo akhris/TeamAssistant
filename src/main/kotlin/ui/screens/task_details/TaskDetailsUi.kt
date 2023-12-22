@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import domain.SubTask
 import domain.Task
 import domain.User
@@ -28,7 +29,10 @@ import kotlinx.coroutines.delay
 import ui.UiSettings
 import ui.dialogs.EditAttachmentDialog
 import ui.dialogs.DatePickerDialog
+import ui.dialogs.IDialogComponent
+import ui.dialogs.base_entity_picker_dialog.EntityPickerDialogUi
 import ui.dialogs.text_input_dialog.RenderTextInputDialog
+import ui.dialogs.text_input_dialog.TextInputDialogUi
 import ui.fields.CircleIconButton
 import ui.fields.DateTimeChip
 import ui.fields.EditableTextField
@@ -39,8 +43,11 @@ import java.time.LocalDateTime
 
 @Composable
 fun TaskDetailsUi(component: IDetailsComponent<Task>) {
+    val taskComponent = remember(component) { component as? TaskDetailsComponent } ?: return
     val task by remember(component) { component.item }.collectAsState(null)
     val user = LocalCurrentUser.current ?: return
+    val dialogSlot by remember(taskComponent) { taskComponent.dialogSlot }.subscribeAsState()
+
     task?.let {
 
         //only creator can edit the task
@@ -49,17 +56,44 @@ fun TaskDetailsUi(component: IDetailsComponent<Task>) {
             isEditable = listOfNotNull(it.creator).contains(user),
             onTaskUpdated = { updatedTask ->
                 component.updateItem(updatedTask)
+            },
+            onAddUsersClicked = {
+                taskComponent.showUserPickerDialog()
             }
         )
-
     }
+
+
+    dialogSlot.child?.instance?.also { dialogComponent ->
+        when (dialogComponent) {
+            ITaskDetailsComponent.TaskDetailsDialog.NONE -> {
+                //show nothing
+            }
+
+            is ITaskDetailsComponent.TaskDetailsDialog.UserPickerDialog -> {
+                EntityPickerDialogUi(
+                    component = dialogComponent.component,
+                    onDismiss = {
+                        taskComponent.dismissDialog()
+                    },
+                    initialSelection = listOfNotNull(task?.creator).plus(task?.users ?: listOf())
+                )
+            }
+        }
+    }
+
 }
 
 
 // https://dribbble.com/shots/5541961-Projecto-Desktop-Task-Management-App
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (Task) -> Unit) {
+private fun RenderTaskDetails(
+    task: Task,
+    isEditable: Boolean,
+    onTaskUpdated: (Task) -> Unit,
+    onAddUsersClicked: () -> Unit,
+) {
     var tempTask by remember(task) { mutableStateOf(task) }
 
     var showDatePicker by remember { mutableStateOf(false) }
@@ -150,6 +184,7 @@ private fun RenderTaskDetails(task: Task, isEditable: Boolean, onTaskUpdated: (T
                 iconRes = "vector/add_circle_black_24dp.svg",
                 onClick = {
                     //add user to the task
+                    onAddUsersClicked()
                 }
             )
             Spacer(modifier = Modifier.weight(1f))

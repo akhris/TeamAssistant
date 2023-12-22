@@ -11,12 +11,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import domain.EntitiesList
-import domain.Project
 import domain.Task
 import ui.EntitiesListUi
 import ui.ItemRenderer
-import ui.SelectableMode
-import ui.dialogs.text_input_dialog.DialogTextInputComponent
+import ui.SelectionMode
 import ui.dialogs.text_input_dialog.RenderTextInputDialog
 import ui.screens.master_detail.IMasterComponent
 import java.time.LocalDateTime
@@ -34,7 +32,7 @@ fun TasksListUi(component: IMasterComponent<Task>) {
 
     EntitiesListUi(
         tasks,
-        selectableMode = SelectableMode.NonSelectable(onItemClicked = {
+        selectionMode = SelectionMode.NonSelectable(onItemClicked = {
             component.onItemClicked(it)
         }),
         itemRenderer = object : ItemRenderer<Task> {

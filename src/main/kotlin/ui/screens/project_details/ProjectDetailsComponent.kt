@@ -30,6 +30,12 @@ class ProjectDetailsComponent(
         }
     }
 
+    override fun removeItem(item: Project) {
+        scope.launch {
+            repo.remove(item)
+        }
+    }
+
     override fun updateItem(item: Project) {
         scope.launch {
             repo.update(item)

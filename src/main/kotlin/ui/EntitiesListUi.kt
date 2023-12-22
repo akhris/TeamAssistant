@@ -1,11 +1,9 @@
 package ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.AddCircle
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,16 +11,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.toSize
 import domain.EntitiesList
 
 @Composable
 fun <T> EntitiesListUi(
     list: EntitiesList<T>,
-    selectableMode: SelectableMode<T> = SelectableMode.NonSelectable(),
+    selectionMode: SelectionMode<T> = SelectionMode.NonSelectable(),
     itemRenderer: ItemRenderer<T>,
     onAddItemClick: (() -> Unit)? = null,
 ) {
@@ -34,8 +30,8 @@ fun <T> EntitiesListUi(
             filterPanelSize = it
         }, onAddItemClick = onAddItemClick)
         when (list) {
-            is EntitiesList.Grouped -> RenderGroupedList(list, selectableMode, itemRenderer)
-            is EntitiesList.NotGrouped -> RenderNotGroupedList(list, selectableMode, itemRenderer, filterPanelSize)
+            is EntitiesList.Grouped -> RenderGroupedList(list, selectionMode, itemRenderer)
+            is EntitiesList.NotGrouped -> RenderNotGroupedList(list, selectionMode, itemRenderer, filterPanelSize)
         }
     }
 }
@@ -62,7 +58,7 @@ private fun RenderFilterPanel(
 @Composable
 private fun <T> RenderGroupedList(
     list: EntitiesList.Grouped<T>,
-    selectableMode: SelectableMode<T>,
+    selectionMode: SelectionMode<T>,
     itemRenderer: ItemRenderer<T>,
     topOffset: IntSize? = null,
 ) {
@@ -73,23 +69,23 @@ private fun <T> RenderGroupedList(
 @Composable
 private fun <T> RenderNotGroupedList(
     list: EntitiesList.NotGrouped<T>,
-    selectableMode: SelectableMode<T>,
+    selectionMode: SelectionMode<T>,
     itemRenderer: ItemRenderer<T>,
     topOffset: IntSize? = null,
 ) {
-    var selection by remember(selectableMode) {
+    var selection by remember(selectionMode) {
         mutableStateOf(
-            when (selectableMode) {
-                is SelectableMode.MultiSelectable<T> -> {
-                    selectableMode.initialSelection
+            when (selectionMode) {
+                is SelectionMode.MultiSelection<T> -> {
+                    selectionMode.initialSelection
                 }
 
-                is SelectableMode.NonSelectable -> {
+                is SelectionMode.NonSelectable -> {
                     listOf()
                 }
 
-                is SelectableMode.SingleSelection<T> -> {
-                    listOf(selectableMode.initialSelection)
+                is SelectionMode.SingleSelection<T> -> {
+                    listOf(selectionMode.initialSelection)
                 }
             }
         )
@@ -107,8 +103,8 @@ private fun <T> RenderNotGroupedList(
 
             val iconRes =
                 remember(item, selection) {
-                    when (selectableMode) {
-                        is SelectableMode.MultiSelectable -> {
+                    when (selectionMode) {
+                        is SelectionMode.MultiSelection -> {
                             if (item in selection) {
                                 "vector/check_box_black_24dp.svg"
                             } else {
@@ -116,11 +112,11 @@ private fun <T> RenderNotGroupedList(
                             }
                         }
 
-                        is SelectableMode.NonSelectable -> {
+                        is SelectionMode.NonSelectable -> {
                             itemRenderer.getIconPath(item)
                         }
 
-                        is SelectableMode.SingleSelection -> {
+                        is SelectionMode.SingleSelection -> {
                             if (item in selection) {
                                 "vector/radio_button_checked_black_24dp.svg"
                             } else {
@@ -143,9 +139,9 @@ private fun <T> RenderNotGroupedList(
                         .padding(4.dp)
                         .clickable(
                             onClick = {
-                                selectableMode.onItemClicked?.invoke(item)
+                                selectionMode.onItemClicked?.invoke(item)
                             },
-                            enabled = selectableMode.onItemClicked != null
+                            enabled = selectionMode.onItemClicked != null
                         )
                     ,
                     text = {
@@ -179,21 +175,21 @@ private fun <T> RenderNotGroupedList(
 }
 
 
-sealed class SelectableMode<T> {
+sealed class SelectionMode<T> {
 
     abstract val onItemClicked: ((T) -> Unit)?
 
-    class NonSelectable<T>(override val onItemClicked: ((T) -> Unit)? = null) : SelectableMode<T>()
+    class NonSelectable<T>(override val onItemClicked: ((T) -> Unit)? = null) : SelectionMode<T>()
     class SingleSelection<T>(
-        val initialSelection: T, val onItemSelected: (T) -> Unit,
+        val initialSelection: T? = null, val onItemSelected: (T) -> Unit,
         override val onItemClicked: ((T) -> Unit)? = null,
-    ) : SelectableMode<T>()
+    ) : SelectionMode<T>()
 
-    class MultiSelectable<T>(
+    class MultiSelection<T>(
         val initialSelection: List<T>, val onItemsSelected: (List<T>) -> Unit,
         override val onItemClicked: ((T) -> Unit)? = null,
     ) :
-        SelectableMode<T>()
+        SelectionMode<T>()
 
 }
 

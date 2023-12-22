@@ -22,6 +22,11 @@ class TeamDetailsComponent(teamID: String, di: DI, componentContext: ComponentCo
         }
     }
 
+    override fun removeItem(item: Team) {
+        scope.launch {
+            repo.remove(item)
+        }
+    }
     override fun updateItem(item: Team) {
         scope.launch {
             repo.update(item)

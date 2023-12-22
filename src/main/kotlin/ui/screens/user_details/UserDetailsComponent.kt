@@ -33,6 +33,11 @@ class UserDetailsComponent(
         }
     }
 
+    override fun removeItem(item: User) {
+        scope.launch {
+            repo.remove(item)
+        }
+    }
     override fun updateItem(item: User) {
         scope.launch {
             repo.update(item)

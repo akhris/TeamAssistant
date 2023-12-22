@@ -6,7 +6,7 @@ import domain.EntitiesList
 import domain.Project
 import ui.EntitiesListUi
 import ui.ItemRenderer
-import ui.SelectableMode
+import ui.SelectionMode
 import ui.screens.master_detail.IMasterComponent
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -16,7 +16,7 @@ fun ProjectsListUi(component: IMasterComponent<Project>) {
 
     EntitiesListUi(
         projects,
-        selectableMode = SelectableMode.NonSelectable(onItemClicked = {
+        selectionMode = SelectionMode.NonSelectable(onItemClicked = {
             component.onItemClicked(it)
         }),
         itemRenderer = object : ItemRenderer<Project> {
