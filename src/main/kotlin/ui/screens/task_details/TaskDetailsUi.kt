@@ -1,13 +1,11 @@
 package ui.screens.task_details
 
 import LocalCurrentUser
+import LocalNavController
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.Send
-import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -19,7 +17,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import domain.SubTask
 import domain.Task
 import domain.User
@@ -29,25 +26,21 @@ import kotlinx.coroutines.delay
 import ui.UiSettings
 import ui.dialogs.EditAttachmentDialog
 import ui.dialogs.DatePickerDialog
-import ui.dialogs.IDialogComponent
-import ui.dialogs.base_entity_picker_dialog.EntityPickerDialogUi
 import ui.dialogs.text_input_dialog.RenderTextInputDialog
-import ui.dialogs.text_input_dialog.TextInputDialogUi
 import ui.fields.CircleIconButton
 import ui.fields.DateTimeChip
 import ui.fields.EditableTextField
 import ui.screens.BaseDetailsScreen
 import ui.screens.master_detail.IDetailsComponent
+import utils.log
 import java.time.DayOfWeek
 import java.time.LocalDateTime
 
 @Composable
 fun TaskDetailsUi(component: IDetailsComponent<Task>) {
-    val taskComponent = remember(component) { component as? TaskDetailsComponent } ?: return
     val task by remember(component) { component.item }.collectAsState(null)
     val user = LocalCurrentUser.current ?: return
-    val dialogSlot by remember(taskComponent) { taskComponent.dialogSlot }.subscribeAsState()
-
+    val navController = LocalNavController.current
     task?.let {
 
         //only creator can edit the task
@@ -58,28 +51,14 @@ fun TaskDetailsUi(component: IDetailsComponent<Task>) {
                 component.updateItem(updatedTask)
             },
             onAddUsersClicked = {
-                taskComponent.showUserPickerDialog()
+                navController?.showUsersPickerDialog(
+                    isMultipleSelection = true,
+                    initialSelection = listOfNotNull(task?.creator).plus(task?.users ?: listOf()),
+                    onUsersPicked = {
+                        log("users picked: $it")
+                    })
             }
         )
-    }
-
-
-    dialogSlot.child?.instance?.also { dialogComponent ->
-        when (dialogComponent) {
-            ITaskDetailsComponent.TaskDetailsDialog.NONE -> {
-                //show nothing
-            }
-
-            is ITaskDetailsComponent.TaskDetailsDialog.UserPickerDialog -> {
-                EntityPickerDialogUi(
-                    component = dialogComponent.component,
-                    onDismiss = {
-                        taskComponent.dismissDialog()
-                    },
-                    initialSelection = listOfNotNull(task?.creator).plus(task?.users ?: listOf())
-                )
-            }
-        }
     }
 
 }
@@ -102,19 +81,48 @@ private fun RenderTaskDetails(
 
     val bottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
 
+    val navController = LocalNavController.current
 
     BaseDetailsScreen(
-        mainTag = tempTask.project?.let { p ->
+        mainTag = tempTask.project?.let { project ->
             {
                 Chip(
                     shape = UiSettings.DetailsScreen.tagsShape,
-                    onClick = {},
-                    content = { Text(p.name) },
+                    onClick = {
+                        if (isEditable)
+                            navController?.showProjectsPickerDialog(
+                                initialSelection = listOfNotNull(project),
+                                isMultipleSelection = false,
+                                onProjectsPicked = {
+                                    tempTask = tempTask.copy(project = it.firstOrNull())
+                                }
+                            )
+                    },
+                    content = { Text(text = project.name) },
                     colors = ChipDefaults.chipColors(
-                        backgroundColor = p.color?.let { Color(it) }
-                            ?: MaterialTheme.colors.onSurface
-                    )
+                        backgroundColor = project.color?.let { Color(it) }
+                            ?: Color.Unspecified
+                    ),
+                    leadingIcon = if (project.icon.isNotEmpty()) {
+                        {
+                            Icon(painter = painterResource(project.icon), contentDescription = "иконка проекта")
+                        }
+                    } else null
+
+
                 )
+            }
+        } ?: {
+            if (isEditable) {
+                TextButton(onClick = {
+                    navController?.showProjectsPickerDialog(
+                        initialSelection = listOf(),
+                        isMultipleSelection = false,
+                        onProjectsPicked = {
+                            tempTask = tempTask.copy(project = it.firstOrNull())
+                        }
+                    )
+                }, content = { Text("привязать к проекту") })
             }
         },
         secondaryTag = if (tempTask.targetDate != null || isEditable) {

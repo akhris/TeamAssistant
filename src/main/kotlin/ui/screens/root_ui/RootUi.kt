@@ -1,6 +1,7 @@
 package ui.screens.root_ui
 
 import LocalCurrentUser
+import LocalNavController
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,17 +18,14 @@ import androidx.compose.ui.window.WindowState
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.Children
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.fade
-import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.slide
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimation
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import domain.User
 import kotlinx.coroutines.launch
 import ui.FABController
 import ui.FABState
-import ui.NavItem
 import ui.SideNavigationPanel
-import ui.dialogs.IDialogComponent
-import ui.dialogs.text_input_dialog.TextInputDialogUi
+import ui.dialogs.entity_picker_dialogs.EntityPickerDialogUi
 import ui.screens.activity.ActivityUi
 import ui.screens.master_detail.MasterDetailsUi
 import ui.screens.project_details.ProjectDetailsUi
@@ -56,6 +54,7 @@ fun FrameWindowScope.RootUi(
 //    val sampleTypes by remember(component) { component.sampleTypes }.subscribeAsState()
     val currentlyLoggedUser by remember(component) { component.userLoggingInfo }.collectAsState(IRootComponent.UserLoggingInfo())
 
+    val dialogSlot by remember(component) { component.dialogSlot }.subscribeAsState()
 
 
     log("currentlyLoggedUser: $currentlyLoggedUser")
@@ -66,6 +65,7 @@ fun FrameWindowScope.RootUi(
 
     val fabController = remember(component) { FABController() }
     val fabState by remember(fabController) { fabController.state }
+    val navController = remember(component) { component.navController }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -173,8 +173,11 @@ fun FrameWindowScope.RootUi(
                 }
             } else if (currentlyLoggedUser.user != null) {
                 //show main stuff
-                CompositionLocalProvider(LocalCurrentUser provides currentlyLoggedUser.user) {
-                    //providing current user for all children views
+                CompositionLocalProvider(
+                    LocalCurrentUser provides currentlyLoggedUser.user,
+                    LocalNavController provides navController
+                ) {
+                    //providing current user and navcontroller for all children views
                     Row {
                         SideNavigationPanel(
                             isExpandable = false,
@@ -190,7 +193,7 @@ fun FrameWindowScope.RootUi(
                             Children(stack = component.navHostStack, animation = stackAnimation(fade())) {
                                 when (val child = it.instance) {
                                     is IRootComponent.NavHost.Activity -> ActivityUi()
-                                   is IRootComponent.NavHost.TaskMasterDetail -> MasterDetailsUi(
+                                    is IRootComponent.NavHost.TaskMasterDetail -> MasterDetailsUi(
                                         component = child.component,
                                         renderItemDetails = { c ->
                                             TaskDetailsUi(c)
@@ -198,7 +201,7 @@ fun FrameWindowScope.RootUi(
                                         renderItemsList = { c ->
                                             TasksListUi(c)
                                         },
-                                       fabController = fabController
+                                        fabController = fabController
                                     )
 
                                     is IRootComponent.NavHost.ProjectMasterDetail -> MasterDetailsUi(
@@ -245,6 +248,25 @@ fun FrameWindowScope.RootUi(
         }
     )
 
+
+    //dialogs:
+
+    dialogSlot.child?.instance?.also { dialogComponent ->
+        when (dialogComponent) {
+
+            IRootComponent.Dialog.None -> {
+                //show nothing
+            }
+            is IRootComponent.Dialog.PickerDialog<*> -> {
+                EntityPickerDialogUi(
+                    component = dialogComponent.component,
+                    onDismiss = {
+                        component.dismissDialog()
+                    }
+                )
+            }
+        }
+    }
 
 }
 

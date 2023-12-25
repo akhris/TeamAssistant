@@ -37,22 +37,27 @@ class RealmTeamsRepository(private val realm: Realm) : IRepositoryObservable<Tea
     }
 
     override fun query(specifications: List<ISpecification>): Flow<EntitiesList<Team>> {
-        return (specifications.find { it is Specification.GetAllForUserID } as? Specification.GetAllForUserID)?.let { spec: Specification.GetAllForUserID ->
-            realm
-                .query<RealmTeam>("admins._id == $0 OR members._id == $0 OR creator._id == $0", spec.userID)
-                .find()
-                .asFlow()
-                .map {
-                    EntitiesList.NotGrouped(
-                        it
-                            .list
-                            .map { it.toTeam() }
-                    )
-                }
-                .distinctUntilChanged()
 
+        var query = realm.query<RealmTeam>()
 
-        } ?: flowOf(EntitiesList.empty())
+        specifications
+            .filterIsInstance(Specification.GetAllForUserID::class.java)
+            .forEach { spec ->
+                query = query
+                    .query("admins._id == $0 OR members._id == $0 OR creator._id == $0", spec.userID)
+            }
+
+        return query
+            .find()
+            .asFlow()
+            .map {
+                EntitiesList.NotGrouped(
+                    it
+                        .list
+                        .map { it.toTeam() }
+                )
+            }
+            .distinctUntilChanged()
     }
 
     override suspend fun insert(entity: Team) {

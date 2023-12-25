@@ -1,4 +1,4 @@
-package ui.dialogs.base_entity_picker_dialog
+package ui.dialogs.entity_picker_dialogs
 
 import domain.EntitiesList
 import kotlinx.coroutines.flow.Flow
@@ -10,6 +10,10 @@ interface IBaseEntityPickerDialogComponent<T> {
     val selectMode: SelectMode
     val itemRenderer: ItemRenderer<T>
     val title: String
+
+    val initialSelection: List<T>
+
+    fun onItemsSelected(items: List<T>)
 }
 
 sealed class SelectMode {

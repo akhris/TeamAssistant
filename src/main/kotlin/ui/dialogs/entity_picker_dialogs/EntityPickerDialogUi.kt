@@ -1,4 +1,4 @@
-package ui.dialogs.base_entity_picker_dialog
+package ui.dialogs.entity_picker_dialogs
 
 import androidx.compose.material.Button
 import androidx.compose.material.Text
@@ -18,23 +18,23 @@ import ui.theme.DialogSettings
 fun <T> EntityPickerDialogUi(
     component: IBaseEntityPickerDialogComponent<T>,
     onDismiss: () -> Unit,
-    initialSelection: List<T> = listOf(),
 ) {
     val items by remember(component) { component.items }.collectAsState(EntitiesList.empty())
+    val initialSelection = remember(component) { component.initialSelection }
 
     val selectionMode = remember(component.selectMode) {
         when (component.selectMode) {
             SelectMode.MULTIPLE -> SelectionMode.MultiSelection<T>(
                 initialSelection = initialSelection,
                 onItemsSelected = {
-
+                    component.onItemsSelected(it)
                 }
             )
 
             SelectMode.SINGLE -> SelectionMode.SingleSelection<T>(
                 initialSelection = initialSelection.firstOrNull(),
                 onItemSelected = {
-
+                    component.onItemsSelected(listOf(it))
                 }
             )
         }

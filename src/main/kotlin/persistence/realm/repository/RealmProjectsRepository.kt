@@ -33,34 +33,24 @@ class RealmProjectsRepository(private val realm: Realm) : IRepositoryObservable<
     }
 
     override fun query(specifications: List<ISpecification>): Flow<EntitiesList<Project>> {
-        return (specifications.find { it is Specification.GetAllForUserID } as? Specification.GetAllForUserID)?.let { spec: Specification.GetAllForUserID ->
-            realm
-                .query<RealmProject>()
-                .find()
-                .asFlow()
-                .map { projList ->
-                    //filter projects available to user with id specified in spec
-                    projList
-                        .list
-                        .filter { proj ->
-                            (proj.creator?._id == spec.userID) or (
-                                    proj
-                                        .teams
-                                        .flatMap { it.admins + it.members + listOfNotNull(it.creator) }
-                                        .map { it._id }
-                                        .contains(spec.userID)
-                                    )
-                        }
-                }
-                .map { realmProjects ->
-                    EntitiesList.NotGrouped(
-                        realmProjects.map { it.toProject() }
-                    )
-                }
-                .distinctUntilChanged()
+        var query = realm.query<RealmProject>()
 
+        specifications
+            .filterIsInstance(Specification.GetAllForUserID::class.java)
+            .forEach { spec ->
+                query = query
+                    .query("admins._id == $0 OR creator._id == $0", spec.userID)
+            }
+        return query
+            .find()
+            .asFlow()
+            .map { realmProjects ->
+                EntitiesList.NotGrouped(
+                    realmProjects.list.map { it.toProject() }
+                )
+            }
+            .distinctUntilChanged()
 
-        } ?: flowOf(EntitiesList.empty())
     }
 
     override fun getFilterSpecs(): Flow<List<FilterSpec>> {

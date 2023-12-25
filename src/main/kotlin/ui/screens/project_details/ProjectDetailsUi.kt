@@ -1,6 +1,7 @@
 package ui.screens.project_details
 
 import LocalCurrentUser
+import LocalNavController
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.onClick
@@ -42,7 +43,7 @@ private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjec
 
     var showIconPicker by remember { mutableStateOf(false) }
     var showForum by remember { mutableStateOf(false) }
-
+    val navController = LocalNavController.current
     BaseDetailsScreen(
         title = {
             Row(verticalAlignment = Alignment.Top) {
@@ -95,7 +96,14 @@ private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjec
             CircleIconButton(
                 iconRes = "vector/add_circle_black_24dp.svg",
                 onClick = {
-                    //add user to the task
+                    //add team to the project
+                    navController?.showTeamsPickerDialog(
+                        isMultipleSelection = true,
+                        initialSelection = tempProject.teams,
+                        onTeamsPicked = {
+                            tempProject = tempProject.copy(teams = it)
+                        }
+                    )
                 }
             )
             Spacer(modifier = Modifier.weight(1f))
@@ -134,7 +142,7 @@ private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjec
 }
 
 @Composable
-private fun RenderTeamListIcon(team: Team){
+private fun RenderTeamListIcon(team: Team) {
     IconButton(onClick = {
 
     }) {

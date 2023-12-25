@@ -9,35 +9,34 @@ import domain.Team
 import domain.User
 import kotlinx.coroutines.flow.Flow
 import ui.NavItem
-import ui.dialogs.IDialogComponent
+import ui.dialogs.entity_picker_dialogs.IBaseEntityPickerDialogComponent
 import ui.screens.master_detail.IMasterDetailComponent
-import ui.screens.projects_list.IProjectsListComponent
-import ui.screens.task_details.ITaskDetailsComponent
-import ui.screens.tasks_list.ITasksListComponent
-import ui.screens.teams_list.ITeamsListComponent
-import ui.screens.user_details.IUserDetailsComponent
 
 interface IRootComponent {
 
     val navHostStack: Value<ChildStack<*, NavHost>>
-//    val dialogSlot: Value<ChildSlot<*, IDialogComponent>>
+    val dialogSlot: Value<ChildSlot<*, Dialog>>
 //    val toolbarUtilsStack: Value<ChildStack<*, ToolbarUtils>>
 
     val userLoggingInfo: Flow<UserLoggingInfo>
     val currentDestination: Value<NavItem>
 
+    fun dismissDialog()
     fun createNewUser(user: User)
     fun navigateTo(navItem: NavItem)
 
+    val navController: INavController
+
     sealed class NavHost {
-//        class UserDetails(val component: IUserDetailsComponent) : NavHost()
+        //        class UserDetails(val component: IUserDetailsComponent) : NavHost()
 //        class TasksList(val component: ITasksListComponent) : NavHost()
         class ProjectMasterDetail(val component: IMasterDetailComponent<Project>) : NavHost()
         class TaskMasterDetail(val component: IMasterDetailComponent<Task>) : NavHost()
 
         class UserMasterDetail(val component: IMasterDetailComponent<User>) : NavHost()
         class TeamMasterDetail(val component: IMasterDetailComponent<domain.Team>) : NavHost()
-//        class TaskDetails(val component: ITaskDetailsComponent) : NavHost()
+
+        //        class TaskDetails(val component: ITaskDetailsComponent) : NavHost()
         class Activity : NavHost()
 //        class Projects(val component: IProjectsListComponent) : NavHost()
 //        class Team(val component: ITeamsListComponent) : NavHost()
@@ -45,6 +44,9 @@ interface IRootComponent {
 
     sealed class Dialog {
         object None : Dialog()
+
+        class PickerDialog<T>(val component: IBaseEntityPickerDialogComponent<T>) : Dialog()
+//        class TeamPickerDialog(val component: IBaseEntityPickerDialogComponent<Team>) : Dialog()
     }
 
     sealed class ToolbarUtils {

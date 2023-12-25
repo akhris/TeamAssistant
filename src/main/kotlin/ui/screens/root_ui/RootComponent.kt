@@ -15,15 +15,13 @@ import kotlinx.coroutines.flow.map
 import org.kodein.di.DI
 import org.kodein.di.instance
 import ui.NavItem
-import ui.dialogs.DialogProperties
-import ui.dialogs.IDialogComponent
-import ui.dialogs.text_input_dialog.DialogTextInputComponent
+import ui.dialogs.entity_picker_dialogs.ProjectPickerComponent
+import ui.dialogs.entity_picker_dialogs.TeamPickerComponent
+import ui.dialogs.entity_picker_dialogs.UserPickerComponent
 import ui.screens.master_detail.projects.ProjectsMasterDetailsComponent
 import ui.screens.master_detail.tasks.TasksMasterDetailsComponent
 import ui.screens.master_detail.teams.TeamsMasterDetailsComponent
 import ui.screens.master_detail.users.UsersMasterDetailsComponent
-import ui.screens.tasks_list.TasksListComponent
-import ui.screens.user_details.UserDetailsComponent
 import utils.UserUtils
 
 class RootComponent(
@@ -41,64 +39,53 @@ class RootComponent(
     private val projectsRepo: IRepositoryObservable<Project> by di.instance()
     private val teamsRepo: IRepositoryObservable<Team> by di.instance()
 
-//    private val dialogNav = SlotNavigation<DialogConfig>()
+    private val dialogNav = SlotNavigation<DialogConfig>()
     private val navHostNav = StackNavigation<NavHostConfig>()
 //    private val toolbarUtilsNav = StackNavigation<ToolbarUtilsConfig>()
 
-//    override val dialogSlot: Value<ChildSlot<*, IDialogComponent>> =
-//        childSlot(
-//            source = dialogNav,
-//            // persistent = false, // Disable navigation state saving, if needed
-//            handleBackButton = true, // Close the dialog on back button press
-//        ) { config, childComponentContext ->
-//            when (config) {
-//                DialogConfig.None -> IDialogComponent.NONE
-//                is DialogConfig.CreateNewEntityDialog -> getEntityDialog(childComponentContext, config.entityClass)
-//                    ?: IDialogComponent.NONE
-//            }
-//        }
+    override val dialogSlot: Value<ChildSlot<*, IRootComponent.Dialog>> =
+        childSlot(
+            source = dialogNav,
+            // persistent = false, // Disable navigation state saving, if needed
+            handleBackButton = true, // Close the dialog on back button press
+        ) { config, childComponentContext ->
+            when (config) {
+                DialogConfig.None -> IRootComponent.Dialog.None
+                is DialogConfig.UserPickerDialog -> IRootComponent.Dialog.PickerDialog(
+                    component = UserPickerComponent(
+                        isMultipleSelection = config.isMultipleSelection,
+                        initialSelection = config.initialSelection,
+                        onUsersPicked = config.onUsersPicked,
+                        di,
+                        childComponentContext
+                    )
+                )
 
-//    private fun getEntityDialog(
-//        componentContext: ComponentContext,
-//        entityClass: Class<out IEntity>,
-//    ): IDialogComponent? {
-//
-//        val props = when (entityClass) {
-//            Project::class.java -> DialogProperties(
-//                title = "добавить проект",
-//                hint = "имя проекта",
-//                OKButtonText = "добавить"
-//            )
-//
-//            Task::class.java -> DialogProperties(
-//                title = "добавить задачу",
-//                hint = "имя задачи",
-//                OKButtonText = "добавить"
-//            )
-//
-//            Team::class.java -> DialogProperties(
-//                title = "добавить команду",
-//                hint = "имя команды",
-//                OKButtonText = "добавить"
-//            )
-//
-//            User::class.java -> DialogProperties(
-//                title = "добавить пользователя",
-//                hint = "имя пользователя",
-//                OKButtonText = "добавить"
-//            )
-//
-//            else -> null
-//        }
-//
-//        return props?.let {
-//            DialogTextInputComponent(
-//                componentContext = componentContext,
-//                properties = it,
-//                onDismissed = dialogNav::dismiss
-//            )
-//        }
-//    }
+                is DialogConfig.TeamPickerDialog -> IRootComponent.Dialog.PickerDialog(
+                    component = TeamPickerComponent(
+                        isMultipleSelection = config.isMultipleSelection,
+                        initialSelection = config.initialSelection,
+                        onTeamsPicked = config.onTeamsPicked,
+                        di,
+                        childComponentContext
+                    )
+                )
+
+                is DialogConfig.ProjectPickerDialog -> IRootComponent.Dialog.PickerDialog(
+                    component = ProjectPickerComponent(
+                        isMultipleSelection = config.isMultipleSelection,
+                        initialSelection = config.initialSelection,
+                        onProjectsPicked = config.onProjectsPicked,
+                        di,
+                        childComponentContext
+                    )
+                )
+            }
+        }
+
+    override fun dismissDialog() {
+        dialogNav.dismiss()
+    }
 
     private val _currentDestination = MutableValue<NavItem>(NavItem.homeItem)
     override val currentDestination: Value<NavItem> = _currentDestination
@@ -138,18 +125,49 @@ class RootComponent(
     }
 
 
-//    override fun createNewEntityDialog() {
-//        val newEntityClass = when (navHostStack.active.instance) {
-//            is IRootComponent.NavHost.Activity -> null
-//            is IRootComponent.NavHost.ProjectMasterDetail -> Project::class.java
-//            is IRootComponent.NavHost.TaskMasterDetail -> Task::class.java
-//            is IRootComponent.NavHost.TeamMasterDetail -> Team::class.java
-//            is IRootComponent.NavHost.UserMasterDetail -> User::class.java
-//        }
-//        newEntityClass?.let {
-//            dialogNav.activate(DialogConfig.CreateNewEntityDialog(it))
-//        }
-//    }
+    override val navController: INavController = object : INavController {
+        override fun showUsersPickerDialog(
+            isMultipleSelection: Boolean,
+            initialSelection: List<User>,
+            onUsersPicked: (List<User>) -> Unit,
+        ) {
+            dialogNav.activate(
+                DialogConfig.UserPickerDialog(
+                    isMultipleSelection = isMultipleSelection,
+                    initialSelection = initialSelection,
+                    onUsersPicked = onUsersPicked
+                )
+            )
+        }
+
+        override fun showTeamsPickerDialog(
+            isMultipleSelection: Boolean,
+            initialSelection: List<Team>,
+            onTeamsPicked: (List<Team>) -> Unit,
+        ) {
+            dialogNav.activate(
+                DialogConfig.TeamPickerDialog(
+                    isMultipleSelection = isMultipleSelection,
+                    initialSelection = initialSelection,
+                    onTeamsPicked = onTeamsPicked
+                )
+            )
+        }
+
+        override fun showProjectsPickerDialog(
+            isMultipleSelection: Boolean,
+            initialSelection: List<Project>,
+            onProjectsPicked: (List<Project>) -> Unit,
+        ) {
+            dialogNav.activate(
+                DialogConfig.ProjectPickerDialog(
+                    isMultipleSelection = isMultipleSelection,
+                    initialSelection = initialSelection,
+                    onProjectsPicked = onProjectsPicked
+                )
+            )
+        }
+    }
 
 
     private fun createChild(config: NavHostConfig, componentContext: ComponentContext): IRootComponent.NavHost {
@@ -213,15 +231,30 @@ class RootComponent(
 
     @Parcelize
     private sealed class DialogConfig : Parcelable {
-//
-//        @Parcelize
-//        object AddSampleType : DialogConfig()
-
-        @Parcelize
-        data class CreateNewEntityDialog(val entityClass: Class<out IEntity>) : DialogConfig()
-
         @Parcelize
         object None : DialogConfig()
+
+        @Parcelize
+        data class UserPickerDialog(
+            val isMultipleSelection: Boolean = false,
+            val initialSelection: List<User> = listOf(),
+            val onUsersPicked: (List<User>) -> Unit,
+        ) : DialogConfig()
+
+        @Parcelize
+        data class TeamPickerDialog(
+            val isMultipleSelection: Boolean = false,
+            val initialSelection: List<Team> = listOf(),
+            val onTeamsPicked: (List<Team>) -> Unit,
+        ) : DialogConfig()
+
+        @Parcelize
+        data class ProjectPickerDialog(
+            val isMultipleSelection: Boolean = false,
+            val initialSelection: List<Project> = listOf(),
+            val onProjectsPicked: (List<Project>) -> Unit,
+        ) : DialogConfig()
+
 
     }
 

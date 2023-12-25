@@ -1,9 +1,6 @@
 package ui.screens.task_details
 
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.decompose.router.slot.*
-import com.arkivanov.decompose.value.Value
-import com.arkivanov.essenty.lifecycle.subscribe
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import domain.*
@@ -12,9 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 import org.kodein.di.DI
 import org.kodein.di.instance
-import ui.dialogs.user_picker_dialog.UserPickerComponent
 import ui.screens.BaseComponent
-import utils.UserUtils
 
 class TaskDetailsComponent(
     taskID: String,
@@ -25,24 +20,24 @@ class TaskDetailsComponent(
     private val repo: IRepositoryObservable<Task> by di.instance()
 
 
-    private val dialogNav = SlotNavigation<DialogConfig>()
+//    private val dialogNav = SlotNavigation<DialogConfig>()
 
-    override val dialogSlot: Value<ChildSlot<*, ITaskDetailsComponent.TaskDetailsDialog>> =
-        childSlot(
-            source = dialogNav,
-            // persistent = false, // Disable navigation state saving, if needed
-            handleBackButton = true, // Close the dialog on back button press
-        ) { config, childComponentContext ->
-            when (config) {
-                DialogConfig.None -> ITaskDetailsComponent.TaskDetailsDialog.NONE
-                is DialogConfig.UserPickerDialog -> ITaskDetailsComponent.TaskDetailsDialog.UserPickerDialog(
-                    component = UserPickerComponent(
-                        di,
-                        childComponentContext
-                    )
-                )
-            }
-        }
+//    override val dialogSlot: Value<ChildSlot<*, ITaskDetailsComponent.TaskDetailsDialog>> =
+//        childSlot(
+//            source = dialogNav,
+//            // persistent = false, // Disable navigation state saving, if needed
+//            handleBackButton = true, // Close the dialog on back button press
+//        ) { config, childComponentContext ->
+//            when (config) {
+//                DialogConfig.None -> ITaskDetailsComponent.TaskDetailsDialog.NONE
+//                is DialogConfig.UserPickerDialog -> ITaskDetailsComponent.TaskDetailsDialog.UserPickerDialog(
+//                    component = UserPickerComponent(
+//                        di,
+//                        childComponentContext
+//                    )
+//                )
+//            }
+//        }
 
 
     override val item: Flow<Task> = repo.getByID(taskID).mapNotNull {
@@ -67,13 +62,13 @@ class TaskDetailsComponent(
         }
     }
 
-    override fun showUserPickerDialog() {
-        dialogNav.activate(DialogConfig.UserPickerDialog())
-    }
-
-    override fun dismissDialog() {
-        dialogNav.dismiss()
-    }
+//    override fun showUserPickerDialog() {
+//        dialogNav.activate(DialogConfig.UserPickerDialog())
+//    }
+//
+//    override fun dismissDialog() {
+//        dialogNav.dismiss()
+//    }
 
     @Parcelize
     private sealed class DialogConfig : Parcelable {
