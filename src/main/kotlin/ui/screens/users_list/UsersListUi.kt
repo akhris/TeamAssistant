@@ -11,7 +11,7 @@ import domain.EntitiesList
 import domain.User
 import ui.EntitiesListUi
 import ui.ItemRenderer
-import ui.SelectionMode
+import ui.SelectMode
 import ui.screens.master_detail.IMasterComponent
 
 @Composable
@@ -22,9 +22,7 @@ fun UsersListUi(component: IMasterComponent<User>) {
 
     EntitiesListUi(
         users,
-        selectionMode = SelectionMode.NonSelectable(onItemClicked = {
-            component.onItemClicked(it)
-        }),
+        selectMode = SelectMode.NONSELECTABLE,
         itemRenderer = object : ItemRenderer<User> {
             override fun getPrimaryText(item: User) = item.getInitials()
 
@@ -37,7 +35,8 @@ fun UsersListUi(component: IMasterComponent<User>) {
             override fun getIconTint(item: User): Color? = if (item.id == currentUserID) {
                 currentUserColor
             } else null
-        }
+        },
+        onItemClicked = {component.onItemClicked(it)}
     )
 
 }

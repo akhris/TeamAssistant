@@ -9,13 +9,13 @@ import kotlinx.coroutines.flow.Flow
 import org.kodein.di.DI
 import org.kodein.di.instance
 import ui.ItemRenderer
-import ui.dialogs.entity_picker_dialogs.IBaseEntityPickerDialogComponent
-import ui.dialogs.entity_picker_dialogs.SelectMode
+import ui.SelectMode
 import ui.screens.BaseComponent
 
 class UserPickerComponent(
     val isMultipleSelection: Boolean,
     override val initialSelection: List<User>,
+    val hiddenUsers: List<User> = listOf(),
     val onUsersPicked: (List<User>) -> Unit,
     di: DI,
     componentContext: ComponentContext,
@@ -23,7 +23,8 @@ class UserPickerComponent(
 
     private val repo: IRepositoryObservable<User> by di.instance()
 
-    override val items: Flow<EntitiesList<User>> = repo.query(listOf(Specification.QueryAll))
+    override val items: Flow<EntitiesList<User>> =
+        repo.query(listOf(Specification.QueryAllButIDs(hiddenUsers.map { it.id })))
 
     override val selectMode: SelectMode = when (isMultipleSelection) {
         true -> SelectMode.MULTIPLE

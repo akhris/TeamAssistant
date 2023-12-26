@@ -56,8 +56,9 @@ class RootComponent(
                         isMultipleSelection = config.isMultipleSelection,
                         initialSelection = config.initialSelection,
                         onUsersPicked = config.onUsersPicked,
-                        di,
-                        childComponentContext
+                        hiddenUsers = config.hiddenUsers,
+                        di = di,
+                        componentContext = childComponentContext
                     )
                 )
 
@@ -130,12 +131,14 @@ class RootComponent(
             isMultipleSelection: Boolean,
             initialSelection: List<User>,
             onUsersPicked: (List<User>) -> Unit,
+            hiddenUsers: List<User>,
         ) {
             dialogNav.activate(
                 DialogConfig.UserPickerDialog(
                     isMultipleSelection = isMultipleSelection,
                     initialSelection = initialSelection,
-                    onUsersPicked = onUsersPicked
+                    onUsersPicked = onUsersPicked,
+                    hiddenUsers = hiddenUsers
                 )
             )
         }
@@ -239,6 +242,7 @@ class RootComponent(
             val isMultipleSelection: Boolean = false,
             val initialSelection: List<User> = listOf(),
             val onUsersPicked: (List<User>) -> Unit,
+            val hiddenUsers: List<User> = listOf()
         ) : DialogConfig()
 
         @Parcelize

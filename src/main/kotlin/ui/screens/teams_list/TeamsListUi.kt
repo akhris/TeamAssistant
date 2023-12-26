@@ -6,7 +6,7 @@ import domain.EntitiesList
 import domain.Team
 import ui.EntitiesListUi
 import ui.ItemRenderer
-import ui.SelectionMode
+import ui.SelectMode
 import ui.screens.master_detail.IMasterComponent
 
 
@@ -21,9 +21,7 @@ fun TeamsListUi(component: IMasterComponent<Team>) {
 
     EntitiesListUi(
         teams,
-        selectionMode = SelectionMode.NonSelectable(onItemClicked = {
-            component.onItemClicked(it)
-        }),
+        selectMode = SelectMode.NONSELECTABLE,
         itemRenderer = object : ItemRenderer<Team> {
             override fun getPrimaryText(item: Team) = item.name
 
@@ -31,6 +29,7 @@ fun TeamsListUi(component: IMasterComponent<Team>) {
 
             override fun getOverlineText(item: Team) = ""
 
-        }
+        },
+        onItemClicked = {component.onItemClicked(it)}
     )
 }

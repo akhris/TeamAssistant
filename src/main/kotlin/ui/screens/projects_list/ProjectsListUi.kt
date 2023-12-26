@@ -6,7 +6,8 @@ import domain.EntitiesList
 import domain.Project
 import ui.EntitiesListUi
 import ui.ItemRenderer
-import ui.SelectionMode
+import ui.SelectMode
+
 import ui.screens.master_detail.IMasterComponent
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -16,9 +17,7 @@ fun ProjectsListUi(component: IMasterComponent<Project>) {
 
     EntitiesListUi(
         projects,
-        selectionMode = SelectionMode.NonSelectable(onItemClicked = {
-            component.onItemClicked(it)
-        }),
+        selectMode = SelectMode.NONSELECTABLE,
         itemRenderer = object : ItemRenderer<Project> {
             override fun getPrimaryText(item: Project) = item.name
 
@@ -28,7 +27,8 @@ fun ProjectsListUi(component: IMasterComponent<Project>) {
 
             override fun getIconPath(item: Project): String = "vector/projects/rocket_black_24dp.svg"
 
-    }
+        },
+        onItemClicked = { component.onItemClicked(it) }
     )
 
 

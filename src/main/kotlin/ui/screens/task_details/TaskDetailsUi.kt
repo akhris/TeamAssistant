@@ -32,7 +32,6 @@ import ui.fields.DateTimeChip
 import ui.fields.EditableTextField
 import ui.screens.BaseDetailsScreen
 import ui.screens.master_detail.IDetailsComponent
-import utils.log
 import java.time.DayOfWeek
 import java.time.LocalDateTime
 
@@ -41,22 +40,24 @@ fun TaskDetailsUi(component: IDetailsComponent<Task>) {
     val task by remember(component) { component.item }.collectAsState(null)
     val user = LocalCurrentUser.current ?: return
     val navController = LocalNavController.current
-    task?.let {
+    task?.let { t ->
 
         //only creator can edit the task
         RenderTaskDetails(
-            it,
-            isEditable = listOfNotNull(it.creator).contains(user),
+            t,
+            isEditable = listOfNotNull(t.creator).contains(user),
             onTaskUpdated = { updatedTask ->
                 component.updateItem(updatedTask)
             },
             onAddUsersClicked = {
                 navController?.showUsersPickerDialog(
                     isMultipleSelection = true,
-                    initialSelection = listOfNotNull(task?.creator).plus(task?.users ?: listOf()),
+                    initialSelection = t.users,
                     onUsersPicked = {
-                        log("users picked: $it")
-                    })
+                        component.updateItem(t.copy(users = it))
+                    },
+                    hiddenUsers = listOfNotNull(t.creator)
+                )
             }
         )
     }

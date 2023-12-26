@@ -29,6 +29,7 @@ fun BaseDialogWindow(
         text = title
     )
 
+
     DialogWindow(
         state = state,
         onCloseRequest = onCloseRequest,

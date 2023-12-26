@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import org.kodein.di.DI
 import org.kodein.di.instance
 import ui.ItemRenderer
+import ui.SelectMode
 import ui.screens.BaseComponent
 
 class ProjectPickerComponent(

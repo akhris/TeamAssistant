@@ -14,14 +14,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import domain.EntitiesList
+import kotlinx.coroutines.delay
 
 @Composable
 fun <T> EntitiesListUi(
     list: EntitiesList<T>,
-    selectionMode: SelectionMode<T> = SelectionMode.NonSelectable(),
+    selectMode: SelectMode = SelectMode.NONSELECTABLE,
+    initialSelection: List<T> = listOf(),
     itemRenderer: ItemRenderer<T>,
+    onItemClicked: ((T) -> Unit)? = null,
     onAddItemClick: (() -> Unit)? = null,
+    onSelectionChanged: ((List<T>) -> Unit)? = null,
 ) {
+
+    var selection by remember(initialSelection, selectMode) { mutableStateOf(initialSelection) }
 
     var filterPanelSize by remember { mutableStateOf(IntSize(0, 0)) }
 
@@ -30,9 +36,37 @@ fun <T> EntitiesListUi(
             filterPanelSize = it
         }, onAddItemClick = onAddItemClick)
         when (list) {
-            is EntitiesList.Grouped -> RenderGroupedList(list, selectionMode, itemRenderer)
-            is EntitiesList.NotGrouped -> RenderNotGroupedList(list, selectionMode, itemRenderer, filterPanelSize)
+            is EntitiesList.Grouped -> RenderGroupedList(list, selectMode, itemRenderer)
+            is EntitiesList.NotGrouped -> RenderNotGroupedList(
+                list = list,
+                selectMode = selectMode,
+                itemRenderer = itemRenderer,
+                selection = selection,
+                onItemClicked = { item ->
+                    when (selectMode) {
+                        SelectMode.MULTIPLE, SelectMode.SINGLE -> {
+                            selection = if (selection.contains(item)) {
+                                selection.minus(item)
+                            } else {
+                                selection.plus(item)
+                            }
+                        }
+
+                        SelectMode.NONSELECTABLE -> {
+                            onItemClicked?.invoke(item)
+                        }
+                    }
+                },
+                topOffset = filterPanelSize
+            )
         }
+    }
+
+    LaunchedEffect(selection) {
+        if (selection == initialSelection)
+            return@LaunchedEffect
+        delay(UiSettings.Debounce.debounceTime)
+        onSelectionChanged?.invoke(selection)
     }
 }
 
@@ -58,7 +92,7 @@ private fun RenderFilterPanel(
 @Composable
 private fun <T> RenderGroupedList(
     list: EntitiesList.Grouped<T>,
-    selectionMode: SelectionMode<T>,
+    selectionMode: SelectMode,
     itemRenderer: ItemRenderer<T>,
     topOffset: IntSize? = null,
 ) {
@@ -69,27 +103,13 @@ private fun <T> RenderGroupedList(
 @Composable
 private fun <T> RenderNotGroupedList(
     list: EntitiesList.NotGrouped<T>,
-    selectionMode: SelectionMode<T>,
+    selection: List<T>,
+    selectMode: SelectMode,
     itemRenderer: ItemRenderer<T>,
+    onItemClicked: ((T) -> Unit)? = null,
     topOffset: IntSize? = null,
 ) {
-    var selection by remember(selectionMode) {
-        mutableStateOf(
-            when (selectionMode) {
-                is SelectionMode.MultiSelection<T> -> {
-                    selectionMode.initialSelection
-                }
 
-                is SelectionMode.NonSelectable -> {
-                    listOf()
-                }
-
-                is SelectionMode.SingleSelection<T> -> {
-                    listOf(selectionMode.initialSelection)
-                }
-            }
-        )
-    }
     val modifier = remember(topOffset) {
         topOffset?.let {
             Modifier.padding(top = it.height.dp)
@@ -103,8 +123,8 @@ private fun <T> RenderNotGroupedList(
 
             val iconRes =
                 remember(item, selection) {
-                    when (selectionMode) {
-                        is SelectionMode.MultiSelection -> {
+                    when (selectMode) {
+                        SelectMode.MULTIPLE -> {
                             if (item in selection) {
                                 "vector/check_box_black_24dp.svg"
                             } else {
@@ -112,11 +132,11 @@ private fun <T> RenderNotGroupedList(
                             }
                         }
 
-                        is SelectionMode.NonSelectable -> {
+                        SelectMode.NONSELECTABLE -> {
                             itemRenderer.getIconPath(item)
                         }
 
-                        is SelectionMode.SingleSelection -> {
+                        SelectMode.SINGLE -> {
                             if (item in selection) {
                                 "vector/radio_button_checked_black_24dp.svg"
                             } else {
@@ -126,72 +146,45 @@ private fun <T> RenderNotGroupedList(
                     }
                 }
 
-//            Card(
-//                modifier = Modifier.clickable(
-//                    onClick = {
-//                        selectableMode.onItemClicked?.invoke(item)
-//                    },
-//                    enabled = selectableMode.onItemClicked != null
-//                )
-//            ) {
-                ListItem(
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .clickable(
-                            onClick = {
-                                selectionMode.onItemClicked?.invoke(item)
-                            },
-                            enabled = selectionMode.onItemClicked != null
+            ListItem(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .clickable(
+                        onClick = {
+                            onItemClicked?.invoke(item)
+                        },
+                        enabled = onItemClicked != null
+                    ),
+                text = {
+                    Text(text = itemRenderer.getPrimaryText(item) ?: "")
+                }, secondaryText = itemRenderer.getSecondaryText(item)?.let {
+                    if (it.isEmpty()) {
+                        null
+                    } else {
+                        { Text(it) }
+                    }
+                }, overlineText = itemRenderer.getOverlineText(item)?.let {
+                    if (it.isEmpty()) {
+                        null
+                    } else {
+                        { Text(it) }
+                    }
+                }, icon = iconRes?.let { icon ->
+                    {
+                        Icon(
+                            painter = painterResource(icon),
+                            contentDescription = null,
+                            tint = itemRenderer.getIconTint(item)
+                                ?: LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
                         )
-                    ,
-                    text = {
-                        Text(text = itemRenderer.getPrimaryText(item) ?: "")
-                    }, secondaryText = itemRenderer.getSecondaryText(item)?.let {
-                        if (it.isEmpty()) {
-                            null
-                        } else {
-                            { Text(it) }
-                        }
-                    }, overlineText = itemRenderer.getOverlineText(item)?.let {
-                        if (it.isEmpty()) {
-                            null
-                        } else {
-                            { Text(it) }
-                        }
-                    }, icon = iconRes?.let { icon ->
-                        {
-                            Icon(
-                                painter = painterResource(icon),
-                                contentDescription = null,
-                                tint = itemRenderer.getIconTint(item)
-                                    ?: LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
-                            )
-                        }
-                    })
+                    }
+                })
             Divider(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colors.onBackground.copy(alpha = 0.12f))
-//            }
+
         }
     }
 }
 
-
-sealed class SelectionMode<T> {
-
-    abstract val onItemClicked: ((T) -> Unit)?
-
-    class NonSelectable<T>(override val onItemClicked: ((T) -> Unit)? = null) : SelectionMode<T>()
-    class SingleSelection<T>(
-        val initialSelection: T? = null, val onItemSelected: (T) -> Unit,
-        override val onItemClicked: ((T) -> Unit)? = null,
-    ) : SelectionMode<T>()
-
-    class MultiSelection<T>(
-        val initialSelection: List<T>, val onItemsSelected: (List<T>) -> Unit,
-        override val onItemClicked: ((T) -> Unit)? = null,
-    ) :
-        SelectionMode<T>()
-
-}
 
 interface ItemRenderer<T> {
     fun getPrimaryText(item: T): String? = null

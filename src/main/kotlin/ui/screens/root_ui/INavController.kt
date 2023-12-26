@@ -9,6 +9,7 @@ interface INavController {
         isMultipleSelection: Boolean = false,
         initialSelection: List<User> = listOf(),
         onUsersPicked: (List<User>) -> Unit,
+        hiddenUsers: List<User> = listOf(),
     )
 
     fun showTeamsPickerDialog(
@@ -16,6 +17,7 @@ interface INavController {
         initialSelection: List<Team> = listOf(),
         onTeamsPicked: (List<Team>) -> Unit,
     )
+
     fun showProjectsPickerDialog(
         isMultipleSelection: Boolean = false,
         initialSelection: List<Project> = listOf(),

@@ -2,15 +2,12 @@ package ui.dialogs.entity_picker_dialogs
 
 import androidx.compose.material.Button
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.material.TextButton
+import androidx.compose.runtime.*
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.window.rememberDialogState
 import domain.EntitiesList
 import ui.EntitiesListUi
-import ui.SelectionMode
 import ui.dialogs.BaseDialogWindow
 import ui.theme.DialogSettings
 
@@ -20,25 +17,9 @@ fun <T> EntityPickerDialogUi(
     onDismiss: () -> Unit,
 ) {
     val items by remember(component) { component.items }.collectAsState(EntitiesList.empty())
-    val initialSelection = remember(component) { component.initialSelection }
+    var selection by remember(component) { mutableStateOf(component.initialSelection) }
 
-    val selectionMode = remember(component.selectMode) {
-        when (component.selectMode) {
-            SelectMode.MULTIPLE -> SelectionMode.MultiSelection<T>(
-                initialSelection = initialSelection,
-                onItemsSelected = {
-                    component.onItemsSelected(it)
-                }
-            )
-
-            SelectMode.SINGLE -> SelectionMode.SingleSelection<T>(
-                initialSelection = initialSelection.firstOrNull(),
-                onItemSelected = {
-                    component.onItemsSelected(listOf(it))
-                }
-            )
-        }
-    }
+    val selectionMode = remember(component) { component.selectMode }
 
     val dialogState = rememberDialogState(
         size = DpSize(
@@ -52,9 +33,15 @@ fun <T> EntityPickerDialogUi(
         onCloseRequest = onDismiss,
         title = { Text(text = component.title) },
         buttons = {
+            TextButton(onClick = {
+                onDismiss()
+            }, content = {
+                Text(text = "отмена")
+            })
             Button(
                 onClick = {
-
+                    if (selection != component.initialSelection)
+                        component.onItemsSelected(selection)
                     onDismiss()
                 },
                 content = { Text(text = "выбрать") }
@@ -63,8 +50,12 @@ fun <T> EntityPickerDialogUi(
         content = {
             EntitiesListUi(
                 list = items,
-                selectionMode = selectionMode,
-                itemRenderer = remember(component) { component.itemRenderer }
+                initialSelection = selection,
+                selectMode = selectionMode,
+                itemRenderer = remember(component) { component.itemRenderer },
+                onSelectionChanged = {
+                    selection = it
+                }
             )
         }
     )

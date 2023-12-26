@@ -34,22 +34,31 @@ class RealmUsersRepository(private val realm: Realm) : IRepositoryObservable<Use
     }
 
     override fun query(specifications: List<ISpecification>): Flow<EntitiesList<User>> {
-        return (specifications
-            .find { it is Specification.QueryAll } as? Specification.QueryAll)
-            ?.let { s ->
-                realm
-                    .query<RealmUser>()
-                    .find()
-                    .asFlow()
-                    .map {
-                        EntitiesList.NotGrouped(
-                            it
-                                .list
-                                .map { it.toUser() }
-                        )
+
+        var query = realm.query<RealmUser>()
+
+        specifications
+            .filterIsInstance(Specification.QueryAllButIDs::class.java)
+            .forEach { spec ->
+                spec
+                    .outIds
+                    .forEach { outId ->
+                        query = query.query("_id != $0", outId)
                     }
-                    .distinctUntilChanged()
-            } ?: flowOf(EntitiesList.empty())
+            }
+
+        return query
+            .find()
+            .asFlow()
+            .map {
+                EntitiesList.NotGrouped(
+                    it
+                        .list
+                        .map { it.toUser() }
+                )
+            }
+            .distinctUntilChanged()
+
     }
 
     override fun getFilterSpecs(): Flow<List<FilterSpec>>? = null

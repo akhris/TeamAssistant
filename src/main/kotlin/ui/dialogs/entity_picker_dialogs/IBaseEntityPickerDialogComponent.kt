@@ -3,6 +3,7 @@ package ui.dialogs.entity_picker_dialogs
 import domain.EntitiesList
 import kotlinx.coroutines.flow.Flow
 import ui.ItemRenderer
+import ui.SelectMode
 
 interface IBaseEntityPickerDialogComponent<T> {
     val items: Flow<EntitiesList<T>>
@@ -16,7 +17,3 @@ interface IBaseEntityPickerDialogComponent<T> {
     fun onItemsSelected(items: List<T>)
 }
 
-sealed class SelectMode {
-    object SINGLE : SelectMode()
-    object MULTIPLE : SelectMode()
-}

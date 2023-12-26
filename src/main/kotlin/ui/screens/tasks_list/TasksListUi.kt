@@ -14,7 +14,7 @@ import domain.EntitiesList
 import domain.Task
 import ui.EntitiesListUi
 import ui.ItemRenderer
-import ui.SelectionMode
+import ui.SelectMode
 import ui.dialogs.text_input_dialog.RenderTextInputDialog
 import ui.screens.master_detail.IMasterComponent
 import java.time.LocalDateTime
@@ -32,9 +32,7 @@ fun TasksListUi(component: IMasterComponent<Task>) {
 
     EntitiesListUi(
         tasks,
-        selectionMode = SelectionMode.NonSelectable(onItemClicked = {
-            component.onItemClicked(it)
-        }),
+        selectMode = SelectMode.NONSELECTABLE,
         itemRenderer = object : ItemRenderer<Task> {
             override fun getPrimaryText(item: Task) = item.name
 
@@ -49,7 +47,8 @@ fun TasksListUi(component: IMasterComponent<Task>) {
         },
         onAddItemClick = {
             showAddNewTaskDialog = true
-        }
+        },
+        onItemClicked = {component.onItemClicked(it)}
     )
 
     if (showAddNewTaskDialog) {
