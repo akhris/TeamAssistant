@@ -3,8 +3,6 @@ package ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AddCircle
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,17 +22,19 @@ fun <T> EntitiesListUi(
     itemRenderer: ItemRenderer<T>,
     onItemClicked: ((T) -> Unit)? = null,
     onAddItemClick: (() -> Unit)? = null,
+    addItemText: String = "",
     onSelectionChanged: ((List<T>) -> Unit)? = null,
 ) {
 
     var selection by remember(initialSelection, selectMode) { mutableStateOf(initialSelection) }
 
     var filterPanelSize by remember { mutableStateOf(IntSize(0, 0)) }
+    var bottomPanelSize by remember { mutableStateOf(IntSize(0, 0)) }
 
-    Box {
+    Box(modifier = Modifier.fillMaxHeight()) {
         RenderFilterPanel(modifier = Modifier.onSizeChanged {
             filterPanelSize = it
-        }, onAddItemClick = onAddItemClick)
+        })
         when (list) {
             is EntitiesList.Grouped -> RenderGroupedList(list, selectMode, itemRenderer)
             is EntitiesList.NotGrouped -> RenderNotGroupedList(
@@ -57,8 +57,15 @@ fun <T> EntitiesListUi(
                         }
                     }
                 },
-                topOffset = filterPanelSize
-            )
+                topOffset = filterPanelSize,
+                bottomOffset = bottomPanelSize,
+
+                )
+        }
+        onAddItemClick?.let { oaic ->
+            RenderBottomAction(modifier = Modifier.align(Alignment.BottomCenter).onSizeChanged {
+                bottomPanelSize = it
+            }, text = addItemText.ifEmpty { "добавить" }, onActionClicked = oaic)
         }
     }
 
@@ -73,17 +80,30 @@ fun <T> EntitiesListUi(
 @Composable
 private fun RenderFilterPanel(
     modifier: Modifier = Modifier,
-    onAddItemClick: (() -> Unit)? = null,
 ) {
     Surface(modifier = modifier.fillMaxWidth().padding(8.dp), color = MaterialTheme.colors.background) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Spacer(modifier = Modifier.weight(1f))
-            onAddItemClick?.let { oaiClick ->
-                Icon(
-                    modifier = Modifier.clickable { oaiClick() },
-                    imageVector = Icons.Rounded.AddCircle,
-                    contentDescription = "add item"
-                )
+            //add filter buttons
+        }
+    }
+}
+
+@Composable
+private fun RenderBottomAction(
+    modifier: Modifier = Modifier,
+    text: String = "",
+    onActionClicked: (() -> Unit)? = null,
+) {
+    if (text.isNotEmpty()) {
+        Surface(modifier = modifier.fillMaxWidth().padding(8.dp), color = MaterialTheme.colors.background) {
+            Box(contentAlignment = Alignment.Center) {
+                TextButton(
+                    onClick = {
+                        onActionClicked?.invoke()
+                    }) {
+                    Text(text)
+                }
             }
         }
     }
@@ -108,12 +128,11 @@ private fun <T> RenderNotGroupedList(
     itemRenderer: ItemRenderer<T>,
     onItemClicked: ((T) -> Unit)? = null,
     topOffset: IntSize? = null,
+    bottomOffset: IntSize? = null,
 ) {
 
-    val modifier = remember(topOffset) {
-        topOffset?.let {
-            Modifier.padding(top = it.height.dp)
-        } ?: Modifier
+    val modifier = remember(topOffset, bottomOffset) {
+        Modifier.padding(top = topOffset?.height?.dp ?: 0.dp, bottom = bottomOffset?.height?.dp ?: 0.dp)
     }
     Column(
         modifier = modifier,

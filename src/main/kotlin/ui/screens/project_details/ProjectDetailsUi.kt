@@ -13,6 +13,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import domain.Project
 import domain.Team
+import kotlinx.coroutines.delay
+import ui.UiSettings
 import ui.dialogs.IconsPickerDialog
 import ui.fields.CircleIconButton
 import ui.fields.EditableTextField
@@ -29,13 +31,15 @@ fun ProjectDetailsUi(component: IDetailsComponent<Project>) {
         RenderProjectDetails(
             project = it,
             isEditable = listOfNotNull(it.creator).contains(user),
-            onProjectUpdated = {}
+            onProjectUpdated = { updatedProject ->
+                component.updateItem(updatedProject)
+            }
         )
     }
 }
 
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjectUpdated: (Project) -> Unit) {
 
@@ -49,8 +53,8 @@ private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjec
             Row(verticalAlignment = Alignment.Top) {
                 Icon(
                     modifier = Modifier
-                        .size(48.dp)
-                        .padding(4.dp)
+                        .padding(end = 24.dp)
+                        .size(64.dp)
                         .onClick {
                             showIconPicker = true
                         },
@@ -75,7 +79,7 @@ private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjec
         if (tempProject.description.isNotEmpty() || isEditable) {
             {
                 EditableTextField(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                     value = tempProject.description,
                     onValueChange = {
                         tempProject = tempProject.copy(description = it)
@@ -138,6 +142,14 @@ private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjec
             onIconPicked = { tempProject = tempProject.copy(icon = it) },
             onDismiss = { showIconPicker = false }
         )
+    }
+
+    LaunchedEffect(tempProject) {
+        if (tempProject == project)
+            return@LaunchedEffect
+
+        delay(UiSettings.Debounce.debounceTime)
+        onProjectUpdated(tempProject)
     }
 }
 

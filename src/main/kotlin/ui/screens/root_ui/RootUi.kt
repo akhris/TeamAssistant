@@ -63,8 +63,6 @@ fun FrameWindowScope.RootUi(
 
     val navigationItem by remember(component) { component.currentDestination }.subscribeAsState()
 
-    val fabController = remember(component) { FABController() }
-    val fabState by remember(fabController) { fabController.state }
     val navController = remember(component) { component.navController }
 
     Scaffold(
@@ -125,35 +123,6 @@ fun FrameWindowScope.RootUi(
                 }
             }
         },
-
-        floatingActionButton = {
-
-            when (val fabSt = fabState) {
-                FABState.HIDDEN -> {
-                    //show no FAB
-                }
-
-                is FABState.VISIBLE -> {
-                    //show FAB
-                    ExtendedFloatingActionButton(
-                        onClick = {
-                            scope.launch {
-                                log("calling fabController $fabController onClick")
-                                fabController.onClick()
-                            }
-                        },
-                        text = {
-                            Text(text = fabSt.text)
-                        },
-                        icon = fabSt.iconPath?.let {
-                            {
-                                Icon(painter = painterResource(it), contentDescription = fabSt.description)
-                            }
-                        }
-                    )
-                }
-            }
-        },
         content = {
             if (currentlyLoggedUser.user == null && currentlyLoggedUser.userID.isNotEmpty()) {
                 //show new user ui
@@ -184,7 +153,6 @@ fun FrameWindowScope.RootUi(
                             withLabels = true,
                             currentSelection = navigationItem,
                             onNavigationItemSelected = {
-                                fabController.setFABState(FABState.HIDDEN)  //hide FAB
                                 component.navigateTo(it)
                             })
                         Box(
@@ -195,47 +163,39 @@ fun FrameWindowScope.RootUi(
                                     is IRootComponent.NavHost.Activity -> ActivityUi()
                                     is IRootComponent.NavHost.TaskMasterDetail -> MasterDetailsUi(
                                         component = child.component,
-                                        renderItemDetails = { c ->
-                                            TaskDetailsUi(c)
-                                        },
                                         renderItemsList = { c ->
                                             TasksListUi(c)
-                                        },
-                                        fabController = fabController
-                                    )
+                                        }
+                                    ) { c ->
+                                        TaskDetailsUi(c)
+                                    }
 
                                     is IRootComponent.NavHost.ProjectMasterDetail -> MasterDetailsUi(
                                         component = child.component,
                                         renderItemsList = { c ->
                                             ProjectsListUi(c)
-                                        },
-                                        renderItemDetails = { c ->
-                                            ProjectDetailsUi(c)
-                                        },
-                                        fabController = fabController
-                                    )
+                                        }
+                                    ) { c ->
+                                        ProjectDetailsUi(c)
+                                    }
 
                                     is IRootComponent.NavHost.TeamMasterDetail -> MasterDetailsUi(
                                         component = child.component,
                                         renderItemsList = { c ->
                                             TeamsListUi(c)
-                                        },
-                                        renderItemDetails = { c ->
-                                            TeamDetailsUi(c)
-                                        },
-                                        fabController = fabController
-                                    )
+                                        }
+                                    ) { c ->
+                                        TeamDetailsUi(c)
+                                    }
 
                                     is IRootComponent.NavHost.UserMasterDetail -> MasterDetailsUi(
                                         component = child.component,
                                         renderItemsList = { c ->
                                             UsersListUi(c)
-                                        },
-                                        renderItemDetails = { c ->
-                                            UserDetailsUi(c)
-                                        },
-                                        fabController = fabController
-                                    )
+                                        }
+                                    ) { c ->
+                                        UserDetailsUi(c)
+                                    }
                                 }
                             }
                         }

@@ -42,14 +42,6 @@ class TeamsMasterDetailsComponent(private val di: DI, componentContext: Componen
             OKButtonText = "добавить"
         )
 
-    override val fabState: Value<FABState> = MutableValue(
-        FABState.VISIBLE(
-            iconPath = "vector/add_black_24dp.svg",
-            text = "добавить команду",
-            description = ""
-        )
-    )
-
     override fun onDialogOKClicked(text: String, user: User) {
         createNewTeam(text, user)
     }

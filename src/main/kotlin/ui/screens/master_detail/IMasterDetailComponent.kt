@@ -17,10 +17,7 @@ interface IMasterDetailComponent<T> {
 
     val dialogSlot: Value<ChildSlot<*, IDialogComponent>>?
 
-    val fabState: Value<FABState>
-
     fun onDialogOKClicked(text: String, user: User)
-    fun onFABClicked()
     sealed class Master<T> {
         class ItemsList<T : IEntity>(val component: IMasterComponent<T>) : Master<T>()
     }

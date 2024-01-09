@@ -48,8 +48,6 @@ open class BaseMasterDetailsComponent<T : IEntity>(
 
     open fun getAddNewEntityDialogProperties(): DialogProperties? = null
 
-    override val fabState: Value<FABState> = MutableValue(FABState.HIDDEN)
-
     override val masterStack: Value<ChildStack<*, IMasterDetailComponent.Master<T>>> = childStack(
         source = masterNavigation,
         initialConfiguration = MasterConfig.ItemsList,
@@ -92,10 +90,6 @@ open class BaseMasterDetailsComponent<T : IEntity>(
 
             DetailsConfig.None -> IMasterDetailComponent.Details.None()
         }
-    }
-
-    override fun onFABClicked() {
-        dialogNav.activate(configuration = DialogConfig.AddNewEntityDialog())
     }
 
     override fun onDialogOKClicked(text: String, user: User) {

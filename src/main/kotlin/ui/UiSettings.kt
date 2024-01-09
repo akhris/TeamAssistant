@@ -14,7 +14,7 @@ object UiSettings {
     }
 
     object Debounce {
-        const val debounceTime: Long = 200L
+        const val debounceTime: Long = 100L
     }
 
     object AppBar {
@@ -39,7 +39,7 @@ object UiSettings {
     }
 
     object DetailsScreen {
-        val rightPanelWidth = 128.dp
+        val rightPanelWidth = 80.dp
         val mainPanelPadding = 32.dp
         val tagsShape = RoundedCornerShape(4.dp)
         val bottomSheetShape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)

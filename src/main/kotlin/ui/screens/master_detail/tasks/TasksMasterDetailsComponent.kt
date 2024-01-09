@@ -39,16 +39,6 @@ class TasksMasterDetailsComponent(private val di: DI, componentContext: Componen
             OKButtonText = "добавить"
         )
 
-    override val fabState: Value<FABState> = MutableValue(
-        FABState.HIDDEN
-//
-//        FABState.VISIBLE(
-//            iconPath = "vector/add_black_24dp.svg",
-//            text = "добавить задачу",
-//            description = ""
-//        )
-    )
-
     override fun onDialogOKClicked(text: String, user: User) {
         createNewTask(text, user)
     }

@@ -35,14 +35,6 @@ class ProjectsMasterDetailsComponent(private val di: DI, componentContext: Compo
             OKButtonText = "добавить"
         )
 
-    override val fabState: Value<FABState> = MutableValue(
-        FABState.VISIBLE(
-            iconPath = "vector/add_black_24dp.svg",
-            text = "добавить проект",
-            description = ""
-        )
-    )
-
     override fun onDialogOKClicked(text: String, user: User) {
         createNewProject(text, user)
     }
