@@ -3,6 +3,7 @@ package ui.screens.project_details
 import LocalCurrentUser
 import LocalNavController
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.onClick
 import androidx.compose.material.*
@@ -55,9 +56,11 @@ private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjec
                     modifier = Modifier
                         .padding(end = 24.dp)
                         .size(64.dp)
-                        .onClick {
+                        .clickable {
                             showIconPicker = true
-                        },
+                        }
+
+                        ,
                     painter = painterResource(tempProject.icon.ifEmpty { "vector/broken_image_black_24dp.svg" }),
                     contentDescription = "иконка проекта"
                 )
@@ -91,6 +94,8 @@ private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjec
             }
         } else null,
         rightPanel = {
+            Text(modifier = Modifier.padding(4.dp), text = "команды", style = MaterialTheme.typography.caption)
+
             tempProject.teams.forEach { team ->
                 RenderTeamListIcon(
                     team = team
@@ -153,11 +158,13 @@ private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjec
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun RenderTeamListIcon(team: Team) {
-    IconButton(onClick = {
+
+    Chip(onClick = {
 
     }) {
-        Text(text = team.name, style = MaterialTheme.typography.caption)
+        Text(text = team.name)
     }
 }

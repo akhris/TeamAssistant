@@ -53,7 +53,7 @@ fun BaseDetailsScreen(
         rightPanelContent = rightPanel?.let { rp ->
             {
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.wrapContentWidth(),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -110,7 +110,7 @@ private fun BaseDetailsScreenPattern(
         rightPanelContent?.let { ac ->
             Box(
                 modifier = Modifier
-                    .width(UiSettings.DetailsScreen.rightPanelWidth)
+//                    .width(UiSettings.DetailsScreen.rightPanelWidth)
                     .background(MaterialTheme.colors.background)
                     .padding(4.dp)
             ) {

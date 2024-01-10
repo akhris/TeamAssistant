@@ -182,6 +182,8 @@ private fun RenderTaskDetails(
             }
         } else null,
         rightPanel = {
+            Text(modifier = Modifier.padding(4.dp), text = "участники", style = MaterialTheme.typography.caption)
+
             listOfNotNull(task.creator).plus(task.users).forEach { user ->
                 RenderUserListItem(
                     user = user,
@@ -258,10 +260,11 @@ private fun RenderTaskDetails(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun RenderUserListItem(user: User, isCreator: Boolean = false) {
     BadgedBox(
-        modifier = Modifier.padding(12.dp),
+        modifier = Modifier.padding(end = 12.dp),
         badge = {
             Badge(
                 backgroundColor = MaterialTheme.colors.background
@@ -274,10 +277,10 @@ private fun RenderUserListItem(user: User, isCreator: Boolean = false) {
                 }
             }
         }) {
-        IconButton(onClick = {
+        Chip(onClick = {
 
         }) {
-            Text(text = user.getFirstLetters(), style = MaterialTheme.typography.caption)
+            Text(text = user.getInitials())
         }
     }
 

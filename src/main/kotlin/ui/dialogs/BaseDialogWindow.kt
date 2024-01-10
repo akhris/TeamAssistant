@@ -21,7 +21,7 @@ fun BaseDialogWindow(
     onCloseRequest: () -> Unit,
     title: @Composable (() -> Unit)? = null,
     buttons: @Composable (RowScope.() -> Unit)? = null,
-    content: @Composable ColumnScope.() -> Unit,
+    content: @Composable BoxScope.() -> Unit,
 ) {
     val styledTitle = applyTextStyle(
         textStyle = MaterialTheme.typography.h5,
@@ -50,7 +50,9 @@ fun BaseDialogWindow(
                             }
                         }
                     }
-                    content()
+                    Box(modifier = Modifier.weight(1f)) {
+                        content()
+                    }
                     buttons?.let { b ->
                         Row(modifier = Modifier.fillMaxWidth().padding(4.dp), horizontalArrangement = Arrangement.End) {
                             b()

@@ -52,7 +52,7 @@ fun IconsPickerDialog(
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.weight(1f).padding(vertical = 8.dp).verticalScroll(rememberScrollState())
+                modifier = Modifier.fillMaxSize().padding(vertical = 8.dp).verticalScroll(rememberScrollState())
             ) {
                 icons.forEach { icon ->
                     OutlinedButton(
