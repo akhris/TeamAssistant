@@ -14,6 +14,7 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import ui.dialogs.IDialogComponent
 import ui.dialogs.text_input_dialog.DialogTextInputComponent
+import ui.screens.master_detail.IMasterComponent
 import ui.screens.teams_list.TeamsListComponent
 import utils.UserUtils
 import utils.log
@@ -23,7 +24,7 @@ class ProjectsListComponent(
     di: DI,
     componentContext: ComponentContext,
     private val onItemSelected: (String) -> Unit,
-) : IProjectsListComponent, ComponentContext by componentContext {
+) : IMasterComponent<Project>, ComponentContext by componentContext {
 
     private val scope =
         CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -73,7 +74,7 @@ class ProjectsListComponent(
     }
 
 
-    override fun deleteProject() {
+    override fun onItemDelete(item: Project) {
         TODO("Not yet implemented")
     }
 

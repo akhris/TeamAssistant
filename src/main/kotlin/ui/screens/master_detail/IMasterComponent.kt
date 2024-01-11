@@ -12,4 +12,6 @@ interface IMasterComponent<T> {
     fun onItemClicked(item: T)
 
     fun onAddNewItem(item: T)
+
+    fun onItemDelete(item: T)
 }

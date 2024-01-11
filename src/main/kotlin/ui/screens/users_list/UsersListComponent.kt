@@ -7,13 +7,14 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 import ui.screens.BaseComponent
+import ui.screens.master_detail.IMasterComponent
 import utils.log
 
 class UsersListComponent(
     di: DI,
     componentContext: ComponentContext,
     private val onItemSelected: (String) -> Unit,
-) : IUsersListComponent, BaseComponent(componentContext) {
+) : IMasterComponent<User>, BaseComponent(componentContext) {
 
     private val repo: IRepositoryObservable<User> by di.instance()
 
@@ -35,5 +36,9 @@ class UsersListComponent(
 
     override fun onItemClicked(item: User) {
         onItemSelected(item.id)
+    }
+
+    override fun onItemDelete(item: User) {
+        TODO("Not yet implemented")
     }
 }

@@ -28,6 +28,8 @@ import ui.SideNavigationPanel
 import ui.dialogs.entity_picker_dialogs.EntityPickerDialogUi
 import ui.screens.activity.ActivityUi
 import ui.screens.master_detail.MasterDetailsUi
+import ui.screens.master_detail.settings.SettingsDetailsUi
+import ui.screens.master_detail.settings.SettingsListUi
 import ui.screens.project_details.ProjectDetailsUi
 import ui.screens.projects_list.ProjectsListUi
 import ui.screens.task_details.TaskDetailsUi
@@ -197,10 +199,15 @@ fun FrameWindowScope.RootUi(
                                         UserDetailsUi(c)
                                     }
 
-                                    is IRootComponent.NavHost.Settings -> {
-                                        //show settings ui
-                                        Text(text = "some settings ui here")
-                                    }
+                                    is IRootComponent.NavHost.Settings -> MasterDetailsUi(
+                                        component = child.component,
+                                        renderItemsList = { c ->
+                                            SettingsListUi(c)
+                                        },
+                                        renderItemDetails = {c->
+                                            SettingsDetailsUi(c)
+                                        }
+                                    )
                                 }
                             }
                         }
@@ -222,6 +229,7 @@ fun FrameWindowScope.RootUi(
             IRootComponent.Dialog.None -> {
                 //show nothing
             }
+
             is IRootComponent.Dialog.PickerDialog<*> -> {
                 EntityPickerDialogUi(
                     component = dialogComponent.component,

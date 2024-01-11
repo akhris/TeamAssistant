@@ -24,11 +24,11 @@ import java.time.LocalDateTime
 
 class TeamsMasterDetailsComponent(private val di: DI, componentContext: ComponentContext) :
     BaseMasterDetailsComponent<Team>(componentContext,
-        createMasterComponent = { componentContext: ComponentContext, onItemSelected: (String) -> Unit ->
-            TeamsListComponent(di = di, componentContext = componentContext, onItemSelected = onItemSelected)
+        createMasterComponent = { context: ComponentContext, onItemSelected: (String) -> Unit ->
+            TeamsListComponent(di = di, componentContext = context, onItemSelected = onItemSelected)
         },
-        createDetailsComponent = { componentContext, itemID ->
-            TeamDetailsComponent(di = di, componentContext = componentContext, teamID = itemID)
+        createDetailsComponent = { context, itemID ->
+            TeamDetailsComponent(di = di, componentContext = context, teamID = itemID)
         }
     ) {
 

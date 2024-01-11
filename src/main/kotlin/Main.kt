@@ -1,3 +1,4 @@
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.window.*
 import com.arkivanov.decompose.DefaultComponentContext
@@ -15,7 +16,8 @@ import java.awt.Dimension
 @Composable
 fun FrameWindowScope.App(rootComponent: IRootComponent, windowState: WindowState, onCloseRequest: () -> Unit) {
 
-    var isDark by remember { mutableStateOf(false) }
+    val isSystemInDarkTheme = isSystemInDarkTheme()
+    var isDark by remember { mutableStateOf(isSystemInDarkTheme) }
     AppTheme(darkTheme = isDark) {
 
         RootUi(

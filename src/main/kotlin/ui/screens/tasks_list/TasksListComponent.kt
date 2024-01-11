@@ -13,6 +13,7 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import ui.dialogs.IDialogComponent
 import ui.dialogs.text_input_dialog.DialogTextInputComponent
+import ui.screens.master_detail.IMasterComponent
 import utils.UserUtils
 import utils.log
 import java.time.LocalDateTime
@@ -21,7 +22,7 @@ class TasksListComponent(
     di: DI,
     componentContext: ComponentContext,
     private val onTaskSelected: (String) -> Unit
-) : ITasksListComponent, ComponentContext by componentContext {
+) : IMasterComponent<Task>, ComponentContext by componentContext {
 
     private val scope =
         CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -48,10 +49,9 @@ class TasksListComponent(
         }
     }
 
-    override fun deleteTasks() {
+    override fun onItemDelete(item: Task) {
         TODO("Not yet implemented")
     }
-
     override fun onItemClicked(item: Task) {
         onTaskSelected(item.id)
     }

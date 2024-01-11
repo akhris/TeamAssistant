@@ -16,6 +16,7 @@ import org.kodein.di.instance
 import ui.dialogs.IDialogComponent
 import ui.dialogs.text_input_dialog.DialogTextInputComponent
 import ui.screens.BaseComponent
+import ui.screens.master_detail.IMasterComponent
 import utils.UserUtils
 import utils.log
 import java.time.LocalDateTime
@@ -25,7 +26,7 @@ class TeamsListComponent(
     di: DI,
     componentContext: ComponentContext,
     private val onItemSelected: (String) -> Unit,
-) : ITeamsListComponent, BaseComponent(componentContext) {
+) : IMasterComponent<Team>, BaseComponent(componentContext) {
 
 //    private val dialogNavigation = SlotNavigation<DialogConfig>()
 
@@ -90,10 +91,8 @@ class TeamsListComponent(
     }
 
 
-    override fun deleteTeam() {
-        scope.launch {
-            //remove team here
-        }
+    override fun onItemDelete(item: Team) {
+        TODO("Not yet implemented")
     }
 
 

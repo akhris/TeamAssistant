@@ -10,12 +10,13 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 import ui.screens.BaseComponent
+import ui.screens.master_detail.IDetailsComponent
 
 class ProjectDetailsComponent(
     projectID: String,
     di: DI,
     componentContext: ComponentContext,
-) : IProjectDetailsComponent, BaseComponent(componentContext) {
+) : IDetailsComponent<Project>, BaseComponent(componentContext) {
 
     private val repo: IRepositoryObservable<Project> by di.instance()
 

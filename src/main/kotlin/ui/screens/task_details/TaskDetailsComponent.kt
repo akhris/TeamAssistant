@@ -10,12 +10,13 @@ import kotlinx.coroutines.flow.mapNotNull
 import org.kodein.di.DI
 import org.kodein.di.instance
 import ui.screens.BaseComponent
+import ui.screens.master_detail.IDetailsComponent
 
 class TaskDetailsComponent(
     taskID: String,
     di: DI,
     componentContext: ComponentContext,
-) : ITaskDetailsComponent, BaseComponent(componentContext) {
+) : IDetailsComponent<Task>, BaseComponent(componentContext) {
 
     private val repo: IRepositoryObservable<Task> by di.instance()
 

@@ -8,8 +8,9 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 import ui.screens.BaseComponent
+import ui.screens.master_detail.IDetailsComponent
 
-class TeamDetailsComponent(teamID: String, di: DI, componentContext: ComponentContext) : ITeamDetailsComponent, BaseComponent(componentContext) {
+class TeamDetailsComponent(teamID: String, di: DI, componentContext: ComponentContext) : IDetailsComponent<Team>, BaseComponent(componentContext) {
     private val repo: IRepositoryObservable<Team> by di.instance()
 
     override val item: Flow<Team> = repo.getByID(teamID).mapNotNull {

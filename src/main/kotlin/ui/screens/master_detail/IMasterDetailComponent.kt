@@ -19,11 +19,11 @@ interface IMasterDetailComponent<T> {
 
     fun onDialogOKClicked(text: String, user: User)
     sealed class Master<T> {
-        class ItemsList<T : IEntity>(val component: IMasterComponent<T>) : Master<T>()
+        class ItemsList<T>(val component: IMasterComponent<T>) : Master<T>()
     }
 
     sealed class Details<T> {
-        class ItemDetails<T : IEntity>(val component: IDetailsComponent<T>) : Details<T>()
+        class ItemDetails<T>(val component: IDetailsComponent<T>) : Details<T>()
 
         class None<T> : Details<T>()
     }
