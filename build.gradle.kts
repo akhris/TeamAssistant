@@ -65,6 +65,13 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "TeamAssistant"
             packageVersion = "1.0.0"
+            val iconsRoot = project.file("src/main/resources/")
+            windows {
+                iconFile.set(iconsRoot.resolve("drawables/round_groups_white_48dp.ico"))
+            }
+            linux {
+                iconFile.set(iconsRoot.resolve("drawables/round_groups_white_48dp.png"))
+            }
         }
     }
 }

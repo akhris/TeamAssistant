@@ -129,16 +129,18 @@ object AppTheme {
 
 @Composable
 fun AppTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-        MaterialTheme(
+    MaterialTheme(
         colors = if (darkTheme)
             darkColors(AppTheme.darkTheme)
         else lightColors(AppTheme.lightTheme),
         content = content
+//        content = {
+//            AnimatedDynamicMaterialTheme(
+//                seedColor = Color.Green,
+//                useDarkTheme = darkTheme,
+//                style = PaletteStyle.Neutral,
+//                content = content
+//            )
+//        }
     )
-//    DynamicMaterialTheme(
-//        useDarkTheme = darkTheme,
-//        seedColor = Color(0xFF2C3639),
-//        style = PaletteStyle.Neutral,
-//        content = content
-//    )
 }
