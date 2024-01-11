@@ -39,7 +39,8 @@ fun DateTimeChip(
         .onPointerEvent(PointerEventType.Exit) { isHovered = false },
         shape = shape,
         onClick = {
-            showDatePicker = true
+            if (isEditable)
+                showDatePicker = true
             //show date/time picker
         }, content = {
             val target = remember(dateTime) {

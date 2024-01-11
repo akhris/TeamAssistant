@@ -1,6 +1,7 @@
 package ui
 
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.*
@@ -12,13 +13,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.toLowerCase
 
 @Composable
 fun SideNavigationPanel(
     isExpandable: Boolean = false,
     withLabels: Boolean = false,
     currentSelection: NavItem? = null,
-    onNavigationItemSelected: (NavItem) -> Unit
+    onNavigationItemSelected: (NavItem) -> Unit,
 ) {
 
     var isExpanded by remember { mutableStateOf(false) }
@@ -29,6 +31,11 @@ fun SideNavigationPanel(
             false -> UiSettings.NavigationPanel.widthCollapsed
         }
     )
+
+    val alwaysShowLabel = remember(panelWidth) {
+        panelWidth == UiSettings.NavigationPanel.widthExpanded
+    }
+
 
     NavigationRail(
         elevation = UiSettings.NavigationPanel.elevation,
@@ -56,24 +63,48 @@ fun SideNavigationPanel(
         NavItem
             .getMainNavigationItems()
             .forEach { navItem ->
-                NavigationRailItem(
-                    selected = navItem == currentSelection,
-                    alwaysShowLabel = panelWidth == UiSettings.NavigationPanel.widthExpanded,
-                    icon =
-                    {
-                        Icon(
-                            painter = painterResource(navItem.pathToIcon),
-                            contentDescription = navItem.title,
-                            modifier = Modifier.size(UiSettings.NavigationPanel.iconSize)
-                        )
-
-                    },
-                    label = if (withLabels) {
-                        { Text(maxLines = 1, overflow = TextOverflow.Ellipsis, text = navItem.title) }
-                    } else null,
-                    onClick = {
-                        onNavigationItemSelected(navItem)
-                    })
+                RenderNavigationItem(
+                    navItem = navItem,
+                    isSelected = navItem == currentSelection,
+                    alwaysShowLabel = alwaysShowLabel,
+                    withLabels = withLabels,
+                    onClick = { onNavigationItemSelected(navItem) }
+                )
             }
+        NavItem.bottomNavigationItem?.let { bni ->
+            Spacer(modifier = Modifier.weight(1f))
+            RenderNavigationItem(
+                navItem = bni,
+                isSelected = bni == currentSelection,
+                alwaysShowLabel = alwaysShowLabel,
+                withLabels = withLabels,
+                onClick = { onNavigationItemSelected(bni) }
+            )
+        }
     }
+}
+
+@Composable
+private fun RenderNavigationItem(
+    navItem: NavItem,
+    isSelected: Boolean,
+    alwaysShowLabel: Boolean,
+    withLabels: Boolean,
+    onClick: () -> Unit,
+) {
+    NavigationRailItem(
+        selected = isSelected,
+        alwaysShowLabel = alwaysShowLabel,
+        icon = {
+            Icon(
+                painter = painterResource(navItem.pathToIcon),
+                contentDescription = navItem.title,
+                modifier = Modifier.size(UiSettings.NavigationPanel.iconSize)
+            )
+        },
+        label = if (withLabels) {
+            { Text(maxLines = 1, overflow = TextOverflow.Ellipsis, text = navItem.title.lowercase()) }
+        } else null,
+        onClick = onClick
+    )
 }

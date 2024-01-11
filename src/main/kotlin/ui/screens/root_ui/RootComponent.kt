@@ -198,6 +198,8 @@ class RootComponent(
             NavHostConfig.TeamsList -> IRootComponent.NavHost.TeamMasterDetail(
                 TeamsMasterDetailsComponent(di = di, componentContext = componentContext)
             )
+
+            NavHostConfig.Settings -> IRootComponent.NavHost.Settings()
         }
     }
 
@@ -229,6 +231,7 @@ class RootComponent(
             NavItem.Tasks -> NavHostConfig.TasksList
             NavItem.Team -> NavHostConfig.TeamsList
             NavItem.UserDetails -> NavHostConfig.UsersList
+            NavItem.Settings -> NavHostConfig.Settings
         }
     }
 
@@ -242,7 +245,7 @@ class RootComponent(
             val isMultipleSelection: Boolean = false,
             val initialSelection: List<User> = listOf(),
             val onUsersPicked: (List<User>) -> Unit,
-            val hiddenUsers: List<User> = listOf()
+            val hiddenUsers: List<User> = listOf(),
         ) : DialogConfig()
 
         @Parcelize
@@ -281,6 +284,10 @@ class RootComponent(
 
         @Parcelize
         object Activity : NavHostConfig()
+
+        @Parcelize
+        object Settings : NavHostConfig()
+
 
 //        @Parcelize
 //        object Projects : NavHostConfig()

@@ -32,10 +32,16 @@ sealed class NavItem(val pathToIcon: String, val title: String) {
         title = "Команда"
     )
 
+    object Settings : NavItem(
+        pathToIcon = "vector/settings_black_24dp.svg",
+        title = "Настройки"
+    )
+
     companion object {
         fun getMainNavigationItems() =
             listOf<NavItem>(Tasks, Projects, Team, UserDetails)
 
+        val bottomNavigationItem: NavItem? = Settings
         val homeItem = Tasks
     }
 }

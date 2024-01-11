@@ -10,6 +10,7 @@ import ui.theme.AppTheme
 import utils.ResourcesUtils
 import utils.UserUtils
 import utils.log
+import java.awt.Dimension
 
 @Composable
 fun FrameWindowScope.App(rootComponent: IRootComponent, windowState: WindowState, onCloseRequest: () -> Unit) {
@@ -46,6 +47,8 @@ fun main() {
                 onCloseRequest = ::exitApplication,
                 undecorated = true
             ) {
+                //restrict minimum window size
+                window.minimumSize = Dimension(800 , 600)
                 App(remember { root }, windowState, onCloseRequest = { isRunning = false })
             }
         }

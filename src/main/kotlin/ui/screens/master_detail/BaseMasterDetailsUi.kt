@@ -3,6 +3,7 @@ package ui.screens.master_detail
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import ui.UiSettings
 
 /**
@@ -20,15 +21,16 @@ internal fun BaseMasterDetailsUi(
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .weight(1 / 3f)
+//                .weight(1/3f)
+                .requiredWidthIn(min = 64.dp, max = 200.dp)
                 .padding(UiSettings.Screen.screenPadding)
         ) {
-           renderMaster()
+            renderMaster()
         }
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .weight(2 / 3f)
+                .weight(1f)
                 .padding(UiSettings.Screen.screenPadding)
         ) {
             //Details screen

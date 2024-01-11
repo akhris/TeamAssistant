@@ -196,6 +196,11 @@ fun FrameWindowScope.RootUi(
                                     ) { c ->
                                         UserDetailsUi(c)
                                     }
+
+                                    is IRootComponent.NavHost.Settings -> {
+                                        //show settings ui
+                                        Text(text = "some settings ui here")
+                                    }
                                 }
                             }
                         }

@@ -31,23 +31,6 @@ class TasksListComponent(
     private val userID = UserUtils.getUserID()
 
     private val repo: IRepositoryObservable<Task> by di.instance()
-//    override val dialogSlot: Value<ChildSlot<*, IDialogComponent>> =
-//        childSlot(
-//            source = dialogNavigation,
-//            // persistent = false, // Disable navigation state saving, if needed
-//            handleBackButton = true, // Close the dialog on back button press
-//        ) { config, childComponentContext ->
-//            when (config) {
-//                DialogConfig.NewTaskDialog ->
-//                    DialogTextInputComponent(
-//                        componentContext = childComponentContext,
-//                        hint = "имя новой задачи",
-//                        title = "добавить задачу",
-//                        OKButtonText = "добавить",
-//                        onDismissed = dialogNavigation::dismiss
-//                    )
-//            }
-//        }
 
     override val filterSpecs: Flow<List<FilterSpec>>? = repo.getFilterSpecs()
 

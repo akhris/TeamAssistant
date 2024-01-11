@@ -45,7 +45,8 @@ fun TaskDetailsUi(component: IDetailsComponent<Task>) {
         //only creator can edit the task
         RenderTaskDetails(
             t,
-            isEditable = listOfNotNull(t.creator).contains(user),
+            isEditable = setOfNotNull(t.creator).contains(user),
+            isControllable = setOfNotNull(t.creator).plus(t.users).contains(user),
             onTaskUpdated = { updatedTask ->
                 component.updateItem(updatedTask)
             },
@@ -65,12 +66,20 @@ fun TaskDetailsUi(component: IDetailsComponent<Task>) {
 }
 
 
-// https://dribbble.com/shots/5541961-Projecto-Desktop-Task-Management-App
+/**
+ * Rendering task details function.
+ * @param isEditable - true for task admin
+ * @param isControllable - true for task admin or task members
+ *
+ * design inspired partially on:
+ * https://dribbble.com/shots/5541961-Projecto-Desktop-Task-Management-App
+ */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun RenderTaskDetails(
     task: Task,
     isEditable: Boolean,
+    isControllable: Boolean,
     onTaskUpdated: (Task) -> Unit,
     onAddUsersClicked: () -> Unit,
 ) {
@@ -149,6 +158,7 @@ private fun RenderTaskDetails(
             RenderSubTasks(
                 subtasks = tempTask.subtasks,
                 isEditable = isEditable,
+                isControllable = isControllable,
                 onSubtasksEdited = {
                     tempTask = tempTask.copy(subtasks = it)
                 }
@@ -184,20 +194,20 @@ private fun RenderTaskDetails(
         rightPanel = {
             Text(modifier = Modifier.padding(4.dp), text = "участники", style = MaterialTheme.typography.caption)
 
-            listOfNotNull(task.creator).plus(task.users).forEach { user ->
+            setOfNotNull(task.creator).plus(task.users).forEach { user ->
                 RenderUserListItem(
                     user = user,
                     isCreator = task.creator?.id == user.id
                 )
-
             }
-            CircleIconButton(
-                iconRes = "vector/add_circle_black_24dp.svg",
-                onClick = {
-                    //add user to the task
-                    onAddUsersClicked()
-                }
-            )
+            if (isEditable)
+                CircleIconButton(
+                    iconRes = "vector/add_circle_black_24dp.svg",
+                    onClick = {
+                        //add user to the task
+                        onAddUsersClicked()
+                    }
+                )
             Spacer(modifier = Modifier.weight(1f))
             BadgedBox(
                 modifier = Modifier.padding(12.dp),
@@ -447,6 +457,7 @@ private fun RenderAttachment(
 private fun ColumnScope.RenderSubTasks(
     subtasks: List<SubTask>,
     isEditable: Boolean,
+    isControllable: Boolean,
     onSubtasksEdited: (List<SubTask>) -> Unit,
 ) {
 
@@ -459,7 +470,7 @@ private fun ColumnScope.RenderSubTasks(
     ) {
         subtasks.forEachIndexed { index, subtask ->
             val currentUser = LocalCurrentUser.current
-            RenderSubTask(subtask = subtask, onClick = {
+            RenderSubTask(subtask = subtask, isControllable = isControllable, onClick = {
                 val editedCompleteTime = if (subtask.completedAt == null) {
                     LocalDateTime.now()
                 } else null
@@ -495,8 +506,9 @@ private fun ColumnScope.RenderSubTasks(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun RenderSubTask(subtask: SubTask, onClick: () -> Unit) {
+private fun RenderSubTask(subtask: SubTask, isControllable: Boolean, onClick: () -> Unit) {
     Chip(
+        enabled = isControllable,
         onClick = onClick,
         leadingIcon = {
             val iconRes = remember(subtask) {

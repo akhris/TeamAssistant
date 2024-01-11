@@ -40,6 +40,8 @@ interface IRootComponent {
         class Activity : NavHost()
 //        class Projects(val component: IProjectsListComponent) : NavHost()
 //        class Team(val component: ITeamsListComponent) : NavHost()
+
+        class Settings : NavHost()
     }
 
     sealed class Dialog {
