@@ -4,6 +4,9 @@ import androidx.compose.ui.window.*
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import di.di
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+import persistence.realm.RealmInit.checkDatabaseCreator
 import ui.screens.root_ui.IRootComponent
 import ui.screens.root_ui.RootComponent
 import ui.screens.root_ui.RootUi
@@ -39,6 +42,7 @@ fun main() {
     val root = RootComponent(componentContext = DefaultComponentContext(lifecycle), di = di)
     val userName = UserUtils.getUserID()
     log(userName, "userName: ")
+
     application {
         val windowState = rememberWindowState()
         var isRunning by remember { mutableStateOf(true) }
@@ -50,7 +54,7 @@ fun main() {
                 undecorated = true
             ) {
                 //restrict minimum window size
-                window.minimumSize = Dimension(800 , 600)
+                window.minimumSize = Dimension(800, 600)
                 App(remember { root }, windowState, onCloseRequest = { isRunning = false })
             }
         }

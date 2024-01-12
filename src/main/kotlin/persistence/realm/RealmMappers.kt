@@ -30,7 +30,8 @@ fun RealmUser.toUser(): User =
         createdAt = createdAt?.toLocalDateTime(),
         lastOnline = lastOnline?.toLocalDateTime(),
         avatar = avatar,
-        isPinned = isPinned
+        isPinned = isPinned,
+        isDBCreator = isDBCreator
     )
 
 fun User.toRealmUser(): RealmUser =
@@ -47,6 +48,7 @@ fun User.toRealmUser(): RealmUser =
         lastOnline = this@toRealmUser.lastOnline?.toRealmInstant()
         avatar = this@toRealmUser.avatar
         isPinned = this@toRealmUser.isPinned
+        isDBCreator = this@toRealmUser.isDBCreator
     }
 
 fun RealmTeam.toTeam(): Team =
@@ -243,5 +245,39 @@ fun TaskMessage.toRealmTaskMessage(): RealmTaskMessage {
         user = this@toRealmTaskMessage.user?.toRealmUser()
         createdAt = this@toRealmTaskMessage.createdAt?.toRealmInstant()
         attachments = this@toRealmTaskMessage.attachments.map { it.toRealmAttachment() }.toRealmList()
+    }
+}
+
+fun RealmSetting.toSetting(): Setting {
+    return when (type) {
+        Setting.TYPE_BOOLEAN -> Setting.BooleanSetting(
+            id = this._id,
+            name = this.name,
+            description = this.description,
+            value = this.value.toBoolean()
+        )
+        Setting.TYPE_STRING -> Setting.StringSetting(
+            id = this._id,
+            name = this.name,
+            description = this.description,
+            value = this.value
+        )
+        else -> throw IllegalArgumentException("unknown setting type: $type")
+    }
+}
+
+fun Setting.toRealmSetting(): RealmSetting {
+    return RealmSetting().apply {
+        _id = this@toRealmSetting.id
+        name = this@toRealmSetting.name
+        description = this@toRealmSetting.description
+        type = when (this@toRealmSetting) {
+            is Setting.BooleanSetting -> Setting.TYPE_BOOLEAN
+            is Setting.StringSetting -> Setting.TYPE_STRING
+        }
+        value = when (this@toRealmSetting) {
+            is Setting.BooleanSetting -> this@toRealmSetting.value.toString()
+            is Setting.StringSetting -> this@toRealmSetting.value
+        }
     }
 }

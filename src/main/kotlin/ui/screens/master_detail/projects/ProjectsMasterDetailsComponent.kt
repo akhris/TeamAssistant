@@ -20,11 +20,11 @@ import java.time.LocalDateTime
 
 class ProjectsMasterDetailsComponent(private val di: DI, componentContext: ComponentContext) :
     BaseMasterDetailsComponent<Project>(componentContext = componentContext,
-        createMasterComponent = { componentContext: ComponentContext, onItemSelected: (String) -> Unit ->
-            ProjectsListComponent(di = di, componentContext = componentContext, onItemSelected = onItemSelected)
+        createMasterComponent = { context: ComponentContext, onItemSelected: (String) -> Unit ->
+            ProjectsListComponent(di = di, componentContext = context, onItemSelected = onItemSelected)
         },
-        createDetailsComponent = {componentContext, itemID->
-            ProjectDetailsComponent(di = di, componentContext = componentContext, projectID = itemID)
+        createDetailsComponent = {context, itemID->
+            ProjectDetailsComponent(di = di, componentContext = context, projectID = itemID)
         }) {
     private val repo: IRepositoryObservable<Project> by di.instance()
 

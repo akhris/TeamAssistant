@@ -26,6 +26,7 @@ data class User(
     val avatar: String = "",
     val lastOnline: LocalDateTime? = null,
     val isPinned: Boolean = false,
+    val isDBCreator: Boolean = false
 ) : IEntity {
     override fun toString() = "$name $surname"
 
@@ -137,6 +138,4 @@ data class SubTask(
     val completedAt: LocalDateTime? = null,
     val completedBy: User? = null,
 ) : IEntity
-
-
 

@@ -4,7 +4,6 @@ import com.arkivanov.decompose.ComponentContext
 import domain.EntitiesList
 import domain.FilterSpec
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import org.kodein.di.DI
 import ui.screens.BaseComponent
@@ -13,23 +12,23 @@ import ui.screens.master_detail.IMasterComponent
 class SettingsListComponent(
     di: DI,
     componentContext: ComponentContext,
-) : IMasterComponent<SettingsItem>, BaseComponent(componentContext) {
+) : IMasterComponent<SettingsNavItem>, BaseComponent(componentContext) {
 
-    override val items: Flow<EntitiesList<SettingsItem>> = flowOf(
+    override val items: Flow<EntitiesList<SettingsNavItem>> = flowOf(
         EntitiesList.NotGrouped(
-            items = listOf(SettingsItem.DBSettings)
+            items = listOf(SettingsNavItem.DBSettings)
         )
     )
 
-    override fun onItemDelete(item: SettingsItem) {
+    override fun onItemDelete(item: SettingsNavItem) {
 
     }
 
-    override fun onAddNewItem(item: SettingsItem) {
+    override fun onAddNewItem(item: SettingsNavItem) {
 
     }
 
-    override fun onItemClicked(item: SettingsItem) {
+    override fun onItemClicked(item: SettingsNavItem) {
 
     }
 

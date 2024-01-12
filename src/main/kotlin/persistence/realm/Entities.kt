@@ -67,6 +67,7 @@ class RealmUser : RealmObject {
     var lastOnline: RealmInstant? = null
     var avatar: String = ""
     var isPinned: Boolean = false
+    var isDBCreator: Boolean = false
 }
 
 class RealmTeam : RealmObject {
@@ -97,4 +98,14 @@ class RealmTaskMessage : EmbeddedRealmObject {
     var user: RealmUser? = null
     var createdAt: RealmInstant? = null
     var attachments: RealmList<RealmAttachment> = realmListOf()
+}
+
+// Settings that are stored in database and common for all users of that database file
+class RealmSetting : RealmObject {
+    @PrimaryKey
+    var _id: String = ""
+    var name: String = ""
+    var description: String = ""
+    var type: String = ""
+    var value: String = ""
 }

@@ -14,11 +14,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.kodein.di.DI
 import org.kodein.di.instance
+import persistence.realm.RealmInit
 import ui.NavItem
 import ui.dialogs.entity_picker_dialogs.ProjectPickerComponent
 import ui.dialogs.entity_picker_dialogs.TeamPickerComponent
 import ui.dialogs.entity_picker_dialogs.UserPickerComponent
 import ui.screens.master_detail.projects.ProjectsMasterDetailsComponent
+import ui.screens.master_detail.settings.SettingsMasterDetailsComponent
 import ui.screens.master_detail.tasks.TasksMasterDetailsComponent
 import ui.screens.master_detail.teams.TeamsMasterDetailsComponent
 import ui.screens.master_detail.users.UsersMasterDetailsComponent
@@ -120,8 +122,11 @@ class RootComponent(
 
     override fun createNewUser(user: User) {
         scope.launch {
-            //make insert user usecase
-            usersRepo.insert(user)
+            val isCreator = RealmInit.checkDatabaseCreator(
+                userID = user.id,
+                di = di
+            )
+            usersRepo.insert(user.copy(isDBCreator = isCreator))
         }
     }
 
@@ -199,7 +204,9 @@ class RootComponent(
                 TeamsMasterDetailsComponent(di = di, componentContext = componentContext)
             )
 
-            NavHostConfig.Settings -> IRootComponent.NavHost.Settings()
+            NavHostConfig.Settings -> IRootComponent.NavHost.Settings(
+                SettingsMasterDetailsComponent(di = di, componentContext = componentContext)
+            )
         }
     }
 

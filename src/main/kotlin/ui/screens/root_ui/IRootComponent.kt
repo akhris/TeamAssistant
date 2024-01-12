@@ -5,13 +5,12 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
 import domain.Project
 import domain.Task
-import domain.Team
 import domain.User
 import kotlinx.coroutines.flow.Flow
 import ui.NavItem
 import ui.dialogs.entity_picker_dialogs.IBaseEntityPickerDialogComponent
 import ui.screens.master_detail.IMasterDetailComponent
-import ui.screens.master_detail.settings.SettingsItem
+import ui.screens.master_detail.settings.SettingsNavItem
 
 interface IRootComponent {
 
@@ -42,7 +41,7 @@ interface IRootComponent {
 //        class Projects(val component: IProjectsListComponent) : NavHost()
 //        class Team(val component: ITeamsListComponent) : NavHost()
 
-        class Settings(val component: IMasterDetailComponent<SettingsItem>) : NavHost()
+        class Settings(val component: IMasterDetailComponent<SettingsNavItem>) : NavHost()
     }
 
     sealed class Dialog {

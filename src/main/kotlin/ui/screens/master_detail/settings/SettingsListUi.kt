@@ -5,6 +5,6 @@ import androidx.compose.runtime.Composable
 import ui.screens.master_detail.IMasterComponent
 
 @Composable
-fun SettingsListUi(component: IMasterComponent<SettingsItem>) {
+fun SettingsListUi(component: IMasterComponent<SettingsNavItem>) {
     Text("settings list ui")
 }

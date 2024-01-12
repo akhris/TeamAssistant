@@ -9,6 +9,7 @@ val di = DI {
     import(usersModule)
     import(teamsModule)
     import(projectsModule)
-    import(tasksRepository)
+    import(tasksModule)
+    import(settingsModule)
 }
 
