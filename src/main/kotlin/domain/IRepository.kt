@@ -33,6 +33,19 @@ interface IRepositoryObservable<ENTITY : IEntity> {
     fun getFilterSpecs(): Flow<List<FilterSpec>>?
 }
 
+interface ISettingsRepository {
+    fun getByID(id: String): Flow<RepoResult<Setting>>
+
+    fun query(specifications: List<ISpecification>): Flow<List<Setting>>
+
+    suspend fun update(setting: Setting)
+
+    suspend fun insert(entity: Setting)
+
+    suspend fun remove(entity: Setting)
+
+}
+
 
 /**
  * Marker interface for querying list of data from repository

@@ -21,7 +21,7 @@ import ui.screens.master_detail.teams.TeamsMasterDetailsComponent
 
 open class BaseMasterDetailsComponent<T>(
     componentContext: ComponentContext,
-    private val createMasterComponent: (componentContext: ComponentContext, onItemSelected: (String) -> Unit) -> IMasterComponent<T>,
+    private val createMasterComponent: (componentContext: ComponentContext, onItemSelected: (itemID: String) -> Unit) -> IMasterComponent<T>,
     private val createDetailsComponent: (componentContext: ComponentContext, itemID: String) -> IDetailsComponent<T>,
 ) : IMasterDetailComponent<T>, BaseComponent(componentContext) {
 

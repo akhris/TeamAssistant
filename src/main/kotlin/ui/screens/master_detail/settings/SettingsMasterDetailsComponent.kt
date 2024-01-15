@@ -5,14 +5,14 @@ import org.kodein.di.DI
 import ui.screens.master_detail.BaseMasterDetailsComponent
 
 class SettingsMasterDetailsComponent(private val di: DI, componentContext: ComponentContext) :
-    BaseMasterDetailsComponent<SettingsNavItem>(
+    BaseMasterDetailsComponent<SettingsType>(
         createMasterComponent = { context, onItemSelected ->
-            SettingsListComponent(di, context)
+            SettingsListComponent(di, context, onItemSelected)
         },
         createDetailsComponent = { context, itemID ->
-            val settingsNav = SettingsNavItem.getSettingsNavItemByID(itemID)
+            val settingsNav = SettingsType.getSettingsNavItemByID(itemID, listOf())
                 ?: throw IllegalArgumentException("cannot find Settings section for given id: $itemID")
-            SettingsDetailsComponent(settingsNavItem = settingsNav, di = di, componentContext = context)
+            SettingsDetailsComponent(settingsType = settingsNav, di = di, componentContext = context)
         },
         componentContext = componentContext
     ) {

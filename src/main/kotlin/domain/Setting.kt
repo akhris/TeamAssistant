@@ -4,14 +4,14 @@ sealed class Setting() : IEntity {
     abstract val name: String
     abstract val description: String
 
-    class BooleanSetting(
+    data class BooleanSetting(
         override val id: String,
         override val name: String,
         override val description: String,
         val value: Boolean,
     ) : Setting()
 
-    class StringSetting(
+    data class StringSetting(
         override val id: String,
         override val name: String,
         override val description: String,

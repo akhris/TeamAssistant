@@ -12,24 +12,28 @@ import ui.screens.master_detail.IMasterComponent
 class SettingsListComponent(
     di: DI,
     componentContext: ComponentContext,
-) : IMasterComponent<SettingsNavItem>, BaseComponent(componentContext) {
+    private val onSettingsSelected: (String) -> Unit,
+) : IMasterComponent<SettingsType>, BaseComponent(componentContext) {
 
-    override val items: Flow<EntitiesList<SettingsNavItem>> = flowOf(
+    override val items: Flow<EntitiesList<SettingsType>> = flowOf(
         EntitiesList.NotGrouped(
-            items = listOf(SettingsNavItem.DBSettings)
+            items = listOfNotNull(
+                SettingsType.getSettingsNavItemByID(SettingsType.DBSettingsID),
+                SettingsType.getSettingsNavItemByID(SettingsType.APPSettingsID)
+            )
         )
     )
 
-    override fun onItemDelete(item: SettingsNavItem) {
+    override fun onItemDelete(item: SettingsType) {
 
     }
 
-    override fun onAddNewItem(item: SettingsNavItem) {
+    override fun onAddNewItem(item: SettingsType) {
 
     }
 
-    override fun onItemClicked(item: SettingsNavItem) {
-
+    override fun onItemClicked(item: SettingsType) {
+        onSettingsSelected(item.id)
     }
 
     override val filterSpecs: Flow<List<FilterSpec>>? = null

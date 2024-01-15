@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.map
 import persistence.realm.*
 import utils.log
 
-class RealmSettingsRepository(private val realm: Realm) : IRepositoryObservable<Setting> {
+class RealmSettingsRepository(private val realm: Realm) : ISettingsRepository {
     override fun getByID(id: String): Flow<RepoResult<Setting>> {
         return realm
             .query<RealmSetting>("_id == $0", id)
@@ -31,11 +31,8 @@ class RealmSettingsRepository(private val realm: Realm) : IRepositoryObservable<
             .distinctUntilChanged()
     }
 
-    override suspend fun remove(specifications: List<ISpecification>) {
-        TODO("Not yet implemented")
-    }
 
-    override fun query(specifications: List<ISpecification>): Flow<EntitiesList<Setting>> {
+    override fun query(specifications: List<ISpecification>): Flow<List<Setting>> {
         var query = realm.query<RealmSetting>()
 
         specifications
@@ -48,15 +45,9 @@ class RealmSettingsRepository(private val realm: Realm) : IRepositoryObservable<
             .find()
             .asFlow()
             .map { realmSettings ->
-                EntitiesList.NotGrouped(
-                    realmSettings.list.map { it.toSetting() }
-                )
+                realmSettings.list.map { it.toSetting() }
             }
             .distinctUntilChanged()
-    }
-
-    override fun getFilterSpecs(): Flow<List<FilterSpec>>? {
-        TODO("Not yet implemented")
     }
 
     override suspend fun insert(entity: Setting) {
@@ -69,9 +60,6 @@ class RealmSettingsRepository(private val realm: Realm) : IRepositoryObservable<
         }
     }
 
-    override suspend fun update(entities: List<Setting>) {
-        TODO("Not yet implemented")
-    }
 
     override suspend fun update(entity: Setting) {
         TODO("Not yet implemented")

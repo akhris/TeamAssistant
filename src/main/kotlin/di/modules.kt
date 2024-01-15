@@ -23,6 +23,6 @@ val tasksModule = DI.Module("tasks module") {
 }
 
 val settingsModule = DI.Module("settings module") {
-    bindSingleton<IRepositoryObservable<Setting>> { RealmSettingsRepository(instance()) }
+    bindSingleton<ISettingsRepository> { RealmSettingsRepository(instance()) }
 }
 

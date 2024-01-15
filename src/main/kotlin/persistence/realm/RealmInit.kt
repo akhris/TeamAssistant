@@ -1,6 +1,7 @@
 package persistence.realm
 
 import domain.IRepositoryObservable
+import domain.ISettingsRepository
 import domain.Setting
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
@@ -34,7 +35,7 @@ object RealmInit {
      * @return true if current user is creator, false - otherwise
      */
     suspend fun checkDatabaseCreator(userID: String, di: DI): Boolean {
-        val repo: IRepositoryObservable<Setting> by di.instance()
+        val repo: ISettingsRepository by di.instance()
         val dbCreator = repo.getByID(Setting.SETTING_ID_DB_CREATOR).first()
         when (dbCreator.item) {
             is Setting.StringSetting -> {
