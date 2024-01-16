@@ -1,6 +1,8 @@
 package persistence.realm.repository
 
 import domain.*
+import domain.settings.Setting
+import domain.settings.SettingID
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
@@ -15,20 +17,13 @@ import persistence.realm.*
 import utils.log
 
 class RealmSettingsRepository(private val realm: Realm) : ISettingsRepository {
-    override fun getByID(id: String): Flow<RepoResult<Setting>> {
+
+    override suspend fun getSetting(id: SettingID): Setting? {
+
         return realm
-            .query<RealmSetting>("_id == $0", id)
+            .query<RealmSetting>("_id == $0", id.id)
             .first()
-            .asFlow()
-            .map { setting ->
-                when (setting) {
-                    is DeletedObject -> RepoResult.ItemRemoved(setting.obj?.toSetting())
-                    is InitialObject -> RepoResult.InitialItem(setting.obj.toSetting())
-                    is UpdatedObject -> RepoResult.ItemUpdated(setting.obj.toSetting())
-                    is PendingObject -> RepoResult.PendindObject()
-                }
-            }
-            .distinctUntilChanged()
+            .find()?.toSetting()
     }
 
 
@@ -50,18 +45,23 @@ class RealmSettingsRepository(private val realm: Realm) : ISettingsRepository {
             .distinctUntilChanged()
     }
 
-    override suspend fun insert(entity: Setting) {
+    override suspend fun insert(setting: Setting) {
         realm.write {
             try {
-                copyToRealm(entity.toRealmSetting(), updatePolicy = UpdatePolicy.ALL)
+                copyToRealm(setting.toRealmSetting(), updatePolicy = UpdatePolicy.ALL)
             } catch (e: Throwable) {
                 log(e.localizedMessage)
             }
         }
     }
 
+    override suspend fun insert(settings: List<Setting>) {
+        settings.forEach {
+            insert(it)
+        }
+    }
 
-    override suspend fun update(entity: Setting) {
+    override suspend fun update(setting: Setting) {
         TODO("Not yet implemented")
     }
 

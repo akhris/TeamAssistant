@@ -1,8 +1,8 @@
 package persistence.realm
 
-import domain.IRepositoryObservable
 import domain.ISettingsRepository
-import domain.Setting
+import domain.settings.DBDefaults
+import domain.settings.Setting
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import kotlinx.coroutines.flow.first
@@ -44,13 +44,9 @@ object RealmInit {
 
             else -> {
                 //setting not found - db was just created
+                //save database default settings
                 repo.insert(
-                    Setting.StringSetting(
-                        id = Setting.SETTING_ID_DB_CREATOR,
-                        name = "database creator",
-                        description = "id of user that created database file",
-                        value = userID
-                    )
+                    DBDefaults.getSettings(userID = userID)
                 )
                 return true
             }

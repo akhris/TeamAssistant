@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import ui.NavItem
 import ui.dialogs.entity_picker_dialogs.IBaseEntityPickerDialogComponent
 import ui.screens.master_detail.IMasterDetailComponent
-import ui.screens.master_detail.settings.SettingsType
+import ui.screens.master_detail.settings.SettingsSection
 
 interface IRootComponent {
 
@@ -41,7 +41,7 @@ interface IRootComponent {
 //        class Projects(val component: IProjectsListComponent) : NavHost()
 //        class Team(val component: ITeamsListComponent) : NavHost()
 
-        class Settings(val component: IMasterDetailComponent<SettingsType>) : NavHost()
+        class Settings(val component: IMasterDetailComponent<SettingsSection>) : NavHost()
     }
 
     sealed class Dialog {

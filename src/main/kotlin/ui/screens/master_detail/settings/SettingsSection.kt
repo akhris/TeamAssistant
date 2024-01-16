@@ -1,49 +1,46 @@
 package ui.screens.master_detail.settings
 
-import domain.Setting
+import domain.settings.Setting
 
-data class SettingsType(
+/**
+ * Settings section
+ */
+data class SettingsSection(
     val id: String,
     val pathToIcon: String,
     val title: String,
     val settings: List<Setting>,
 ) {
 
-
-//    class DBSettings(override val settings: List<Setting> = listOf()) :
-//        SettingsType(
-//            id = "settings.section.db",
-//            pathToIcon = "vector/settings/storage_black_24dp.svg",
-//            title = "база данных"
-//        )
-//
-//    class APPSettings(override val settings: List<Setting> = listOf()) :
-//        SettingsType(
-//            id = "settings.section.app",
-//            pathToIcon = "vector/settings_black_24dp.svg",
-//            title = "приложение"
-//        )
-
     companion object {
 
         const val DBSettingsID = "settings.section.db"
         const val APPSettingsID = "settings.section.app"
 
-        fun getSettingsNavItemByID(id: String, settings: List<Setting> = listOf()): SettingsType? {
+        val SETTINGS_SECTION_DB_IDS: List<String> = listOf(
+            Setting.SETTING_ID_DB_PATH
+        )
+
+        val SETTINGS_SECTION_APP_IDS: List<String> = listOf(
+
+        )
+
+        fun getSettingsSectionByID(id: String, settings: List<Setting> = listOf()): SettingsSection? {
             return when (id) {
-                DBSettingsID -> SettingsType(
+                DBSettingsID -> SettingsSection(
                     id = id,
                     pathToIcon = "vector/settings/storage_black_24dp.svg",
                     title = "база данных",
                     settings = settings
                 )
 
-                APPSettingsID -> SettingsType(
+                APPSettingsID -> SettingsSection(
                     id = id,
                     pathToIcon = "vector/settings_black_24dp.svg",
                     title = "приложение",
                     settings = settings
                 )
+
                 else -> null
             }
         }

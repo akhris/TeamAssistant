@@ -13,26 +13,26 @@ class SettingsListComponent(
     di: DI,
     componentContext: ComponentContext,
     private val onSettingsSelected: (String) -> Unit,
-) : IMasterComponent<SettingsType>, BaseComponent(componentContext) {
+) : IMasterComponent<SettingsSection>, BaseComponent(componentContext) {
 
-    override val items: Flow<EntitiesList<SettingsType>> = flowOf(
+    override val items: Flow<EntitiesList<SettingsSection>> = flowOf(
         EntitiesList.NotGrouped(
             items = listOfNotNull(
-                SettingsType.getSettingsNavItemByID(SettingsType.DBSettingsID),
-                SettingsType.getSettingsNavItemByID(SettingsType.APPSettingsID)
+                SettingsSection.getSettingsSectionByID(SettingsSection.DBSettingsID),
+                SettingsSection.getSettingsSectionByID(SettingsSection.APPSettingsID)
             )
         )
     )
 
-    override fun onItemDelete(item: SettingsType) {
+    override fun onItemDelete(item: SettingsSection) {
 
     }
 
-    override fun onAddNewItem(item: SettingsType) {
+    override fun onAddNewItem(item: SettingsSection) {
 
     }
 
-    override fun onItemClicked(item: SettingsType) {
+    override fun onItemClicked(item: SettingsSection) {
         onSettingsSelected(item.id)
     }
 

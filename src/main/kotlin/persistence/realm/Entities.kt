@@ -108,4 +108,5 @@ class RealmSetting : RealmObject {
     var description: String = ""
     var type: String = ""
     var value: String = ""
+    var isHidden: Boolean = false
 }

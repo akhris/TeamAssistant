@@ -5,19 +5,14 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
-import com.arkivanov.decompose.value.getValue
-import domain.EntitiesList
-import domain.Setting
+import domain.settings.Setting
 import kotlinx.coroutines.delay
-import ui.EntitiesListUi
-import ui.ItemRenderer
 import ui.UiSettings
 import ui.fields.EditableTextField
 import ui.screens.master_detail.IDetailsComponent
-import utils.log
 
 @Composable
-fun SettingsDetailsUi(component: IDetailsComponent<SettingsType>) {
+fun SettingsDetailsUi(component: IDetailsComponent<SettingsSection>) {
     val settingsDetailsComponent = remember(component) { component as? SettingsDetailsComponent } ?: return
     val settingsType by remember(settingsDetailsComponent) { settingsDetailsComponent.item }.collectAsState(null)
     val settings = remember(settingsType) { settingsType?.settings ?: listOf() }

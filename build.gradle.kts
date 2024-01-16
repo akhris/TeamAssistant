@@ -48,6 +48,10 @@ dependencies {
     //for qualifiers
     implementation("javax.inject:javax.inject:1")
 
+    //for key-value storage:
+    implementation("com.russhwolf:multiplatform-settings:1.1.1")
+    implementation("com.russhwolf:multiplatform-settings-coroutines:1.1.1")
+
     //realm:
     implementation("io.realm.kotlin:library-base:1.12.0")
 

@@ -1,6 +1,8 @@
 package domain
 
 import domain.RepoResult.*
+import domain.settings.Setting
+import domain.settings.SettingID
 import domain.valueobjects.SliceResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
@@ -34,13 +36,14 @@ interface IRepositoryObservable<ENTITY : IEntity> {
 }
 
 interface ISettingsRepository {
-    fun getByID(id: String): Flow<RepoResult<Setting>>
+    suspend fun getSetting(id: SettingID): Setting?
 
     fun query(specifications: List<ISpecification>): Flow<List<Setting>>
 
     suspend fun update(setting: Setting)
 
-    suspend fun insert(entity: Setting)
+    suspend fun insert(setting: Setting)
+    suspend fun insert(settings: List<Setting>)
 
     suspend fun remove(entity: Setting)
 
