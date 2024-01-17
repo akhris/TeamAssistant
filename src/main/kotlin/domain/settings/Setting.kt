@@ -2,14 +2,15 @@ package domain.settings
 
 import domain.IEntity
 
-data class Setting(
-    val settingID: SettingID,
-    val name: String,
-    val description: String,
-    val isHidden: Boolean,
-    val value: String,
+sealed class Setting(
+
 ) : IEntity {
-    override val id: String = settingID.id
+
+    abstract override val id: String
+
+    class BooleanSetting(override val id: String, val value: Boolean) : Setting()
+    class StringSetting(override val id: String, val value: String) : Setting()
+    class PathSetting(override val id: String, val value: String) : Setting()
 
     companion object {
         //ids:
@@ -24,9 +25,9 @@ data class Setting(
 }
 
 
-sealed class SettingID(val id: String, val type: String) {
-
-    class StringType(id: String) : SettingID(id = id, type = Setting.TYPE_STRING)
-    class BooleanType(id: String) : SettingID(id = id, type = Setting.TYPE_BOOLEAN)
-    class PathType(id: String) : SettingID(id = id, type = Setting.TYPE_PATH)
-}
+data class SettingWrapper(
+    val setting: Setting,
+    val name: String,
+    val description: String,
+    val isHidden: Boolean,
+)

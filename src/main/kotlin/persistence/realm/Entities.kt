@@ -4,6 +4,7 @@ import io.realm.kotlin.ext.realmDictionaryOf
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.ext.realmSetOf
 import io.realm.kotlin.types.*
+import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
 import org.mongodb.kbson.ObjectId
 import java.util.*
@@ -104,9 +105,10 @@ class RealmTaskMessage : EmbeddedRealmObject {
 class RealmSetting : RealmObject {
     @PrimaryKey
     var _id: String = ""
-    var name: String = ""
-    var description: String = ""
-    var type: String = ""
     var value: String = ""
-    var isHidden: Boolean = false
+    var type: String = ""
 }
+
+const val REALMSETTING_TYPE_STRING = "realm.setting.type.string"
+const val REALMSETTING_TYPE_BOOLEAN = "realm.setting.type.boolean"
+const val REALMSETTING_TYPE_PATH = "realm.setting.type.path"

@@ -36,7 +36,9 @@ interface IRepositoryObservable<ENTITY : IEntity> {
 }
 
 interface ISettingsRepository {
-    suspend fun getSetting(id: SettingID): Setting?
+    suspend fun getStringSetting(id: String): Setting.StringSetting?
+    suspend fun getBooleanSetting(id: String): Setting.BooleanSetting?
+    suspend fun getPathSetting(id: String): Setting.PathSetting?
 
     fun query(specifications: List<ISpecification>): Flow<List<Setting>>
 

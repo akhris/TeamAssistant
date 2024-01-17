@@ -10,9 +10,29 @@ import kotlinx.coroutines.flow.Flow
 
 @OptIn(ExperimentalSettingsApi::class)
 class SettingsRepository(private val preferencesSettings: SuspendSettings) : ISettingsRepository {
-    override suspend fun getSetting(id: SettingID): Setting? {
-        TODO("Not yet implemented")
+
+
+    override suspend fun getStringSetting(id: String): Setting.StringSetting? {
+        val value = preferencesSettings.getStringOrNull(id)
+        return value?.let {
+            Setting.StringSetting(id = id, value = it)
+        }
     }
+
+    override suspend fun getBooleanSetting(id: String): Setting.BooleanSetting? {
+        val value = preferencesSettings.getBooleanOrNull(id)
+        return value?.let {
+            Setting.BooleanSetting(id = id, value = it)
+        }
+    }
+
+    override suspend fun getPathSetting(id: String): Setting.PathSetting? {
+        val value = preferencesSettings.getStringOrNull(id)
+        return value?.let {
+            Setting.PathSetting(id = id, value = it)
+        }
+    }
+
 
     // TODO: return stringsetting or string? how to get default value and description, e.t.c.
     //  see example:

@@ -6,10 +6,6 @@ import domain.settings.SettingID
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
-import io.realm.kotlin.notifications.DeletedObject
-import io.realm.kotlin.notifications.InitialObject
-import io.realm.kotlin.notifications.PendingObject
-import io.realm.kotlin.notifications.UpdatedObject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -21,7 +17,7 @@ class RealmSettingsRepository(private val realm: Realm) : ISettingsRepository {
     override suspend fun getSetting(id: SettingID): Setting? {
 
         return realm
-            .query<RealmSetting>("_id == $0", id.id)
+            .query<RealmSetting>("_id == $0", id.key)
             .first()
             .find()?.toSetting()
     }

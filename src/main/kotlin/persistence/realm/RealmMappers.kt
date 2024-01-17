@@ -2,7 +2,6 @@ package persistence.realm
 
 import domain.*
 import domain.settings.Setting
-import domain.settings.SettingID
 import domain.valueobjects.Attachment
 import domain.valueobjects.TaskMessage
 import io.realm.kotlin.ext.toRealmDictionary
@@ -251,38 +250,31 @@ fun TaskMessage.toRealmTaskMessage(): RealmTaskMessage {
 }
 
 fun RealmSetting.toSetting(): Setting {
-    return when (type) {
-        Setting.TYPE_BOOLEAN -> Setting(
-            settingID = SettingID.BooleanType(this._id),
-            name = this.name,
-            description = this.description,
-            value = this.value,
-            isHidden = this.isHidden
-        )
+    return when (this.type) {
+        REALMSETTING_TYPE_STRING -> {
+            Setting.StringSetting(id = _id, value = value)
+        }
 
-        Setting.TYPE_STRING -> Setting(
-            settingID = SettingID.StringType(this._id),
-            name = this.name,
-            description = this.description,
-            value = this.value,
-            isHidden = this.isHidden
-        )
+        REALMSETTING_TYPE_BOOLEAN -> {
+            Setting.BooleanSetting(id = _id, value = value.toBoolean())
+        }
 
-        else -> throw IllegalArgumentException("unknown setting type: $type")
+        REALMSETTING_TYPE_PATH -> {
+            Setting.PathSetting(id = _id, value = value)
+        }
+
+        else -> throw IllegalArgumentException("unknown type")
     }
 }
 
 fun Setting.toRealmSetting(): RealmSetting {
+    val stringValue = when (this) {
+        is Setting.BooleanSetting -> value.toString()
+        is Setting.PathSetting -> value
+        is Setting.StringSetting -> value
+    }
     return RealmSetting().apply {
         _id = this@toRealmSetting.id
-        name = this@toRealmSetting.name
-        description = this@toRealmSetting.description
-        type = when (this@toRealmSetting.settingID) {
-            is SettingID.BooleanType -> Setting.TYPE_BOOLEAN
-            is SettingID.PathType -> Setting.TYPE_PATH
-            is SettingID.StringType -> Setting.TYPE_STRING
-        }
-        value = this@toRealmSetting.value
-        isHidden = this@toRealmSetting.isHidden
+        value = stringValue
     }
 }
