@@ -5,11 +5,10 @@ import com.russhwolf.settings.coroutines.SuspendSettings
 import domain.ISettingsRepository
 import domain.ISpecification
 import domain.settings.Setting
-import domain.settings.SettingID
 import kotlinx.coroutines.flow.Flow
 
 @OptIn(ExperimentalSettingsApi::class)
-class SettingsRepository(private val preferencesSettings: SuspendSettings) : ISettingsRepository {
+class MultiplatformSettingsRepository(private val preferencesSettings: SuspendSettings) : ISettingsRepository {
 
 
     override suspend fun getStringSetting(id: String): Setting.StringSetting? {

@@ -1,11 +1,10 @@
 package persistence.realm
 
 import domain.ISettingsRepository
-import domain.settings.DBDefaults
+import domain.settings.DBSettings
 import domain.settings.Setting
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
-import kotlinx.coroutines.flow.first
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -35,21 +34,17 @@ object RealmInit {
      * @return true if current user is creator, false - otherwise
      */
     suspend fun checkDatabaseCreator(userID: String, di: DI): Boolean {
-        val repo: ISettingsRepository by di.instance()
-        val dbCreator = repo.getByID(Setting.SETTING_ID_DB_CREATOR).first()
-        when (dbCreator.item) {
-            is Setting.StringSetting -> {
-                return userID == dbCreator.item.value
-            }
-
-            else -> {
-                //setting not found - db was just created
-                //save database default settings
-                repo.insert(
-                    DBDefaults.getSettings(userID = userID)
-                )
-                return true
-            }
+        val repo: ISettingsRepository by di.instance(tag = "settings.DB")
+        val dbCreator = repo.getStringSetting(DBSettings.SETTING_ID_DB_CREATOR)
+        return if (dbCreator == null) {
+            //setting not found - db was just created
+            //save database default settings
+            repo.insert(
+                DBSettings.getDefaults(userID = userID)
+            )
+            true
+        } else {
+            dbCreator.value == userID
         }
     }
 }

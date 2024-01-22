@@ -5,6 +5,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import domain.settings.ISettingDescriptor
 import domain.settings.Setting
 import kotlinx.coroutines.delay
 import ui.UiSettings
@@ -16,30 +17,45 @@ fun SettingsDetailsUi(component: IDetailsComponent<SettingsSection>) {
     val settingsDetailsComponent = remember(component) { component as? SettingsDetailsComponent } ?: return
     val settingsType by remember(settingsDetailsComponent) { settingsDetailsComponent.item }.collectAsState(null)
     val settings = remember(settingsType) { settingsType?.settings ?: listOf() }
-
-    RenderSettingsList(settings = settings, onSettingChanged = {
-        settingsDetailsComponent.updateSetting(it)
-    })
+    val descriptor = remember(settingsDetailsComponent) { settingsDetailsComponent.settingDescriptor }
+    RenderSettingsList(
+        settings = settings,
+        settingDescriptor = descriptor,
+        onSettingChanged = {
+            settingsDetailsComponent.updateSetting(it)
+        }
+    )
 }
 
 @Composable
-private fun RenderSettingsList(settings: List<Setting>, onSettingChanged: (Setting) -> Unit) {
+private fun RenderSettingsList(
+    settings: List<Setting>,
+    settingDescriptor: ISettingDescriptor,
+    onSettingChanged: (Setting) -> Unit,
+) {
     settings.forEach { setting ->
         when (setting) {
-            is Setting.BooleanSetting -> RenderBooleanSetting(setting, onSettingChanged)
-            is Setting.StringSetting -> RenderStringSetting(setting, onSettingChanged)
+            is Setting.BooleanSetting -> RenderBooleanSetting(setting, settingDescriptor, onSettingChanged)
+            is Setting.StringSetting -> RenderStringSetting(setting, settingDescriptor, onSettingChanged)
+            is Setting.PathSetting -> RenderPathSetting(setting, settingDescriptor, onSettingChanged)
         }
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun RenderBooleanSetting(setting: Setting.BooleanSetting, onSettingChanged: (Setting.BooleanSetting) -> Unit) {
+private fun RenderBooleanSetting(
+    setting: Setting.BooleanSetting,
+    settingDescriptor: ISettingDescriptor,
+    onSettingChanged: (Setting.BooleanSetting) -> Unit,
+) {
+    val title = remember(settingDescriptor, setting) { settingDescriptor.getTitle(setting.id) }
+    val description = remember(settingDescriptor, setting) { settingDescriptor.getDescription(setting.id) }
 
     ListItem(text = {
-        Text(setting.name)
+        title?.let { Text(it) }
     }, secondaryText = {
-        Text(setting.description)
+        description?.let { Text(it) }
     }, trailing = {
         Checkbox(checked = setting.value, onCheckedChange = { onSettingChanged(setting.copy(value = !setting.value)) })
     })
@@ -47,16 +63,27 @@ private fun RenderBooleanSetting(setting: Setting.BooleanSetting, onSettingChang
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun RenderStringSetting(setting: Setting.StringSetting, onSettingChanged: (Setting.StringSetting) -> Unit) {
+private fun RenderStringSetting(
+    setting: Setting.StringSetting,
+    settingDescriptor: ISettingDescriptor,
+    onSettingChanged: (Setting.StringSetting) -> Unit,
+) {
     var tempString by remember(setting) { mutableStateOf(setting.value) }
+    val title = remember(settingDescriptor, setting) { settingDescriptor.getTitle(setting.id) }
+    val description = remember(settingDescriptor, setting) { settingDescriptor.getDescription(setting.id) }
     ListItem(text = {
+
         EditableTextField(
             value = tempString,
             onValueChange = { tempString = it },
-            label = setting.name
+            label = title ?: ""
         )
-    }, secondaryText = {
-        Text(setting.description)
+
+
+    }, secondaryText = description?.let { d ->
+        {
+            Text(d)
+        }
     })
 
     LaunchedEffect(tempString) {
@@ -66,4 +93,13 @@ private fun RenderStringSetting(setting: Setting.StringSetting, onSettingChanged
         delay(UiSettings.Debounce.debounceTime)
         onSettingChanged(setting.copy(value = tempString))
     }
+}
+
+@Composable
+private fun RenderPathSetting(
+    setting: Setting.PathSetting,
+    settingDescriptor: ISettingDescriptor,
+    onSettingChanged: (Setting.PathSetting) -> Unit,
+) {
+
 }

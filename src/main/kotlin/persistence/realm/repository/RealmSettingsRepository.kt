@@ -1,25 +1,42 @@
 package persistence.realm.repository
 
-import domain.*
+import domain.ISettingsRepository
+import domain.ISpecification
+import domain.Specification
 import domain.settings.Setting
-import domain.settings.SettingID
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import persistence.realm.*
+import persistence.realm.RealmSetting
+import persistence.realm.toRealmSetting
+import persistence.realm.toSetting
 import utils.log
 
 class RealmSettingsRepository(private val realm: Realm) : ISettingsRepository {
 
-    override suspend fun getSetting(id: SettingID): Setting? {
 
+    override suspend fun getStringSetting(id: String): Setting.StringSetting? {
         return realm
-            .query<RealmSetting>("_id == $0", id.key)
+            .query<RealmSetting>("_id == $0", id)
             .first()
-            .find()?.toSetting()
+            .find()?.toSetting() as? Setting.StringSetting
+    }
+
+    override suspend fun getBooleanSetting(id: String): Setting.BooleanSetting? {
+        return realm
+            .query<RealmSetting>("_id == $0", id)
+            .first()
+            .find()?.toSetting() as? Setting.BooleanSetting
+    }
+
+    override suspend fun getPathSetting(id: String): Setting.PathSetting? {
+        return realm
+            .query<RealmSetting>("_id == $0", id)
+            .first()
+            .find()?.toSetting() as? Setting.PathSetting
     }
 
 

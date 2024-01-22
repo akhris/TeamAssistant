@@ -7,10 +7,13 @@ import com.russhwolf.settings.Settings
 import com.russhwolf.settings.coroutines.SuspendSettings
 import com.russhwolf.settings.coroutines.toSuspendSettings
 import domain.*
+import domain.settings.ISettingDescriptor
 import org.kodein.di.DI
 import org.kodein.di.bindSingleton
 import org.kodein.di.instance
+import persistence.multiplatform_settings.MultiplatformSettingsRepository
 import persistence.realm.repository.*
+import settings.SettingDescriptor
 import java.util.prefs.Preferences
 
 val usersModule = DI.Module("users module") {
@@ -38,7 +41,8 @@ val settingsModule = DI.Module("settings module") {
     bindSingleton<Preferences> { Preferences.userRoot() }
     bindSingleton<Settings> { PreferencesSettings(instance()) }
     bindSingleton<SuspendSettings> { instance<Settings>().toSuspendSettings() }
-    bindSingleton<ISettingsRepository>(tag = "settings.local") { RealmSettingsRepository(instance()) }
-
+    bindSingleton<ISettingsRepository>(tag = "settings.DB") { RealmSettingsRepository(instance()) }
+    bindSingleton<ISettingsRepository>(tag = "settings.local") { MultiplatformSettingsRepository(instance()) }
+    bindSingleton<ISettingDescriptor> { SettingDescriptor()  }
 }
 
