@@ -2,6 +2,7 @@ package ui.screens.master_detail.settings
 
 import domain.settings.DBSettings
 import domain.settings.Setting
+import settings.Settings
 
 /**
  * Settings section
@@ -19,7 +20,7 @@ data class SettingsSection(
         const val APPSettingsID = "settings.section.app"
 
         val SETTINGS_SECTION_DB_IDS: List<String> = listOf(
-            DBSettings.SETTING_ID_DB_PATH
+            Settings.DB.SETTING_ID_DB_PATH
         )
 
         val SETTINGS_SECTION_APP_IDS: List<String> = listOf(

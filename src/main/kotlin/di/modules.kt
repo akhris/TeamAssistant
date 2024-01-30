@@ -7,6 +7,7 @@ import com.russhwolf.settings.Settings
 import com.russhwolf.settings.coroutines.SuspendSettings
 import com.russhwolf.settings.coroutines.toSuspendSettings
 import domain.*
+import domain.application.SettingsUseCase
 import domain.settings.ISettingDescriptor
 import org.kodein.di.DI
 import org.kodein.di.bindSingleton
@@ -43,6 +44,12 @@ val settingsModule = DI.Module("settings module") {
     bindSingleton<SuspendSettings> { instance<Settings>().toSuspendSettings() }
     bindSingleton<ISettingsRepository>(tag = "settings.DB") { RealmSettingsRepository(instance()) }
     bindSingleton<ISettingsRepository>(tag = "settings.local") { MultiplatformSettingsRepository(instance()) }
-    bindSingleton<ISettingDescriptor> { SettingDescriptor()  }
+    bindSingleton<ISettingDescriptor> { SettingDescriptor() }
+    bindSingleton<SettingsUseCase> {
+        SettingsUseCase(
+            dbSettingsRepo = instance(tag = "settings.DB"),
+            appSettingsRepo = instance(tag = "settings.local")
+        )
+    }
 }
 

@@ -2,6 +2,7 @@ package ui.screens.master_detail.settings
 
 import com.arkivanov.decompose.ComponentContext
 import domain.*
+import domain.application.SettingsUseCase
 import domain.settings.ISettingDescriptor
 import domain.settings.Setting
 import kotlinx.coroutines.flow.Flow
@@ -20,7 +21,7 @@ class SettingsDetailsComponent(
 
     // TODO: need to bind all settings repos (DB + APP + ...)
     //  maybe make different settings component (not details component)?
-    private val repo: ISettingsRepository by di.instance()
+    private val settingsUseCase: SettingsUseCase by di.instance()
 
     private val _item: MutableStateFlow<SettingsSection> = MutableStateFlow(settingsSection)
 
@@ -28,7 +29,7 @@ class SettingsDetailsComponent(
 
     val settingDescriptor: ISettingDescriptor by di.instance()
 
-    fun updateSetting(setting: Setting){
+    fun updateSetting(setting: Setting) {
 
     }
 
@@ -45,13 +46,15 @@ class SettingsDetailsComponent(
         scope.launch {
             when (settingsSection.id) {
                 SettingsSection.DBSettingsID -> {
-                    repo.query(listOf(Specification.QueryAll)).collect { s ->
-                        _item.value = settingsSection.copy(settings = s)
+                    settingsUseCase.queryAllDBSettings().collect{
+                        _item.value = settingsSection.copy(settings = it)
                     }
                 }
 
                 SettingsSection.APPSettingsID -> {
-
+                    settingsUseCase.queryAllAPPSettings().collect{
+                        _item.value = settingsSection.copy(settings = it)
+                    }
                 }
             }
         }
