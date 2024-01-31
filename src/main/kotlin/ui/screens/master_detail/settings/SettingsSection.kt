@@ -1,6 +1,5 @@
 package ui.screens.master_detail.settings
 
-import domain.settings.DBSettings
 import domain.settings.Setting
 import settings.Settings
 

@@ -106,7 +106,7 @@ class RealmSetting : RealmObject {
     @PrimaryKey
     var _id: String = ""
     var value: String = ""
-    var type: String = ""
+//    var type: String = ""
 }
 
 const val REALMSETTING_TYPE_STRING = "realm.setting.type.string"

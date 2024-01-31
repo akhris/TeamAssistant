@@ -46,15 +46,11 @@ class SettingsDetailsComponent(
         scope.launch {
             when (settingsSection.id) {
                 SettingsSection.DBSettingsID -> {
-                    settingsUseCase.queryAllDBSettings().collect{
-                        _item.value = settingsSection.copy(settings = it)
-                    }
+                    _item.value = settingsSection.copy(settings = settingsUseCase.getAllDBSettings())
                 }
 
                 SettingsSection.APPSettingsID -> {
-                    settingsUseCase.queryAllAPPSettings().collect{
-                        _item.value = settingsSection.copy(settings = it)
-                    }
+                    _item.value = settingsSection.copy(settings = settingsUseCase.getAllAPPSettings())
                 }
             }
         }

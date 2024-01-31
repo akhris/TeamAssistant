@@ -250,31 +250,13 @@ fun TaskMessage.toRealmTaskMessage(): RealmTaskMessage {
 }
 
 fun RealmSetting.toSetting(): Setting {
-    return when (this.type) {
-        REALMSETTING_TYPE_STRING -> {
-            Setting.StringSetting(id = _id, value = value)
-        }
-
-        REALMSETTING_TYPE_BOOLEAN -> {
-            Setting.BooleanSetting(id = _id, value = value.toBoolean())
-        }
-
-        REALMSETTING_TYPE_PATH -> {
-            Setting.PathSetting(id = _id, value = value)
-        }
-
-        else -> throw IllegalArgumentException("unknown type")
-    }
+    return Setting(id = _id, value = value)
 }
 
+
 fun Setting.toRealmSetting(): RealmSetting {
-    val stringValue = when (this) {
-        is Setting.BooleanSetting -> value.toString()
-        is Setting.PathSetting -> value
-        is Setting.StringSetting -> value
-    }
     return RealmSetting().apply {
         _id = this@toRealmSetting.id
-        value = stringValue
+        value = value
     }
 }

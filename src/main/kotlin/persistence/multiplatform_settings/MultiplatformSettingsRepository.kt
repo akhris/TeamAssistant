@@ -11,24 +11,10 @@ import kotlinx.coroutines.flow.Flow
 class MultiplatformSettingsRepository(private val preferencesSettings: SuspendSettings) : ISettingsRepository {
 
 
-    override suspend fun getStringSetting(id: String): Setting.StringSetting? {
+    override suspend fun getSetting(id: String): Setting? {
         val value = preferencesSettings.getStringOrNull(id)
         return value?.let {
-            Setting.StringSetting(id = id, value = it)
-        }
-    }
-
-    override suspend fun getBooleanSetting(id: String): Setting.BooleanSetting? {
-        val value = preferencesSettings.getBooleanOrNull(id)
-        return value?.let {
-            Setting.BooleanSetting(id = id, value = it)
-        }
-    }
-
-    override suspend fun getPathSetting(id: String): Setting.PathSetting? {
-        val value = preferencesSettings.getStringOrNull(id)
-        return value?.let {
-            Setting.PathSetting(id = id, value = it)
+            Setting(id = id, value = it)
         }
     }
 
@@ -38,9 +24,6 @@ class MultiplatformSettingsRepository(private val preferencesSettings: SuspendSe
     //  https://github.com/russhwolf/multiplatform-settings/blob/main/sample/shared/src/commonMain/kotlin/com/russhwolf/settings/example/SettingsRepository.kt
 
 
-    override fun query(specifications: List<ISpecification>): Flow<List<Setting>> {
-        TODO("Not yet implemented")
-    }
 
     override suspend fun update(setting: Setting) {
         TODO("Not yet implemented")

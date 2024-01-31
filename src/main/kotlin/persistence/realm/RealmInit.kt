@@ -1,16 +1,39 @@
 package persistence.realm
 
-import domain.ISettingsRepository
-import domain.settings.DBSettings
-import domain.settings.Setting
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
-import org.kodein.di.DI
-import org.kodein.di.instance
+import settings.AppFoldersManager
+import settings.Settings
+import utils.UserUtils
+import utils.log
+import kotlin.io.path.pathString
 
 object RealmInit {
 
     fun createRealm(): Realm {
+        val conf = RealmConfiguration.Builder(
+            schema = setOf(
+                RealmTask::class,
+                RealmProject::class,
+                RealmUser::class,
+                RealmTeam::class,
+                RealmTask::class,
+                RealmSubTask::class,
+                RealmAttachment::class,
+                RealmTaskMessage::class,
+                RealmSetting::class
+            )
+        )
+            .name(AppFoldersManager.defaultDBFileName)
+            .directory(AppFoldersManager.getAppPath().pathString)
+            .initialData {
+                copyToRealm(RealmSetting().apply {
+                    _id = Settings.DB.SETTING_ID_DB_CREATOR
+                    value = UserUtils.getUserID()
+                })
+            }
+            .build()
+
         val config = RealmConfiguration.create(
             schema = setOf(
                 RealmTask::class,
@@ -24,27 +47,9 @@ object RealmInit {
                 RealmSetting::class
             )
         )
-
+        log("directory: ${AppFoldersManager.getAppPath().pathString} file: ${AppFoldersManager.defaultDBFileName}", "creating realm: ")
         return Realm.open(config)
     }
 
 
-    /**
-     * Checks that database settings table contains creator information
-     * @return true if current user is creator, false - otherwise
-     */
-    suspend fun checkDatabaseCreator(userID: String, di: DI): Boolean {
-        val repo: ISettingsRepository by di.instance(tag = "settings.DB")
-        val dbCreator = repo.getStringSetting(DBSettings.SETTING_ID_DB_CREATOR)
-        return if (dbCreator == null) {
-            //setting not found - db was just created
-            //save database default settings
-            repo.insert(
-                DBSettings.getDefaults(userID = userID)
-            )
-            true
-        } else {
-            dbCreator.value == userID
-        }
-    }
 }

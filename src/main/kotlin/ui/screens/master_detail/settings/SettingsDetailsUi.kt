@@ -7,6 +7,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import domain.settings.ISettingDescriptor
 import domain.settings.Setting
+import domain.settings.SettingType
 import kotlinx.coroutines.delay
 import ui.UiSettings
 import ui.fields.EditableTextField
@@ -34,10 +35,13 @@ private fun RenderSettingsList(
     onSettingChanged: (Setting) -> Unit,
 ) {
     settings.forEach { setting ->
-        when (setting) {
-            is Setting.BooleanSetting -> RenderBooleanSetting(setting, settingDescriptor, onSettingChanged)
-            is Setting.StringSetting -> RenderStringSetting(setting, settingDescriptor, onSettingChanged)
-            is Setting.PathSetting -> RenderPathSetting(setting, settingDescriptor, onSettingChanged)
+        when (settingDescriptor.getType(setting.id)) {
+            SettingType.Boolean -> RenderBooleanSetting(setting, settingDescriptor, onSettingChanged)
+            SettingType.String -> RenderStringSetting(setting, settingDescriptor, onSettingChanged)
+            SettingType.Path -> RenderPathSetting(setting, settingDescriptor, onSettingChanged)
+            null -> {
+
+            }
         }
     }
 }
@@ -45,9 +49,9 @@ private fun RenderSettingsList(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun RenderBooleanSetting(
-    setting: Setting.BooleanSetting,
+    setting: Setting,
     settingDescriptor: ISettingDescriptor,
-    onSettingChanged: (Setting.BooleanSetting) -> Unit,
+    onSettingChanged: (Setting) -> Unit,
 ) {
     val title = remember(settingDescriptor, setting) { settingDescriptor.getTitle(setting.id) }
     val description = remember(settingDescriptor, setting) { settingDescriptor.getDescription(setting.id) }
@@ -57,16 +61,18 @@ private fun RenderBooleanSetting(
     }, secondaryText = {
         description?.let { Text(it) }
     }, trailing = {
-        Checkbox(checked = setting.value, onCheckedChange = { onSettingChanged(setting.copy(value = !setting.value)) })
+        Checkbox(
+            checked = setting.value.toBoolean(),
+            onCheckedChange = { onSettingChanged(setting.copy(value = (!setting.value.toBoolean()).toString())) })
     })
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun RenderStringSetting(
-    setting: Setting.StringSetting,
+    setting: Setting,
     settingDescriptor: ISettingDescriptor,
-    onSettingChanged: (Setting.StringSetting) -> Unit,
+    onSettingChanged: (Setting) -> Unit,
 ) {
     var tempString by remember(setting) { mutableStateOf(setting.value) }
     val title = remember(settingDescriptor, setting) { settingDescriptor.getTitle(setting.id) }
@@ -97,9 +103,9 @@ private fun RenderStringSetting(
 
 @Composable
 private fun RenderPathSetting(
-    setting: Setting.PathSetting,
+    setting: Setting,
     settingDescriptor: ISettingDescriptor,
-    onSettingChanged: (Setting.PathSetting) -> Unit,
+    onSettingChanged: (Setting) -> Unit,
 ) {
 
 }

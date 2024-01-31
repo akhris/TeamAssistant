@@ -4,14 +4,10 @@ import androidx.compose.ui.window.*
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import di.di
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
-import persistence.realm.RealmInit.checkDatabaseCreator
 import ui.screens.root_ui.IRootComponent
 import ui.screens.root_ui.RootComponent
 import ui.screens.root_ui.RootUi
 import ui.theme.AppTheme
-import utils.ResourcesUtils
 import utils.UserUtils
 import utils.log
 import java.awt.Dimension

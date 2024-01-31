@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.map
 import org.kodein.di.DI
 import org.kodein.di.instance
 import persistence.realm.RealmInit
+import settings.Settings
 import ui.NavItem
 import ui.dialogs.entity_picker_dialogs.ProjectPickerComponent
 import ui.dialogs.entity_picker_dialogs.TeamPickerComponent
@@ -40,6 +41,7 @@ class RootComponent(
     private val tasksRepo: IRepositoryObservable<Task> by di.instance()
     private val projectsRepo: IRepositoryObservable<Project> by di.instance()
     private val teamsRepo: IRepositoryObservable<Team> by di.instance()
+    private val settingsDBRepo: ISettingsRepository by di.instance(tag = "settings.DB")
 
     private val dialogNav = SlotNavigation<DialogConfig>()
     private val navHostNav = StackNavigation<NavHostConfig>()
@@ -122,10 +124,7 @@ class RootComponent(
 
     override fun createNewUser(user: User) {
         scope.launch {
-            val isCreator = RealmInit.checkDatabaseCreator(
-                userID = user.id,
-                di = di
-            )
+            val isCreator = user.id == settingsDBRepo.getSetting(Settings.DB.SETTING_ID_DB_CREATOR)?.value
             usersRepo.insert(user.copy(isDBCreator = isCreator))
         }
     }

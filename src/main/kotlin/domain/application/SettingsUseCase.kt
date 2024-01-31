@@ -1,10 +1,7 @@
 package domain.application
 
 import domain.ISettingsRepository
-import domain.Specification
-import domain.settings.DBSettings
 import domain.settings.Setting
-import kotlinx.coroutines.flow.Flow
 import settings.Settings
 
 /**
@@ -23,8 +20,8 @@ class SettingsUseCase(
      */
     suspend fun getSetting(settingID: String): Setting? {
         return when (settingID) {
-            Settings.DB.SETTING_ID_DB_CREATOR -> dbSettingsRepo.getStringSetting(settingID)
-            Settings.DB.SETTING_ID_DB_PATH -> appSettingsRepo.getStringSetting(settingID)
+            Settings.DB.SETTING_ID_DB_CREATOR -> dbSettingsRepo.getSetting(settingID)
+            Settings.DB.SETTING_ID_DB_PATH -> appSettingsRepo.getSetting(settingID)
             else -> null
         }
     }
@@ -43,14 +40,32 @@ class SettingsUseCase(
     // FIXME: it queries all settings that are STORED in settings repo
     //  but what if settings are not stored yet?
     //   maybe return not Flow but List<Setting> with default values for those that are not stored yet
-    fun queryAllDBSettings(): Flow<List<Setting>> {
-        return dbSettingsRepo.query(listOf(Specification.QueryAll))
+    suspend fun getAllDBSettings(): List<Setting> {
+        return Settings
+            .DB
+            .list
+            .map { setting ->
+                val loadedValue = dbSettingsRepo.getSetting(id = setting.id)
+                loadedValue?.let {
+                    setting.copy(value = it.value)
+                } ?: setting
+            }
+
+//        return dbSettingsRepo.query(listOf(Specification.QueryAll))
     }
 
     // FIXME: it queries all settings that are STORED in settings repo
     //  but what if settings are not stored yet?
     //   maybe return not Flow but List<Setting> with default values for those that are not stored yet
-    fun queryAllAPPSettings(): Flow<List<Setting>> {
-        return appSettingsRepo.query(listOf(Specification.QueryAll))
+    suspend fun getAllAPPSettings(): List<Setting> {
+        return Settings
+            .APP
+            .list
+            .map { setting ->
+                val loadedValue = appSettingsRepo.getSetting(id = setting.id)
+                loadedValue?.let {
+                    setting.copy(value = it.value)
+                } ?: setting
+            }
     }
 }
