@@ -18,7 +18,7 @@ class SettingDescriptor : ISettingDescriptor {
     }
 
     override fun getType(id: String): SettingType? = when (id) {
-        Settings.DB.SETTING_ID_DB_PATH -> SettingType.Path
+        Settings.DB.SETTING_ID_DB_PATH -> SettingType.Path(extensions = listOf("realm"))
         Settings.DB.SETTING_ID_DB_CREATOR -> SettingType.String
         else -> null
     }

@@ -26,11 +26,11 @@ class MultiplatformSettingsRepository(private val preferencesSettings: SuspendSe
 
 
     override suspend fun update(setting: Setting) {
-        TODO("Not yet implemented")
+        preferencesSettings.putString(key = setting.id, value = setting.value)
     }
 
     override suspend fun insert(setting: Setting) {
-        TODO("Not yet implemented")
+        preferencesSettings.putString(key = setting.id, value = setting.value)
     }
 
     override suspend fun insert(settings: List<Setting>) {

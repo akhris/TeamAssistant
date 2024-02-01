@@ -18,12 +18,17 @@ class SettingsUseCase(
      * return appropriate Setting object by its ID
      * todo: use multiple values in single 'when' branch
      */
-    suspend fun getSetting(settingID: String): Setting? {
-        return when (settingID) {
-            Settings.DB.SETTING_ID_DB_CREATOR -> dbSettingsRepo.getSetting(settingID)
-            Settings.DB.SETTING_ID_DB_PATH -> appSettingsRepo.getSetting(settingID)
-            else -> null
-        }
+    suspend fun getSetting(settingID: String): Setting {
+        val defSetting = Settings.defaults.find { it.id == settingID }
+            ?: throw IllegalStateException("setting with id: $settingID was not found in defaults")
+        val settingInRepo =
+            when (settingID) {
+                Settings.DB.SETTING_ID_DB_CREATOR -> dbSettingsRepo.getSetting(settingID)
+                Settings.DB.SETTING_ID_DB_PATH -> appSettingsRepo.getSetting(settingID)
+                else -> null
+            }
+
+        return settingInRepo ?: defSetting
     }
 
     /**
@@ -43,7 +48,7 @@ class SettingsUseCase(
     suspend fun getAllDBSettings(): List<Setting> {
         return Settings
             .DB
-            .list
+            .defaults
             .map { setting ->
                 val loadedValue = dbSettingsRepo.getSetting(id = setting.id)
                 loadedValue?.let {
@@ -60,7 +65,7 @@ class SettingsUseCase(
     suspend fun getAllAPPSettings(): List<Setting> {
         return Settings
             .APP
-            .list
+            .defaults
             .map { setting ->
                 val loadedValue = appSettingsRepo.getSetting(id = setting.id)
                 loadedValue?.let {

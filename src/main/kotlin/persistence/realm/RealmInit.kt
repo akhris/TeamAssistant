@@ -1,17 +1,34 @@
 package persistence.realm
 
+import domain.ISettingsRepository
+import domain.application.SettingsUseCase
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.kodein.di.DI
+import org.kodein.di.instance
 import settings.AppFoldersManager
 import settings.Settings
 import utils.UserUtils
 import utils.log
+import kotlin.io.path.Path
 import kotlin.io.path.pathString
 
 object RealmInit {
 
-    fun createRealm(): Realm {
-        val conf = RealmConfiguration.Builder(
+    fun createRealm(appSettingsRepo: ISettingsRepository): Realm {
+        val realmPathSetting = runBlocking {
+            appSettingsRepo.getSetting(Settings.DB.SETTING_ID_DB_PATH)
+        } ?: Settings.DB.defaults.find { it.id == Settings.DB.SETTING_ID_DB_PATH }
+        ?: throw IllegalStateException("setting with id: ${Settings.DB.SETTING_ID_DB_PATH} was not found in defaults")
+
+        val realmPath = Path(realmPathSetting.value).toFile()
+
+
+        val config = RealmConfiguration.Builder(
             schema = setOf(
                 RealmTask::class,
                 RealmProject::class,
@@ -24,8 +41,8 @@ object RealmInit {
                 RealmSetting::class
             )
         )
-            .name(AppFoldersManager.defaultDBFileName)
-            .directory(AppFoldersManager.getAppPath().pathString)
+            .name(realmPath.name)
+            .directory(realmPath.parent)
             .initialData {
                 copyToRealm(RealmSetting().apply {
                     _id = Settings.DB.SETTING_ID_DB_CREATOR
@@ -34,20 +51,11 @@ object RealmInit {
             }
             .build()
 
-        val config = RealmConfiguration.create(
-            schema = setOf(
-                RealmTask::class,
-                RealmProject::class,
-                RealmUser::class,
-                RealmTeam::class,
-                RealmTask::class,
-                RealmSubTask::class,
-                RealmAttachment::class,
-                RealmTaskMessage::class,
-                RealmSetting::class
-            )
+
+        log(
+            "directory: ${realmPath.parent} file: ${realmPath.name}",
+            "creating realm: "
         )
-        log("directory: ${AppFoldersManager.getAppPath().pathString} file: ${AppFoldersManager.defaultDBFileName}", "creating realm: ")
         return Realm.open(config)
     }
 

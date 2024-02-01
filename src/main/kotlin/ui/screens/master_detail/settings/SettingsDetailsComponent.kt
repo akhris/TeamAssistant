@@ -30,7 +30,9 @@ class SettingsDetailsComponent(
     val settingDescriptor: ISettingDescriptor by di.instance()
 
     fun updateSetting(setting: Setting) {
-
+        scope.launch {
+            settingsUseCase.update(setting)
+        }
     }
 
     override fun removeItem(item: SettingsSection) {

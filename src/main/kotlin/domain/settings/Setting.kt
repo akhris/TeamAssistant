@@ -20,7 +20,11 @@ sealed class SettingType {
     object Boolean : SettingType() {
         fun getValue(setting: Setting): kotlin.Boolean = setting.value.toBoolean()
     }
-    object Path : SettingType()
+
+    /**
+     * @param extensions - file extensions without ".": zip, rar, 7z, realm
+     */
+    class Path(val extensions: List<kotlin.String> = listOf()) : SettingType()
 }
 
 

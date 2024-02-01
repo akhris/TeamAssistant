@@ -75,7 +75,7 @@ fun EditableTextField(
             .onPointerEvent(PointerEventType.Enter) { isHovered = true }
             .onPointerEvent(PointerEventType.Exit) { isHovered = false }
             .background(textFieldColors.backgroundColor(enabled).value, shape)
-            .indicatorLine(enabled, isError, interactionSource, textFieldColors)
+            .indicatorLine(enabled, isError, interactionSource, textFieldColors, focusedIndicatorLineThickness = 2.dp, unfocusedIndicatorLineThickness = 2.dp)
             .defaultMinSize(
                 minWidth = TextFieldDefaults.MinWidth,
                 minHeight = TextFieldDefaults.MinHeight
