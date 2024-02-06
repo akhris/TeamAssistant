@@ -1,15 +1,15 @@
 package ui.screens.master_detail.settings
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import domain.settings.ISettingDescriptor
 import domain.settings.Setting
 import domain.settings.SettingType
@@ -19,21 +19,64 @@ import ui.dialogs.file_picker_dialog.fileChooserDialog
 import ui.fields.EditableTextField
 import ui.screens.master_detail.IDetailsComponent
 import utils.FileUtils
+import utils.log
+import utils.replace
+import java.awt.geom.RectangularShape
 import javax.swing.filechooser.FileNameExtensionFilter
 
 @Composable
 fun SettingsDetailsUi(component: IDetailsComponent<SettingsSection>) {
     val settingsDetailsComponent = remember(component) { component as? SettingsDetailsComponent } ?: return
-    val settingsType by remember(settingsDetailsComponent) { settingsDetailsComponent.item }.collectAsState(null)
-    val settings = remember(settingsType) { settingsType?.settings ?: listOf() }
+
+    val loadedSettings by remember(component) { settingsDetailsComponent.settings }.subscribeAsState()
+
+    var tempSettings by remember(loadedSettings) { mutableStateOf(loadedSettings) }
+
     val descriptor = remember(settingsDetailsComponent) { settingsDetailsComponent.settingDescriptor }
-    RenderSettingsList(
-        settings = settings,
-        settingDescriptor = descriptor,
-        onSettingChanged = {
-            settingsDetailsComponent.updateSetting(it)
+    Box(modifier = Modifier.fillMaxSize()) {
+        RenderSettingsList(
+            settings = tempSettings,
+            settingDescriptor = descriptor,
+            onSettingChanged = { changedSetting ->
+                tempSettings = tempSettings.map {
+                    if (it.id == changedSetting.id) {
+                        changedSetting
+                    } else it
+                }
+            }
+        )
+
+
+        if (tempSettings != loadedSettings) {
+            //show panel
+            Surface(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(top = 16.dp, start = 16.dp, end = 16.dp),
+                shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp),
+                elevation = 4.dp
+            ) {
+                Row(
+                    modifier = Modifier.padding(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "Настройки были изменены.")
+                    TextButton(onClick = {
+                        tempSettings.forEach {
+                            settingsDetailsComponent.updateSetting(it)
+                        }
+                    }, content = { Text("Сохранить") })
+                    TextButton(onClick = {
+                        tempSettings = loadedSettings
+                    }, content = { Text("Отмена") })
+                }
+            }
         }
-    )
+
+    }
+
+
 }
 
 @Composable
@@ -47,7 +90,13 @@ private fun RenderSettingsList(
             when (val type = settingDescriptor.getType(setting.id)) {
                 SettingType.Boolean -> RenderBooleanSetting(setting, settingDescriptor, onSettingChanged)
                 SettingType.String -> RenderStringSetting(setting, settingDescriptor, onSettingChanged)
-                is SettingType.Path -> RenderPathSetting(setting, type, settingDescriptor, onSettingChanged)
+                is SettingType.Path -> RenderPathSetting(
+                    setting = setting,
+                    settingType = type,
+                    settingDescriptor = settingDescriptor,
+                    onSettingChanged = onSettingChanged
+                )
+
                 null -> {
 
                 }
@@ -111,7 +160,8 @@ private fun RenderStringSetting(
 }
 
 @Composable
-private fun RenderPathSetting(
+fun RenderPathSetting(
+    modifier: Modifier = Modifier,
     setting: Setting,
     settingType: SettingType.Path,
     settingDescriptor: ISettingDescriptor,
@@ -127,7 +177,7 @@ private fun RenderPathSetting(
             true
         } else false
     }
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         EditableTextField(
             modifier = Modifier.weight(1f),
             value = tempPath,
@@ -158,9 +208,7 @@ private fun RenderPathSetting(
             })
     }
 
-    // TODO: make showing up button and alert text to save new value
-    //  "database file has changed - need a restart to take effect"
-/*
+
     LaunchedEffect(tempPath) {
         if (tempPath == setting.value || isError) {
             return@LaunchedEffect
@@ -168,6 +216,6 @@ private fun RenderPathSetting(
         delay(UiSettings.Debounce.debounceTime)
         onSettingChanged(setting.copy(value = tempPath))
     }
- */
+
 
 }

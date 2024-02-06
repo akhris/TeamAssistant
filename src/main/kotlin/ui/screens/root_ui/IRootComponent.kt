@@ -6,6 +6,8 @@ import com.arkivanov.decompose.value.Value
 import domain.Project
 import domain.Task
 import domain.User
+import domain.settings.ISettingDescriptor
+import domain.settings.Setting
 import kotlinx.coroutines.flow.Flow
 import ui.NavItem
 import ui.dialogs.entity_picker_dialogs.IBaseEntityPickerDialogComponent
@@ -20,6 +22,10 @@ interface IRootComponent {
 
     val userLoggingInfo: Flow<UserLoggingInfo>
     val currentDestination: Value<NavItem>
+
+    val currentDBPathSetting: Value<Setting>
+    val settingDescriptor: ISettingDescriptor
+    fun setNewDBPath(dbFile: String)
 
     fun dismissDialog()
     fun createNewUser(user: User)

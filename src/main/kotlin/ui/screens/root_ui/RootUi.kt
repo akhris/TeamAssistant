@@ -21,13 +21,12 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.fade
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimation
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import domain.User
-import kotlinx.coroutines.launch
-import ui.FABController
-import ui.FABState
+import domain.settings.SettingType
 import ui.SideNavigationPanel
 import ui.dialogs.entity_picker_dialogs.EntityPickerDialogUi
 import ui.screens.activity.ActivityUi
 import ui.screens.master_detail.MasterDetailsUi
+import ui.screens.master_detail.settings.RenderPathSetting
 import ui.screens.master_detail.settings.SettingsDetailsUi
 import ui.screens.master_detail.settings.SettingsListUi
 import ui.screens.project_details.ProjectDetailsUi
@@ -129,11 +128,13 @@ fun FrameWindowScope.RootUi(
             if (currentlyLoggedUser.user == null && currentlyLoggedUser.userID.isNotEmpty()) {
                 //show new user ui
                 var tempUser by remember(currentlyLoggedUser.userID) { mutableStateOf(User(id = currentlyLoggedUser.userID)) }
-                Box(modifier = Modifier.padding(it)) {
+                val dbPathSetting by remember(component) { component.currentDBPathSetting }.subscribeAsState()
+                val settingDescriptor = remember(component) { component.settingDescriptor }
+
+                Column(modifier = Modifier.padding(it)) {
                     NewUserUi(
                         user = tempUser,
                         onUserChange = { user ->
-                            log(user, "onUserChange: ")
                             tempUser = user
                         },
                         onUserCreate = {
@@ -141,6 +142,24 @@ fun FrameWindowScope.RootUi(
                             component.createNewUser(tempUser)
                         }
                     )
+                    //show DB Path selector:
+                    when (val type = settingDescriptor.getType(dbPathSetting.id)) {
+                        is SettingType.Path -> {
+                            RenderPathSetting(
+                                modifier = Modifier.padding(16.dp).align(Alignment.CenterHorizontally),
+                                setting = dbPathSetting,
+                                settingType = type,
+                                settingDescriptor = settingDescriptor,
+                                onSettingChanged = {
+                                    component.setNewDBPath(it.value)
+                                })
+                        }
+
+                        else -> {
+                            //show nothing
+                        }
+                    }
+
                 }
             } else if (currentlyLoggedUser.user != null) {
                 //show main stuff
@@ -204,7 +223,7 @@ fun FrameWindowScope.RootUi(
                                         renderItemsList = { c ->
                                             SettingsListUi(c)
                                         },
-                                        renderItemDetails = {c->
+                                        renderItemDetails = { c ->
                                             SettingsDetailsUi(c)
                                         }
                                     )
@@ -243,7 +262,6 @@ fun FrameWindowScope.RootUi(
 
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun NewUserUi(
     user: User,
@@ -277,7 +295,7 @@ private fun NewUserUi(
         Button(onClick = onUserCreate) {
             Text("Создать")
         }
-        Spacer(modifier = Modifier.weight(1f))
+//        Spacer(modifier = Modifier.weight(1f))
         Text(text = "id: ${user.id}", style = MaterialTheme.typography.caption)
     }
 

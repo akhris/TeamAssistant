@@ -10,7 +10,7 @@ class SettingsMasterDetailsComponent(private val di: DI, componentContext: Compo
             SettingsListComponent(di, context, onItemSelected)
         },
         createDetailsComponent = { context, itemID ->
-            val settingsNav = SettingsSection.getSettingsSectionByID(itemID, listOf())
+            val settingsNav = SettingsSection.getSettingsSectionByID(itemID)
                 ?: throw IllegalArgumentException("cannot find Settings section for given id: $itemID")
             SettingsDetailsComponent(settingsSection = settingsNav, di = di, componentContext = context)
         },

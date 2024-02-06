@@ -9,12 +9,14 @@ import com.arkivanov.essenty.lifecycle.subscribe
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import domain.*
+import domain.application.SettingsUseCase
+import domain.settings.ISettingDescriptor
+import domain.settings.Setting
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.kodein.di.DI
 import org.kodein.di.instance
-import persistence.realm.RealmInit
 import settings.Settings
 import ui.NavItem
 import ui.dialogs.entity_picker_dialogs.ProjectPickerComponent
@@ -41,7 +43,18 @@ class RootComponent(
     private val tasksRepo: IRepositoryObservable<Task> by di.instance()
     private val projectsRepo: IRepositoryObservable<Project> by di.instance()
     private val teamsRepo: IRepositoryObservable<Team> by di.instance()
-    private val settingsDBRepo: ISettingsRepository by di.instance(tag = "settings.DB")
+    private val settingsUseCase: SettingsUseCase by di.instance()
+
+    val _currentDBPath: MutableValue<Setting> =
+        MutableValue(
+            Setting(
+                id = Settings.DB.SETTING_ID_DB_PATH,
+                value = ""
+            )
+        )
+
+    override val settingDescriptor: ISettingDescriptor by di.instance()
+    override val currentDBPathSetting: Value<Setting> = _currentDBPath
 
     private val dialogNav = SlotNavigation<DialogConfig>()
     private val navHostNav = StackNavigation<NavHostConfig>()
@@ -92,6 +105,15 @@ class RootComponent(
         dialogNav.dismiss()
     }
 
+    override fun setNewDBPath(dbPath: String) {
+        scope.launch {
+            settingsUseCase.update(
+                Setting(id = Settings.DB.SETTING_ID_DB_PATH, value = dbPath)
+            )
+            invalidateCurrentDBPath()
+        }
+    }
+
     private val _currentDestination = MutableValue<NavItem>(NavItem.homeItem)
     override val currentDestination: Value<NavItem> = _currentDestination
 
@@ -124,7 +146,7 @@ class RootComponent(
 
     override fun createNewUser(user: User) {
         scope.launch {
-            val isCreator = user.id == settingsDBRepo.getSetting(Settings.DB.SETTING_ID_DB_CREATOR)?.value
+            val isCreator = user.id == settingsUseCase.getSetting(Settings.DB.SETTING_ID_DB_CREATOR).value
             usersRepo.insert(user.copy(isDBCreator = isCreator))
         }
     }
@@ -308,6 +330,11 @@ class RootComponent(
 //        object SampleTypesSelector : ToolbarUtilsConfig()
     }
 
+    private suspend fun invalidateCurrentDBPath() {
+        val pathSetting = settingsUseCase.getSetting(Settings.DB.SETTING_ID_DB_PATH)
+        _currentDBPath.value = pathSetting
+    }
+
 
     init {
         componentContext
@@ -315,6 +342,10 @@ class RootComponent(
             .subscribe(onDestroy = {
                 scope.coroutineContext.cancelChildren()
             })
+
+        scope.launch {
+            invalidateCurrentDBPath()
+        }
 
     }
 

@@ -1,6 +1,5 @@
 package ui.screens.master_detail.settings
 
-import domain.settings.Setting
 import settings.Settings
 
 /**
@@ -9,8 +8,7 @@ import settings.Settings
 data class SettingsSection(
     val id: String,
     val pathToIcon: String,
-    val title: String,
-    val settings: List<Setting>,
+    val title: String
 ) {
 
     companion object {
@@ -26,20 +24,18 @@ data class SettingsSection(
 
         )
 
-        fun getSettingsSectionByID(id: String, settings: List<Setting> = listOf()): SettingsSection? {
+        fun getSettingsSectionByID(id: String): SettingsSection? {
             return when (id) {
                 DBSettingsID -> SettingsSection(
                     id = id,
                     pathToIcon = "vector/settings/storage_black_24dp.svg",
-                    title = "база данных",
-                    settings = settings
+                    title = "база данных"
                 )
 
                 APPSettingsID -> SettingsSection(
                     id = id,
                     pathToIcon = "vector/settings_black_24dp.svg",
-                    title = "приложение",
-                    settings = settings
+                    title = "приложение"
                 )
 
                 else -> null

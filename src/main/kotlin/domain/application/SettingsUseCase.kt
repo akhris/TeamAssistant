@@ -49,14 +49,8 @@ class SettingsUseCase(
         return Settings
             .DB
             .defaults
-            .map { setting ->
-                val loadedValue = dbSettingsRepo.getSetting(id = setting.id)
-                loadedValue?.let {
-                    setting.copy(value = it.value)
-                } ?: setting
-            }
+            .map { setting -> getSetting(settingID = setting.id) }
 
-//        return dbSettingsRepo.query(listOf(Specification.QueryAll))
     }
 
     // FIXME: it queries all settings that are STORED in settings repo
@@ -66,11 +60,6 @@ class SettingsUseCase(
         return Settings
             .APP
             .defaults
-            .map { setting ->
-                val loadedValue = appSettingsRepo.getSetting(id = setting.id)
-                loadedValue?.let {
-                    setting.copy(value = it.value)
-                } ?: setting
-            }
+            .map { setting -> getSetting(settingID = setting.id) }
     }
 }

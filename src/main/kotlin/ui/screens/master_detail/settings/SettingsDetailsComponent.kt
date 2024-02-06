@@ -1,6 +1,8 @@
 package ui.screens.master_detail.settings
 
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.value.MutableValue
+import com.arkivanov.decompose.value.Value
 import domain.*
 import domain.application.SettingsUseCase
 import domain.settings.ISettingDescriptor
@@ -12,9 +14,10 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import ui.screens.BaseComponent
 import ui.screens.master_detail.IDetailsComponent
+import utils.log
 
 class SettingsDetailsComponent(
-    settingsSection: SettingsSection,
+    private val settingsSection: SettingsSection,
     di: DI,
     componentContext: ComponentContext,
 ) : IDetailsComponent<SettingsSection>, BaseComponent(componentContext) {
@@ -27,11 +30,15 @@ class SettingsDetailsComponent(
 
     override val item: Flow<SettingsSection> = _item
 
+    private val _settings: MutableValue<List<Setting>> = MutableValue(listOf())
+    val settings: Value<List<Setting>> = _settings
+
     val settingDescriptor: ISettingDescriptor by di.instance()
 
     fun updateSetting(setting: Setting) {
         scope.launch {
             settingsUseCase.update(setting)
+            invalidateSettings()
         }
     }
 
@@ -43,18 +50,23 @@ class SettingsDetailsComponent(
 
     }
 
+    private suspend fun invalidateSettings() {
+        when (settingsSection.id) {
+            SettingsSection.DBSettingsID -> {
+                _settings.value = settingsUseCase.getAllDBSettings()
+            }
+
+            SettingsSection.APPSettingsID -> {
+                _settings.value = settingsUseCase.getAllAPPSettings()
+            }
+        }
+
+    }
+
     init {
         //get settings from settings repository for given [settingsNavItem]
         scope.launch {
-            when (settingsSection.id) {
-                SettingsSection.DBSettingsID -> {
-                    _item.value = settingsSection.copy(settings = settingsUseCase.getAllDBSettings())
-                }
-
-                SettingsSection.APPSettingsID -> {
-                    _item.value = settingsSection.copy(settings = settingsUseCase.getAllAPPSettings())
-                }
-            }
+            invalidateSettings()
         }
     }
 }
