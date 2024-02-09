@@ -2,28 +2,25 @@ package ui.screens.projects_list
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.slot.*
-import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.lifecycle.subscribe
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import domain.*
-import domain.application.baseUseCases.InsertEntity
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import org.kodein.di.DI
 import org.kodein.di.instance
-import ui.dialogs.IDialogComponent
-import ui.dialogs.text_input_dialog.DialogTextInputComponent
+import settings.DatabaseArguments
 import ui.screens.master_detail.IMasterComponent
-import ui.screens.teams_list.TeamsListComponent
 import utils.UserUtils
 import utils.log
-import java.time.LocalDateTime
 
 class ProjectsListComponent(
     di: DI,
     componentContext: ComponentContext,
     private val onItemSelected: (String) -> Unit,
+    dpPath: String,
+    override val currentUser: User
 ) : IMasterComponent<Project>, ComponentContext by componentContext {
 
     private val scope =
@@ -33,7 +30,7 @@ class ProjectsListComponent(
 
     private val userID = UserUtils.getUserID()
 
-    private val repo: IRepositoryObservable<Project> by di.instance()
+    private val repo: IRepositoryObservable<Project> by di.instance(arg = DatabaseArguments(path = dpPath))
 
     override val filterSpecs: Flow<List<FilterSpec>>? = repo.getFilterSpecs()
 

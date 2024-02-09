@@ -7,6 +7,7 @@ pluginManagement {
     plugins {
         kotlin("jvm").version(extra["kotlin.version"] as String)
         id("org.jetbrains.compose").version(extra["compose.version"] as String)
+        kotlin("plugin.serialization") version "1.9.21"
     }
 }
 

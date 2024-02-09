@@ -29,6 +29,15 @@ class RealmTasksRepository(private val realm: Realm) : IRepositoryObservable<Tas
             .distinctUntilChanged()
     }
 
+    override fun getByIDBlocking(id: String): RepoResult<Task> {
+        val realmItem = realm
+            .query<RealmTask>("_id == $0", id)
+            .first()
+            .find()
+        return realmItem?.let {
+            RepoResult.InitialItem(it.toTask())
+        } ?: RepoResult.PendindObject()
+    }
     override suspend fun remove(specifications: List<ISpecification>) {
         TODO("Not yet implemented")
     }

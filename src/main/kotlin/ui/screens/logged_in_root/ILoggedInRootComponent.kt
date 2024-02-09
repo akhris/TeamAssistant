@@ -1,4 +1,4 @@
-package ui.screens.root_ui
+package ui.screens.logged_in_root
 
 import com.arkivanov.decompose.router.slot.ChildSlot
 import com.arkivanov.decompose.router.stack.ChildStack
@@ -6,29 +6,20 @@ import com.arkivanov.decompose.value.Value
 import domain.Project
 import domain.Task
 import domain.User
-import domain.settings.ISettingDescriptor
-import domain.settings.Setting
-import kotlinx.coroutines.flow.Flow
 import ui.NavItem
 import ui.dialogs.entity_picker_dialogs.IBaseEntityPickerDialogComponent
 import ui.screens.master_detail.IMasterDetailComponent
 import ui.screens.master_detail.settings.SettingsSection
 
-interface IRootComponent {
+interface ILoggedInRootComponent {
 
     val navHostStack: Value<ChildStack<*, NavHost>>
     val dialogSlot: Value<ChildSlot<*, Dialog>>
 //    val toolbarUtilsStack: Value<ChildStack<*, ToolbarUtils>>
 
-    val userLoggingInfo: Flow<UserLoggingInfo>
     val currentDestination: Value<NavItem>
 
-    val currentDBPathSetting: Value<Setting>
-    val settingDescriptor: ISettingDescriptor
-    fun setNewDBPath(dbFile: String)
-
     fun dismissDialog()
-    fun createNewUser(user: User)
     fun navigateTo(navItem: NavItem)
 
     val navController: INavController
@@ -62,8 +53,5 @@ interface IRootComponent {
     }
 
 
-    data class UserLoggingInfo(
-        val userID: String = "",
-        val user: User? = null,
-    )
+
 }

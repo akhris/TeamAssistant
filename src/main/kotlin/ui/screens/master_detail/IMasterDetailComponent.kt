@@ -10,6 +10,7 @@ import ui.dialogs.IDialogComponent
 
 interface IMasterDetailComponent<T> {
 
+    val currentUser: User
 
     val masterStack: Value<ChildStack<*, Master<T>>>
 

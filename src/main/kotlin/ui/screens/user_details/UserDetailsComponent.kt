@@ -1,27 +1,27 @@
 package ui.screens.user_details
 
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.essenty.lifecycle.subscribe
 import domain.IRepositoryObservable
-import domain.Project
 import domain.RepoResult
 import domain.User
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import org.kodein.di.DI
 import org.kodein.di.instance
+import settings.DatabaseArguments
 import ui.screens.BaseComponent
 import utils.UserUtils
 
 class UserDetailsComponent(
     userID: String = UserUtils.getUserID(),
     di: DI,
-    componentContext: ComponentContext
+    componentContext: ComponentContext,
+    dpPath: String,
+    override val currentUser: User
 ) : IUserDetailsComponent, BaseComponent(componentContext) {
 
-    private val repo: IRepositoryObservable<User> by di.instance()
+    private val repo: IRepositoryObservable<User> by di.instance(arg = DatabaseArguments(path = dpPath))
 
     override val item: Flow<User> = repo.getByID(userID).mapNotNull {
         when (it) {
@@ -38,6 +38,7 @@ class UserDetailsComponent(
             repo.remove(item)
         }
     }
+
     override fun updateItem(item: User) {
         scope.launch {
             repo.update(item)

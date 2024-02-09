@@ -7,11 +7,18 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
+import settings.DatabaseArguments
 import ui.screens.BaseComponent
 import ui.screens.master_detail.IDetailsComponent
 
-class TeamDetailsComponent(teamID: String, di: DI, componentContext: ComponentContext) : IDetailsComponent<Team>, BaseComponent(componentContext) {
-    private val repo: IRepositoryObservable<Team> by di.instance()
+class TeamDetailsComponent(
+    teamID: String,
+    di: DI,
+    componentContext: ComponentContext,
+    dpPath: String,
+    override val currentUser: User,
+) : IDetailsComponent<Team>, BaseComponent(componentContext) {
+    private val repo: IRepositoryObservable<Team> by di.instance(arg = DatabaseArguments(path = dpPath))
 
     override val item: Flow<Team> = repo.getByID(teamID).mapNotNull {
         when (it) {

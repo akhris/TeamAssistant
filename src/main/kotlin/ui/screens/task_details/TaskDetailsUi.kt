@@ -1,11 +1,13 @@
 package ui.screens.task_details
 
-import LocalCurrentUser
 import LocalNavController
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Send
+import androidx.compose.material.icons.rounded.Star
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -24,8 +26,8 @@ import domain.valueobjects.Attachment
 import domain.valueobjects.TaskMessage
 import kotlinx.coroutines.delay
 import ui.UiSettings
-import ui.dialogs.EditAttachmentDialog
 import ui.dialogs.DatePickerDialog
+import ui.dialogs.EditAttachmentDialog
 import ui.dialogs.text_input_dialog.RenderTextInputDialog
 import ui.fields.CircleIconButton
 import ui.fields.DateTimeChip
@@ -38,15 +40,16 @@ import java.time.LocalDateTime
 @Composable
 fun TaskDetailsUi(component: IDetailsComponent<Task>) {
     val task by remember(component) { component.item }.collectAsState(null)
-    val user = LocalCurrentUser.current ?: return
+
     val navController = LocalNavController.current
     task?.let { t ->
 
         //only creator can edit the task
         RenderTaskDetails(
             t,
-            isEditable = setOfNotNull(t.creator).contains(user),
-            isControllable = setOfNotNull(t.creator).plus(t.users).contains(user),
+            currentUser = component.currentUser,
+            isEditable = setOfNotNull(t.creator).contains(component.currentUser),
+            isControllable = setOfNotNull(t.creator).plus(t.users).contains(component.currentUser),
             onTaskUpdated = { updatedTask ->
                 component.updateItem(updatedTask)
             },
@@ -78,6 +81,7 @@ fun TaskDetailsUi(component: IDetailsComponent<Task>) {
 @Composable
 private fun RenderTaskDetails(
     task: Task,
+    currentUser: User,
     isEditable: Boolean,
     isControllable: Boolean,
     onTaskUpdated: (Task) -> Unit,
@@ -157,6 +161,7 @@ private fun RenderTaskDetails(
                 })
             RenderSubTasks(
                 subtasks = tempTask.subtasks,
+                currentUser = currentUser,
                 isEditable = isEditable,
                 isControllable = isControllable,
                 onSubtasksEdited = {
@@ -232,7 +237,7 @@ private fun RenderTaskDetails(
         },
         bottomSheetContent = {
             Text(modifier = Modifier.padding(8.dp), text = "обсуждение:", style = MaterialTheme.typography.h6)
-            RenderForum(task = tempTask, onMessageAdded = { message ->
+            RenderForum(task = tempTask, currentUser = currentUser, onMessageAdded = { message ->
                 tempTask = tempTask.copy(messages = tempTask.messages.plus(message))
             })
         },
@@ -297,7 +302,7 @@ private fun RenderUserListItem(user: User, isCreator: Boolean = false) {
 }
 
 @Composable
-private fun ColumnScope.RenderForum(task: Task, onMessageAdded: (TaskMessage) -> Unit) {
+private fun ColumnScope.RenderForum(task: Task, currentUser: User, onMessageAdded: (TaskMessage) -> Unit) {
     if (task.messages.isEmpty()) {
         Card(modifier = Modifier.align(Alignment.CenterHorizontally).padding(16.dp)) {
             Text(
@@ -308,38 +313,36 @@ private fun ColumnScope.RenderForum(task: Task, onMessageAdded: (TaskMessage) ->
         }
     }
     task.messages.forEach {
-        RenderMessage(it)
+        RenderMessage(it, currentUser)
     }
-    val currentUser = LocalCurrentUser.current
-    currentUser?.let { user ->
 
-        var tempMessage by remember { mutableStateOf("") }
 
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            RenderUserIcon(user = user)
-            EditableTextField(
-                modifier = Modifier.weight(1f),
-                value = tempMessage,
-                onValueChange = { tempMessage = it },
-                label = if (tempMessage.isEmpty()) "введите комментарий..." else "",
-                withClearIcon = false
+    var tempMessage by remember { mutableStateOf("") }
+
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        RenderUserIcon(user = currentUser)
+        EditableTextField(
+            modifier = Modifier.weight(1f),
+            value = tempMessage,
+            onValueChange = { tempMessage = it },
+            label = if (tempMessage.isEmpty()) "введите комментарий..." else "",
+            withClearIcon = false
+        )
+        IconButton(onClick = {
+            onMessageAdded(
+                TaskMessage(text = tempMessage, user = currentUser, createdAt = LocalDateTime.now())
             )
-            IconButton(onClick = {
-                onMessageAdded(
-                    TaskMessage(text = tempMessage, user = user, createdAt = LocalDateTime.now())
-                )
-            }, enabled = tempMessage.isNotEmpty()) {
-                Icon(Icons.Rounded.Send, contentDescription = "отправить сообщение")
-            }
+        }, enabled = tempMessage.isNotEmpty()) {
+            Icon(Icons.Rounded.Send, contentDescription = "отправить сообщение")
         }
     }
+
 }
 
 @Composable
-private fun ColumnScope.RenderMessage(taskMessage: TaskMessage) {
+private fun ColumnScope.RenderMessage(taskMessage: TaskMessage, currentUser: User) {
 
     taskMessage.user?.let { user ->
-        val currentUser = LocalCurrentUser.current
         CompositionLocalProvider(LocalLayoutDirection provides if (user.id == currentUser?.id) LayoutDirection.Ltr else LayoutDirection.Rtl) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 RenderUserIcon(user = user)
@@ -456,6 +459,7 @@ private fun RenderAttachment(
 @Composable
 private fun ColumnScope.RenderSubTasks(
     subtasks: List<SubTask>,
+    currentUser: User,
     isEditable: Boolean,
     isControllable: Boolean,
     onSubtasksEdited: (List<SubTask>) -> Unit,
@@ -469,7 +473,6 @@ private fun ColumnScope.RenderSubTasks(
         verticalArrangement = Arrangement.spacedBy(UiSettings.DetailsScreen.chipsVerticalSpacing)
     ) {
         subtasks.forEachIndexed { index, subtask ->
-            val currentUser = LocalCurrentUser.current
             RenderSubTask(subtask = subtask, isControllable = isControllable, onClick = {
                 val editedCompleteTime = if (subtask.completedAt == null) {
                     LocalDateTime.now()

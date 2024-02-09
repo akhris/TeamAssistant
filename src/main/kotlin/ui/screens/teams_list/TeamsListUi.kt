@@ -1,9 +1,7 @@
 package ui.screens.teams_list
 
-import LocalCurrentUser
 import androidx.compose.runtime.*
 import domain.EntitiesList
-import domain.Project
 import domain.Team
 import ui.EntitiesListUi
 import ui.ItemRenderer
@@ -22,7 +20,7 @@ fun TeamsListUi(component: IMasterComponent<Team>) {
 
     var showAddNewTeamDialog by remember { mutableStateOf(false) }
 
-    val currentUser = LocalCurrentUser.current
+
 
     EntitiesListUi(
         teams,
@@ -50,7 +48,7 @@ fun TeamsListUi(component: IMasterComponent<Team>) {
                 if (text.isNotEmpty()) {
                     component.onAddNewItem(
                         item = Team(
-                            creator = currentUser,
+                            creator =  component.currentUser,
                             createdAt = LocalDateTime.now(),
                             name = text
                         )

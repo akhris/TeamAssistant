@@ -1,6 +1,5 @@
 package ui.screens.team_details
 
-import LocalCurrentUser
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -20,11 +19,10 @@ import ui.screens.master_detail.IDetailsComponent
 @Composable
 fun TeamDetailsUi(component: IDetailsComponent<Team>) {
     val team by remember(component) { component.item }.collectAsState(null)
-    val user = LocalCurrentUser.current ?: return
     team?.let {
         RenderTeamDetails(
             team = it,
-            isEditable = listOfNotNull(it.creator).plus(it.admins).contains(user),
+            isEditable = listOfNotNull(it.creator).plus(it.admins).contains(component.currentUser),
             onTeamUpdated = {}
         )
     }

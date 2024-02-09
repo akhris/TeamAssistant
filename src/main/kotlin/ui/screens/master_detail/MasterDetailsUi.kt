@@ -1,6 +1,5 @@
 package ui.screens.master_detail
 
-import LocalCurrentUser
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -18,7 +17,6 @@ fun <T> MasterDetailsUi(
     renderItemDetails: @Composable (IDetailsComponent<T>) -> Unit,
 ) {
 
-    val currentUser = LocalCurrentUser.current
 
     BaseMasterDetailsUi(
         renderMaster = {
@@ -52,9 +50,9 @@ fun <T> MasterDetailsUi(
             when (dialogComponent) {
                 is IDialogComponent.ITextInputDialogComponent -> {
                     TextInputDialogUi(component = dialogComponent, onOkClicked = { newText ->
-                        currentUser?.let { user ->
-                            component.onDialogOKClicked(newText, user)
-                        }
+
+                            component.onDialogOKClicked(newText, component.currentUser)
+
                     })
                 }
 

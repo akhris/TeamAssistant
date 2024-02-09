@@ -3,6 +3,7 @@ package ui.screens.master_detail.settings
 import com.arkivanov.decompose.ComponentContext
 import domain.EntitiesList
 import domain.FilterSpec
+import domain.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.kodein.di.DI
@@ -13,6 +14,8 @@ class SettingsListComponent(
     di: DI,
     componentContext: ComponentContext,
     private val onSettingsSelected: (String) -> Unit,
+    dpPath: String,
+    override val currentUser: User
 ) : IMasterComponent<SettingsSection>, BaseComponent(componentContext) {
 
     override val items: Flow<EntitiesList<SettingsSection>> = flowOf(

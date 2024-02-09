@@ -11,6 +11,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import org.kodein.di.DI
 import org.kodein.di.instance
+import settings.DatabaseArguments
 import ui.dialogs.IDialogComponent
 import ui.dialogs.text_input_dialog.DialogTextInputComponent
 import ui.screens.master_detail.IMasterComponent
@@ -21,7 +22,9 @@ import java.time.LocalDateTime
 class TasksListComponent(
     di: DI,
     componentContext: ComponentContext,
-    private val onTaskSelected: (String) -> Unit
+    private val onTaskSelected: (String) -> Unit,
+    private val dpPath: String,
+    override val currentUser: User
 ) : IMasterComponent<Task>, ComponentContext by componentContext {
 
     private val scope =
@@ -31,7 +34,7 @@ class TasksListComponent(
 
     private val userID = UserUtils.getUserID()
 
-    private val repo: IRepositoryObservable<Task> by di.instance()
+    private val repo: IRepositoryObservable<Task> by di.instance(arg = DatabaseArguments(path = dpPath))
 
     override val filterSpecs: Flow<List<FilterSpec>>? = repo.getFilterSpecs()
 
@@ -52,6 +55,7 @@ class TasksListComponent(
     override fun onItemDelete(item: Task) {
         TODO("Not yet implemented")
     }
+
     override fun onItemClicked(item: Task) {
         onTaskSelected(item.id)
     }

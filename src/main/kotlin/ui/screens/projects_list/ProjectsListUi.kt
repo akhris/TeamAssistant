@@ -1,16 +1,12 @@
 package ui.screens.projects_list
 
-import LocalCurrentUser
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.*
 import domain.EntitiesList
 import domain.Project
-import domain.Task
 import ui.EntitiesListUi
 import ui.ItemRenderer
 import ui.SelectMode
 import ui.dialogs.text_input_dialog.RenderTextInputDialog
-
 import ui.screens.master_detail.IMasterComponent
 import java.time.LocalDateTime
 
@@ -19,8 +15,6 @@ fun ProjectsListUi(component: IMasterComponent<Project>) {
     val projects by remember(component) { component.items }.collectAsState(EntitiesList.empty())
 
     var showAddNewProjectDialog by remember { mutableStateOf(false) }
-
-    val currentUser = LocalCurrentUser.current
 
     EntitiesListUi(
         projects,
@@ -51,7 +45,7 @@ fun ProjectsListUi(component: IMasterComponent<Project>) {
                 if (text.isNotEmpty()) {
                     component.onAddNewItem(
                         item = Project(
-                            creator = currentUser,
+                            creator = component.currentUser,
                             createdAt = LocalDateTime.now(),
                             name = text
                         )

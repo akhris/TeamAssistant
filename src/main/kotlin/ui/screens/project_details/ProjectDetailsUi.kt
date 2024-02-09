@@ -1,11 +1,9 @@
 package ui.screens.project_details
 
-import LocalCurrentUser
 import LocalNavController
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.onClick
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,12 +24,11 @@ import utils.ResourcesUtils
 @Composable
 fun ProjectDetailsUi(component: IDetailsComponent<Project>) {
     val project by remember(component) { component.item }.collectAsState(null)
-    val user = LocalCurrentUser.current ?: return
 
     project?.let {
         RenderProjectDetails(
             project = it,
-            isEditable = listOfNotNull(it.creator).contains(user),
+            isEditable = listOfNotNull(it.creator).contains( component.currentUser),
             onProjectUpdated = { updatedProject ->
                 component.updateItem(updatedProject)
             }

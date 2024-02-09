@@ -1,6 +1,5 @@
 import androidx.compose.runtime.compositionLocalOf
-import domain.User
-import ui.screens.root_ui.INavController
+import ui.screens.logged_in_root.INavController
 
 /**
  * Provider of NavController

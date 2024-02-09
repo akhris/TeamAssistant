@@ -59,6 +59,8 @@ dependencies {
     //generation theme from a seed color
     implementation("com.materialkolor:material-kolor:$kolorVersion")
 
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+
 }
 
 compose.desktop {

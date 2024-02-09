@@ -4,11 +4,13 @@ import com.arkivanov.decompose.ComponentContext
 import domain.IRepositoryObservable
 import domain.Project
 import domain.RepoResult
+import domain.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
+import settings.DatabaseArguments
 import ui.screens.BaseComponent
 import ui.screens.master_detail.IDetailsComponent
 
@@ -16,9 +18,11 @@ class ProjectDetailsComponent(
     projectID: String,
     di: DI,
     componentContext: ComponentContext,
+    dpPath: String,
+    override val currentUser: User
 ) : IDetailsComponent<Project>, BaseComponent(componentContext) {
 
-    private val repo: IRepositoryObservable<Project> by di.instance()
+    private val repo: IRepositoryObservable<Project> by di.instance(arg = DatabaseArguments(path = dpPath))
 
 
     override val item: Flow<Project> = repo.getByID(projectID).mapNotNull {

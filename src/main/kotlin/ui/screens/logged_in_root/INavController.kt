@@ -1,4 +1,4 @@
-package ui.screens.root_ui
+package ui.screens.logged_in_root
 
 import domain.Project
 import domain.Team

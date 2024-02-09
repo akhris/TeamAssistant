@@ -1,31 +1,23 @@
 package persistence.realm
 
 import domain.ISettingsRepository
-import domain.application.SettingsUseCase
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.kodein.di.DI
-import org.kodein.di.instance
-import settings.AppFoldersManager
 import settings.Settings
 import utils.UserUtils
 import utils.log
 import kotlin.io.path.Path
-import kotlin.io.path.pathString
 
 object RealmInit {
 
-    fun createRealm(appSettingsRepo: ISettingsRepository): Realm {
-        val realmPathSetting = runBlocking {
-            appSettingsRepo.getSetting(Settings.DB.SETTING_ID_DB_PATH)
-        } ?: Settings.DB.defaults.find { it.id == Settings.DB.SETTING_ID_DB_PATH }
-        ?: throw IllegalStateException("setting with id: ${Settings.DB.SETTING_ID_DB_PATH} was not found in defaults")
+    fun createRealm(dbPath: String): Realm {
+//        val realmPathSetting = runBlocking {
+//            appSettingsRepo.getSetting(Settings.DB.SETTING_ID_DB_PATH)
+//        } ?: Settings.DB.defaults.find { it.id == Settings.DB.SETTING_ID_DB_PATH }
+//        ?: throw IllegalStateException("setting with id: ${Settings.DB.SETTING_ID_DB_PATH} was not found in defaults")
 
-        val realmPath = Path(realmPathSetting.value).toFile()
+        val realmPath = Path(dbPath).toFile()
 
 
         val config = RealmConfiguration.Builder(
@@ -56,6 +48,7 @@ object RealmInit {
             "directory: ${realmPath.parent} file: ${realmPath.name}",
             "creating realm: "
         )
+
         return Realm.open(config)
     }
 

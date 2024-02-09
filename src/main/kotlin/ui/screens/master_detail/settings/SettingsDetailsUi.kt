@@ -6,22 +6,19 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import domain.settings.ISettingDescriptor
 import domain.settings.Setting
 import domain.settings.SettingType
+import domain.settings.extensions
 import kotlinx.coroutines.delay
 import ui.UiSettings
 import ui.dialogs.file_picker_dialog.fileChooserDialog
 import ui.fields.EditableTextField
 import ui.screens.master_detail.IDetailsComponent
 import utils.FileUtils
-import utils.log
-import utils.replace
-import java.awt.geom.RectangularShape
 import javax.swing.filechooser.FileNameExtensionFilter
 
 @Composable
@@ -87,19 +84,14 @@ private fun RenderSettingsList(
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         settings.forEach { setting ->
-            when (val type = settingDescriptor.getType(setting.id)) {
-                SettingType.Boolean -> RenderBooleanSetting(setting, settingDescriptor, onSettingChanged)
-                SettingType.String -> RenderStringSetting(setting, settingDescriptor, onSettingChanged)
-                is SettingType.Path -> RenderPathSetting(
+            when (setting) {
+                is Setting.BooleanSetting -> RenderBooleanSetting(setting, settingDescriptor, onSettingChanged)
+                is Setting.PathSetting -> RenderPathSetting(
                     setting = setting,
-                    settingType = type,
                     settingDescriptor = settingDescriptor,
                     onSettingChanged = onSettingChanged
                 )
-
-                null -> {
-
-                }
+                else -> Text("rendering of ${setting::class.java.simpleName}not yet implemented")
             }
         }
     }
@@ -108,7 +100,7 @@ private fun RenderSettingsList(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun RenderBooleanSetting(
-    setting: Setting,
+    setting: Setting.BooleanSetting,
     settingDescriptor: ISettingDescriptor,
     onSettingChanged: (Setting) -> Unit,
 ) {
@@ -121,19 +113,19 @@ private fun RenderBooleanSetting(
         description?.let { Text(it) }
     }, trailing = {
         Checkbox(
-            checked = setting.value.toBoolean(),
-            onCheckedChange = { onSettingChanged(setting.copy(value = (!setting.value.toBoolean()).toString())) })
+            checked = setting.stringValue.toBoolean(),
+            onCheckedChange = { onSettingChanged(setting.copy(stringValue = (!setting.stringValue.toBoolean()).toString())) })
     })
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun RenderStringSetting(
-    setting: Setting,
+    setting: Setting.StringSetting,
     settingDescriptor: ISettingDescriptor,
     onSettingChanged: (Setting) -> Unit,
 ) {
-    var tempString by remember(setting) { mutableStateOf(setting.value) }
+    var tempString by remember(setting) { mutableStateOf(setting.stringValue) }
     val title = remember(settingDescriptor, setting) { settingDescriptor.getTitle(setting.id) }
     val description = remember(settingDescriptor, setting) { settingDescriptor.getDescription(setting.id) }
     ListItem(text = {
@@ -151,32 +143,34 @@ private fun RenderStringSetting(
     })
 
     LaunchedEffect(tempString) {
-        if (tempString == setting.value) {
+        if (tempString == setting.stringValue) {
             return@LaunchedEffect
         }
         delay(UiSettings.Debounce.debounceTime)
-        onSettingChanged(setting.copy(value = tempString))
+        onSettingChanged(setting.copy(stringValue = tempString))
     }
 }
 
 @Composable
 fun RenderPathSetting(
     modifier: Modifier = Modifier,
-    setting: Setting,
-    settingType: SettingType.Path,
+    setting: Setting.PathSetting,
+//    settingType: SettingType.Path,
     settingDescriptor: ISettingDescriptor,
     onSettingChanged: (Setting) -> Unit,
 ) {
-    var tempPath by remember(setting) { mutableStateOf(setting.value) }
+    var tempPath by remember(setting) { mutableStateOf(setting.stringValue) }
     val title = remember(settingDescriptor, setting) { settingDescriptor.getTitle(setting.id) }
 
     val isError = remember(tempPath) {
         if (tempPath.isEmpty()) {
             true
-        } else if (!FileUtils.isPathValid(tempPath, extensions = settingType.extensions)) {
+        } else if (!FileUtils.isPathValid(tempPath, extensions = setting.extensions())) {
             true
         } else false
     }
+
+
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         EditableTextField(
             modifier = Modifier.weight(1f),
@@ -193,7 +187,7 @@ fun RenderPathSetting(
             onClick = {
                 //open file picker
                 val filePicked = fileChooserDialog(
-                    title = title ?: "", folderSelection = false, filters = settingType.extensions.map {
+                    title = title ?: "", folderSelection = false, filters = setting.extensions().map {
                         FileNameExtensionFilter(it, ".$it")
                     }
                 )
@@ -206,15 +200,19 @@ fun RenderPathSetting(
                     contentDescription = "open file picker"
                 )
             })
+
+
     }
 
 
     LaunchedEffect(tempPath) {
-        if (tempPath == setting.value || isError) {
+        if (tempPath == setting.stringValue || isError) {
             return@LaunchedEffect
         }
         delay(UiSettings.Debounce.debounceTime)
-        onSettingChanged(setting.copy(value = tempPath))
+
+        onSettingChanged(setting.copy(stringValue = tempPath))
+
     }
 
 

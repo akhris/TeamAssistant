@@ -2,6 +2,7 @@ package persistence.realm
 
 import domain.*
 import domain.settings.Setting
+import domain.settings.SettingMapper
 import domain.valueobjects.Attachment
 import domain.valueobjects.TaskMessage
 import io.realm.kotlin.ext.toRealmDictionary
@@ -250,7 +251,7 @@ fun TaskMessage.toRealmTaskMessage(): RealmTaskMessage {
 }
 
 fun RealmSetting.toSetting(): Setting {
-    return Setting(id = _id, value = value)
+    return SettingMapper.map(id = _id, value = value)
 }
 
 

@@ -28,6 +28,16 @@ class RealmProjectsRepository(private val realm: Realm) : IRepositoryObservable<
             .distinctUntilChanged()
     }
 
+    override fun getByIDBlocking(id: String): RepoResult<Project> {
+        val realmItem = realm
+            .query<RealmProject>("_id == $0", id)
+            .first()
+            .find()
+        return realmItem?.let {
+            RepoResult.InitialItem(it.toProject())
+        } ?: RepoResult.PendindObject()
+    }
+
     override suspend fun remove(specifications: List<ISpecification>) {
         TODO("Not yet implemented")
     }

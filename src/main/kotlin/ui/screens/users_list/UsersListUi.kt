@@ -1,7 +1,6 @@
 package ui.screens.users_list
 
-import LocalCurrentUser
-import androidx.compose.material.*
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -17,7 +16,6 @@ import ui.screens.master_detail.IMasterComponent
 @Composable
 fun UsersListUi(component: IMasterComponent<User>) {
     val users by remember(component) { component.items }.collectAsState(EntitiesList.empty())
-    val currentUserID = LocalCurrentUser.current?.id
     val currentUserColor = MaterialTheme.colors.primary
 
     EntitiesListUi(
@@ -32,7 +30,7 @@ fun UsersListUi(component: IMasterComponent<User>) {
 
             override fun getIconPath(item: User): String = "vector/users/person_black_24dp.svg"
 
-            override fun getIconTint(item: User): Color? = if (item.id == currentUserID) {
+            override fun getIconTint(item: User): Color? = if (item.id == component.currentUser.id) {
                 currentUserColor
             } else null
         },

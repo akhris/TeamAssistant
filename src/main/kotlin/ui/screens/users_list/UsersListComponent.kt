@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
+import settings.DatabaseArguments
 import ui.screens.BaseComponent
 import ui.screens.master_detail.IMasterComponent
 import utils.log
@@ -14,9 +15,11 @@ class UsersListComponent(
     di: DI,
     componentContext: ComponentContext,
     private val onItemSelected: (String) -> Unit,
+    dpPath: String,
+    override val currentUser: User
 ) : IMasterComponent<User>, BaseComponent(componentContext) {
 
-    private val repo: IRepositoryObservable<User> by di.instance()
+    private val repo: IRepositoryObservable<User> by di.instance(arg = DatabaseArguments(path = dpPath))
 
 
     override val items: Flow<EntitiesList<User>> = repo.query(listOf(Specification.QueryAll))

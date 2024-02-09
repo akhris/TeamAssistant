@@ -6,6 +6,8 @@ import domain.User
 import kotlinx.coroutines.flow.Flow
 
 interface IMasterComponent<T> {
+    val currentUser: User
+
     val items: Flow<EntitiesList<T>>
 
     val filterSpecs: Flow<List<FilterSpec>>?

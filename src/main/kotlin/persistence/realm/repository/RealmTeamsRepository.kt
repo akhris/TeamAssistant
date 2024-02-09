@@ -6,9 +6,7 @@ import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.notifications.*
 import kotlinx.coroutines.flow.*
-import persistence.realm.RealmTeam
-import persistence.realm.toRealmTeam
-import persistence.realm.toTeam
+import persistence.realm.*
 import utils.log
 
 class RealmTeamsRepository(private val realm: Realm) : IRepositoryObservable<Team> {
@@ -30,6 +28,16 @@ class RealmTeamsRepository(private val realm: Realm) : IRepositoryObservable<Tea
             .distinctUntilChanged()
     }
 
+    override fun getByIDBlocking(id: String): RepoResult<Team> {
+        val realmItem = realm
+            .query<RealmTeam>("_id == $0", id)
+            .first()
+            .find()
+        return realmItem?.let {
+            RepoResult.InitialItem(it.toTeam())
+        } ?: RepoResult.PendindObject()
+
+    }
     override fun getFilterSpecs(): Flow<List<FilterSpec>>? = null
 
     override suspend fun remove(specifications: List<ISpecification>) {

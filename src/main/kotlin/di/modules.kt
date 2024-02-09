@@ -9,45 +9,61 @@ import com.russhwolf.settings.coroutines.toSuspendSettings
 import domain.*
 import domain.application.SettingsUseCase
 import domain.settings.ISettingDescriptor
+import domain.settings.ISettingMapper
+import domain.settings.SettingMapper
 import org.kodein.di.DI
+import org.kodein.di.bindMultiton
 import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 import persistence.multiplatform_settings.MultiplatformSettingsRepository
 import persistence.realm.repository.*
+import settings.DatabaseArguments
 import settings.SettingDescriptor
+import utils.log
 import java.util.prefs.Preferences
 
 val usersModule = DI.Module("users module") {
-    bindSingleton<IRepositoryObservable<User>> { RealmUsersRepository(instance()) }
+    bindMultiton<DatabaseArguments, IRepositoryObservable<User>> { RealmUsersRepository(instance(arg = it)) }
 }
 
 val teamsModule = DI.Module("teams module") {
-    bindSingleton<IRepositoryObservable<Team>> { RealmTeamsRepository(instance()) }
+    bindMultiton<DatabaseArguments, IRepositoryObservable<Team>> { RealmTeamsRepository(instance(arg = it)) }
 }
 
 val projectsModule = DI.Module("projects module") {
-    bindSingleton<IRepositoryObservable<Project>> { RealmProjectsRepository(instance()) }
+    bindMultiton<DatabaseArguments, IRepositoryObservable<Project>> { RealmProjectsRepository(instance(arg = it)) }
 }
 
 val tasksModule = DI.Module("tasks module") {
-    bindSingleton<IRepositoryObservable<Task>> { RealmTasksRepository(instance()) }
+    bindMultiton<DatabaseArguments, IRepositoryObservable<Task>> { RealmTasksRepository(instance(arg = it)) }
 }
 
 @OptIn(ExperimentalSettingsApi::class)
 val settingsModule = DI.Module("settings module") {
+    bindSingleton<ISettingMapper> { SettingMapper }
+
     //database settings:
-    bindSingleton<ISettingsRepository>(tag = "settings.db") { RealmSettingsRepository(instance()) }
+    bindMultiton<DatabaseArguments, ISettingsRepository>(tag = "settings.db") { RealmSettingsRepository(instance(arg = it)) }
 
     //key-value settings:
-    bindSingleton<Preferences> { Preferences.userRoot() }
+    bindSingleton<Preferences> {
+        val prefs = Preferences.userRoot()
+        log(prefs.toString(), "local preferences:")
+        prefs
+    }
     bindSingleton<Settings> { PreferencesSettings(instance()) }
     bindSingleton<SuspendSettings> { instance<Settings>().toSuspendSettings() }
-    bindSingleton<ISettingsRepository>(tag = "settings.DB") { RealmSettingsRepository(instance()) }
-    bindSingleton<ISettingsRepository>(tag = "settings.local") { MultiplatformSettingsRepository(instance()) }
+
+    bindSingleton<ISettingsRepository>(tag = "settings.local") {
+        MultiplatformSettingsRepository(
+            instance(),
+            instance()
+        )
+    }
     bindSingleton<ISettingDescriptor> { SettingDescriptor() }
-    bindSingleton<SettingsUseCase> {
+    bindMultiton<DatabaseArguments, SettingsUseCase> {
         SettingsUseCase(
-            dbSettingsRepo = instance(tag = "settings.DB"),
+            dbSettingsRepo = instance(tag = "settings.DB", arg = it),
             appSettingsRepo = instance(tag = "settings.local")
         )
     }

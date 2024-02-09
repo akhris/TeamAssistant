@@ -1,9 +1,6 @@
 package ui.screens.master_detail.teams
 
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.decompose.router.slot.*
-import com.arkivanov.decompose.value.MutableValue
-import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import domain.IRepositoryObservable
@@ -12,23 +9,35 @@ import domain.User
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
-import ui.FABState
 import ui.dialogs.DialogProperties
-import ui.dialogs.IDialogComponent
-import ui.dialogs.text_input_dialog.DialogTextInputComponent
 import ui.screens.master_detail.BaseMasterDetailsComponent
 import ui.screens.team_details.TeamDetailsComponent
 import ui.screens.teams_list.TeamsListComponent
 import utils.log
 import java.time.LocalDateTime
 
-class TeamsMasterDetailsComponent(private val di: DI, componentContext: ComponentContext) :
+class TeamsMasterDetailsComponent(
+    private val di: DI, componentContext: ComponentContext, dbPath: String,
+    override val currentUser: User,
+) :
     BaseMasterDetailsComponent<Team>(componentContext,
         createMasterComponent = { context: ComponentContext, onItemSelected: (String) -> Unit ->
-            TeamsListComponent(di = di, componentContext = context, onItemSelected = onItemSelected)
+            TeamsListComponent(
+                di = di,
+                componentContext = context,
+                onItemSelected = onItemSelected,
+                dpPath = dbPath,
+                currentUser = currentUser
+            )
         },
         createDetailsComponent = { context, itemID ->
-            TeamDetailsComponent(di = di, componentContext = context, teamID = itemID)
+            TeamDetailsComponent(
+                di = di,
+                componentContext = context,
+                teamID = itemID,
+                dpPath = dbPath,
+                currentUser = currentUser
+            )
         }
     ) {
 

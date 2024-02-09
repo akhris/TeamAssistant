@@ -3,7 +3,7 @@ package ui.screens.master_detail.settings
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
-import domain.*
+import domain.User
 import domain.application.SettingsUseCase
 import domain.settings.ISettingDescriptor
 import domain.settings.Setting
@@ -12,19 +12,21 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
+import settings.DatabaseArguments
 import ui.screens.BaseComponent
 import ui.screens.master_detail.IDetailsComponent
-import utils.log
 
 class SettingsDetailsComponent(
     private val settingsSection: SettingsSection,
     di: DI,
     componentContext: ComponentContext,
+    dpPath: String,
+    override val currentUser: User
 ) : IDetailsComponent<SettingsSection>, BaseComponent(componentContext) {
 
     // TODO: need to bind all settings repos (DB + APP + ...)
     //  maybe make different settings component (not details component)?
-    private val settingsUseCase: SettingsUseCase by di.instance()
+    private val settingsUseCase: SettingsUseCase by di.instance(arg = DatabaseArguments(path = dpPath))
 
     private val _item: MutableStateFlow<SettingsSection> = MutableStateFlow(settingsSection)
 

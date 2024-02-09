@@ -1,0 +1,98 @@
+package ui.screens.db_selector
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Button
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
+import domain.settings.extensions
+import ui.dialogs.file_picker_dialog.fileChooserDialog
+import ui.fields.EditableTextField
+import utils.FileUtils
+import javax.swing.filechooser.FileNameExtensionFilter
+import kotlin.io.path.Path
+import kotlin.io.path.exists
+
+@Composable
+fun DBSelectorUi(component: IDBSelectorComponent) {
+    val lastOpenedDBPaths by remember(component) { component.lastOpenedDBPaths }.subscribeAsState()
+    val currentDBPath by remember(component) { component.currentDBPath }.subscribeAsState()
+    Column {
+        RenderPathSelector(currentPath = currentDBPath, onPathChanged = {})
+
+    }
+
+}
+
+@Composable
+private fun ColumnScope.RenderPathSelector(
+    modifier: Modifier = Modifier,
+    currentPath: String,
+    onPathChanged: (String) -> Unit,
+) {
+    var tempPath by remember(currentPath) { mutableStateOf(currentPath) }
+
+    val isError = remember(tempPath) {
+        if (tempPath.isEmpty()) {
+            true
+        } else if (!FileUtils.isPathValid(tempPath, extensions = listOf("realm"))) {
+            true
+        } else false
+    }
+
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        EditableTextField(
+            modifier = Modifier.weight(1f),
+            value = tempPath,
+            onValueChange = {
+                tempPath = it
+            },
+            isError = isError,
+            label = "файл базы данных",
+            singleLine = true
+        )
+        IconButton(
+            modifier = Modifier.padding(8.dp),
+            onClick = {
+                //open file picker
+                val filePicked = fileChooserDialog(
+                    title = "открыть файл", folderSelection = false, filters = listOf(
+                        FileNameExtensionFilter("Realm database", ".realm")
+                    )
+                )
+                if (filePicked.isNotEmpty()) {
+                    tempPath = filePicked
+                }
+            }, content = {
+                Icon(
+                    painter = painterResource("/vector/folder_black_24dp.svg"),
+                    contentDescription = "open file picker"
+                )
+            })
+
+    }
+    if (tempPath.isNotEmpty()) {
+        Button(onClick = {
+            onPathChanged(tempPath)
+        },
+            enabled = !isError,
+            content = {
+
+                Text(
+                    text = if (Path(tempPath).exists()) {
+                        "открыть"
+                    } else "создать"
+                )
+
+            })
+    }
+}

@@ -1,10 +1,17 @@
 package ui.screens.tasks_list
 
-import LocalCurrentUser
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
+import androidx.compose.material.Card
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ListItem
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,8 +34,6 @@ fun TasksListUi(component: IMasterComponent<Task>) {
     val scrollstate = rememberScrollState()
 
     var showAddNewTaskDialog by remember { mutableStateOf(false) }
-
-    val currentUser = LocalCurrentUser.current
 
     EntitiesListUi(
         tasks,
@@ -60,7 +65,7 @@ fun TasksListUi(component: IMasterComponent<Task>) {
                 if (text.isNotEmpty()) {
                     component.onAddNewItem(
                         item = Task(
-                            creator = currentUser,
+                            creator = component.currentUser,
                             createdAt = LocalDateTime.now(),
                             name = text
                         )

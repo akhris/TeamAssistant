@@ -3,20 +3,23 @@ package persistence.multiplatform_settings
 import com.russhwolf.settings.ExperimentalSettingsApi
 import com.russhwolf.settings.coroutines.SuspendSettings
 import domain.ISettingsRepository
-import domain.ISpecification
+import domain.settings.ISettingMapper
 import domain.settings.Setting
-import kotlinx.coroutines.flow.Flow
 import utils.log
 
 @OptIn(ExperimentalSettingsApi::class)
-class MultiplatformSettingsRepository(private val preferencesSettings: SuspendSettings) : ISettingsRepository {
+class MultiplatformSettingsRepository(
+    private val preferencesSettings: SuspendSettings,
+    private val mapper: ISettingMapper,
+) : ISettingsRepository {
 
 
     override suspend fun getSetting(id: String): Setting? {
         val value = preferencesSettings.getStringOrNull(id)
+
         log(value ?: "no value", "got setting for id: $id in $this")
         return value?.let {
-            Setting(id = id, value = it)
+            mapper.map(id = id, value = it)
         }
     }
 
@@ -27,11 +30,11 @@ class MultiplatformSettingsRepository(private val preferencesSettings: SuspendSe
 
 
     override suspend fun update(setting: Setting) {
-        preferencesSettings.putString(key = setting.id, value = setting.value)
+        preferencesSettings.putString(key = setting.id, value = setting.stringValue)
     }
 
     override suspend fun insert(setting: Setting) {
-        preferencesSettings.putString(key = setting.id, value = setting.value)
+        preferencesSettings.putString(key = setting.id, value = setting.stringValue)
     }
 
     override suspend fun insert(settings: List<Setting>) {
@@ -41,5 +44,7 @@ class MultiplatformSettingsRepository(private val preferencesSettings: SuspendSe
     override suspend fun remove(entity: Setting) {
         TODO("Not yet implemented")
     }
+
+
 
 }

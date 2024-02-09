@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 import org.kodein.di.DI
 import org.kodein.di.instance
+import settings.DatabaseArguments
 import ui.screens.BaseComponent
 import ui.screens.master_detail.IDetailsComponent
 
@@ -16,9 +17,11 @@ class TaskDetailsComponent(
     taskID: String,
     di: DI,
     componentContext: ComponentContext,
+    dpPath: String,
+    override val currentUser: User
 ) : IDetailsComponent<Task>, BaseComponent(componentContext) {
 
-    private val repo: IRepositoryObservable<Task> by di.instance()
+    private val repo: IRepositoryObservable<Task> by di.instance(arg = DatabaseArguments(path = dpPath))
 
 
 //    private val dialogNav = SlotNavigation<DialogConfig>()

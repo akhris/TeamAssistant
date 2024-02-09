@@ -1,4 +1,4 @@
-package ui.screens.root_ui
+package ui.screens.logged_in_root
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.slot.*
@@ -9,66 +9,41 @@ import com.arkivanov.essenty.lifecycle.subscribe
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import domain.*
-import domain.application.SettingsUseCase
-import domain.settings.ISettingDescriptor
-import domain.settings.Setting
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import org.kodein.di.DI
-import org.kodein.di.instance
 import settings.Settings
 import ui.NavItem
 import ui.dialogs.entity_picker_dialogs.ProjectPickerComponent
 import ui.dialogs.entity_picker_dialogs.TeamPickerComponent
 import ui.dialogs.entity_picker_dialogs.UserPickerComponent
+import ui.screens.BaseComponent
 import ui.screens.master_detail.projects.ProjectsMasterDetailsComponent
 import ui.screens.master_detail.settings.SettingsMasterDetailsComponent
 import ui.screens.master_detail.tasks.TasksMasterDetailsComponent
 import ui.screens.master_detail.teams.TeamsMasterDetailsComponent
 import ui.screens.master_detail.users.UsersMasterDetailsComponent
-import utils.UserUtils
 
-class RootComponent(
+class LoggedInRootComponent(
     private val di: DI,
     componentContext: ComponentContext,
-) : IRootComponent, ComponentContext by componentContext {
+    private val dbPath: String,
+    private val loggedUser: User,
+) : ILoggedInRootComponent, BaseComponent(componentContext) {
 
-    private val scope =
-        CoroutineScope(Dispatchers.Default + SupervisorJob())
-
-    private val userID = UserUtils.getUserID()
-
-    private val usersRepo: IRepositoryObservable<User> by di.instance()
-    private val tasksRepo: IRepositoryObservable<Task> by di.instance()
-    private val projectsRepo: IRepositoryObservable<Project> by di.instance()
-    private val teamsRepo: IRepositoryObservable<Team> by di.instance()
-    private val settingsUseCase: SettingsUseCase by di.instance()
-
-    val _currentDBPath: MutableValue<Setting> =
-        MutableValue(
-            Setting(
-                id = Settings.DB.SETTING_ID_DB_PATH,
-                value = ""
-            )
-        )
-
-    override val settingDescriptor: ISettingDescriptor by di.instance()
-    override val currentDBPathSetting: Value<Setting> = _currentDBPath
 
     private val dialogNav = SlotNavigation<DialogConfig>()
     private val navHostNav = StackNavigation<NavHostConfig>()
 //    private val toolbarUtilsNav = StackNavigation<ToolbarUtilsConfig>()
 
-    override val dialogSlot: Value<ChildSlot<*, IRootComponent.Dialog>> =
+    override val dialogSlot: Value<ChildSlot<*, ILoggedInRootComponent.Dialog>> =
         childSlot(
             source = dialogNav,
             // persistent = false, // Disable navigation state saving, if needed
             handleBackButton = true, // Close the dialog on back button press
         ) { config, childComponentContext ->
             when (config) {
-                DialogConfig.None -> IRootComponent.Dialog.None
-                is DialogConfig.UserPickerDialog -> IRootComponent.Dialog.PickerDialog(
+                DialogConfig.None -> ILoggedInRootComponent.Dialog.None
+                is DialogConfig.UserPickerDialog -> ILoggedInRootComponent.Dialog.PickerDialog(
                     component = UserPickerComponent(
                         isMultipleSelection = config.isMultipleSelection,
                         initialSelection = config.initialSelection,
@@ -79,7 +54,7 @@ class RootComponent(
                     )
                 )
 
-                is DialogConfig.TeamPickerDialog -> IRootComponent.Dialog.PickerDialog(
+                is DialogConfig.TeamPickerDialog -> ILoggedInRootComponent.Dialog.PickerDialog(
                     component = TeamPickerComponent(
                         isMultipleSelection = config.isMultipleSelection,
                         initialSelection = config.initialSelection,
@@ -89,7 +64,7 @@ class RootComponent(
                     )
                 )
 
-                is DialogConfig.ProjectPickerDialog -> IRootComponent.Dialog.PickerDialog(
+                is DialogConfig.ProjectPickerDialog -> ILoggedInRootComponent.Dialog.PickerDialog(
                     component = ProjectPickerComponent(
                         isMultipleSelection = config.isMultipleSelection,
                         initialSelection = config.initialSelection,
@@ -105,51 +80,20 @@ class RootComponent(
         dialogNav.dismiss()
     }
 
-    override fun setNewDBPath(dbPath: String) {
-        scope.launch {
-            settingsUseCase.update(
-                Setting(id = Settings.DB.SETTING_ID_DB_PATH, value = dbPath)
-            )
-            invalidateCurrentDBPath()
-        }
-    }
 
     private val _currentDestination = MutableValue<NavItem>(NavItem.homeItem)
     override val currentDestination: Value<NavItem> = _currentDestination
 
     //    override val userLoggingInfo: Value<IRootComponent.UserLoggingInfo> = _userLoggingInfo
 
-    override val userLoggingInfo: Flow<IRootComponent.UserLoggingInfo> = usersRepo
-        .getByID(userID)
-        .map { result ->
-            when (result) {
-                is RepoResult.InitialItem -> result.item
-                is RepoResult.ItemInserted -> result.item
-                is RepoResult.ItemRemoved -> null
-                is RepoResult.ItemUpdated -> result.item
-                is RepoResult.PendindObject -> null
-            }
-        }
-        .map {
-            IRootComponent.UserLoggingInfo(userID = userID, user = it)
-        }
 
-
-    override val navHostStack: Value<ChildStack<*, IRootComponent.NavHost>> = childStack(
+    override val navHostStack: Value<ChildStack<*, ILoggedInRootComponent.NavHost>> = childStack(
         source = navHostNav,
         initialConfiguration = NavItem.homeItem.toNavHostConfig(),
 //            handleBackButton = true,
         childFactory = ::createChild,
         key = "navhost stack"
     )
-
-
-    override fun createNewUser(user: User) {
-        scope.launch {
-            val isCreator = user.id == settingsUseCase.getSetting(Settings.DB.SETTING_ID_DB_CREATOR).value
-            usersRepo.insert(user.copy(isDBCreator = isCreator))
-        }
-    }
 
 
     override val navController: INavController = object : INavController {
@@ -199,34 +143,59 @@ class RootComponent(
     }
 
 
-    private fun createChild(config: NavHostConfig, componentContext: ComponentContext): IRootComponent.NavHost {
+    private fun createChild(config: NavHostConfig, componentContext: ComponentContext): ILoggedInRootComponent.NavHost {
         return when (config) {
-            NavHostConfig.Activity -> IRootComponent.NavHost.Activity()
+            NavHostConfig.Activity -> ILoggedInRootComponent.NavHost.Activity()
 //            NavHostConfig.Projects -> IRootComponent.NavHost.Projects(ProjectsListComponent(di, componentContext, {}))
 
-            NavHostConfig.TasksList -> IRootComponent.NavHost.TaskMasterDetail(
-                TasksMasterDetailsComponent(di = di, componentContext = componentContext)
+            NavHostConfig.TasksList -> ILoggedInRootComponent.NavHost.TaskMasterDetail(
+                TasksMasterDetailsComponent(
+                    di = di,
+                    componentContext = componentContext,
+                    dbPath = dbPath,
+                    currentUser = loggedUser
+                )
             )
 
 //            NavHostConfig.Team -> IRootComponent.NavHost.Team(TeamsListComponent(di, componentContext))
-            NavHostConfig.UsersList -> IRootComponent.NavHost.UserMasterDetail(
-                UsersMasterDetailsComponent(di = di, componentContext = componentContext)
+            NavHostConfig.UsersList -> ILoggedInRootComponent.NavHost.UserMasterDetail(
+                UsersMasterDetailsComponent(
+                    di = di,
+                    componentContext = componentContext,
+                    dbPath = dbPath,
+                    currentUser = loggedUser
+                )
             )
 
 //            is NavHostConfig.TaskDetails -> IRootComponent.NavHost.TaskDetails(
 //                TaskDetailsComponent(taskID = config.task.id, di = di, componentContext = componentContext)
 //            )
 
-            NavHostConfig.ProjectsList -> IRootComponent.NavHost.ProjectMasterDetail(
-                ProjectsMasterDetailsComponent(di = di, componentContext = componentContext)
+            NavHostConfig.ProjectsList -> ILoggedInRootComponent.NavHost.ProjectMasterDetail(
+                ProjectsMasterDetailsComponent(
+                    di = di,
+                    componentContext = componentContext,
+                    dbPath = dbPath,
+                    currentUser = loggedUser
+                )
             )
 
-            NavHostConfig.TeamsList -> IRootComponent.NavHost.TeamMasterDetail(
-                TeamsMasterDetailsComponent(di = di, componentContext = componentContext)
+            NavHostConfig.TeamsList -> ILoggedInRootComponent.NavHost.TeamMasterDetail(
+                TeamsMasterDetailsComponent(
+                    di = di,
+                    componentContext = componentContext,
+                    dbPath = dbPath,
+                    currentUser = loggedUser
+                )
             )
 
-            NavHostConfig.Settings -> IRootComponent.NavHost.Settings(
-                SettingsMasterDetailsComponent(di = di, componentContext = componentContext)
+            NavHostConfig.Settings -> ILoggedInRootComponent.NavHost.Settings(
+                SettingsMasterDetailsComponent(
+                    di = di,
+                    componentContext = componentContext,
+                    dbPath = dbPath,
+                    currentUser = loggedUser
+                )
             )
         }
     }
@@ -330,23 +299,5 @@ class RootComponent(
 //        object SampleTypesSelector : ToolbarUtilsConfig()
     }
 
-    private suspend fun invalidateCurrentDBPath() {
-        val pathSetting = settingsUseCase.getSetting(Settings.DB.SETTING_ID_DB_PATH)
-        _currentDBPath.value = pathSetting
-    }
-
-
-    init {
-        componentContext
-            .lifecycle
-            .subscribe(onDestroy = {
-                scope.coroutineContext.cancelChildren()
-            })
-
-        scope.launch {
-            invalidateCurrentDBPath()
-        }
-
-    }
 
 }

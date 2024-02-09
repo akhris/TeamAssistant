@@ -19,7 +19,7 @@ import ui.dialogs.text_input_dialog.DialogTextInputComponent
 import ui.screens.BaseComponent
 import ui.screens.master_detail.teams.TeamsMasterDetailsComponent
 
-open class BaseMasterDetailsComponent<T>(
+abstract class BaseMasterDetailsComponent<T>(
     componentContext: ComponentContext,
     private val createMasterComponent: (componentContext: ComponentContext, onItemSelected: (itemID: String) -> Unit) -> IMasterComponent<T>,
     private val createDetailsComponent: (componentContext: ComponentContext, itemID: String) -> IDetailsComponent<T>,
