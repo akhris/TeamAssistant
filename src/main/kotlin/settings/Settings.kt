@@ -13,8 +13,10 @@ object Settings {
         const val SETTING_ID_DB_CREATOR = "setting.id.db_creator"
         const val SETTING_ID_DB_LAST_OPENED_PATHS = "setting.id.db_last_opened_paths"
 
+        val DEFAULT_DB_PATH = Setting.PathSetting(id = SETTING_ID_DB_PATH, stringValue = AppFoldersManager.defaultDBFilePath.pathString)
+
         val defaults: List<Setting> = listOf(
-            Setting.PathSetting(id = SETTING_ID_DB_PATH, stringValue = AppFoldersManager.defaultDBFilePath.pathString),
+            DEFAULT_DB_PATH,
             Setting.StringSetting(id = SETTING_ID_DB_CREATOR, stringValue = "")
         )
     }

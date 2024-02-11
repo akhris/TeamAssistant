@@ -63,7 +63,7 @@ val settingsModule = DI.Module("settings module") {
     bindSingleton<ISettingDescriptor> { SettingDescriptor() }
     bindMultiton<DatabaseArguments, SettingsUseCase> {
         SettingsUseCase(
-            dbSettingsRepo = instance(tag = "settings.DB", arg = it),
+            dbSettingsRepo = instance(tag = "settings.db", arg = it),
             appSettingsRepo = instance(tag = "settings.local")
         )
     }

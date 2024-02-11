@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
-import domain.settings.extensions
+import settings.Settings
 import ui.dialogs.file_picker_dialog.fileChooserDialog
 import ui.fields.EditableTextField
 import utils.FileUtils
@@ -26,8 +26,10 @@ import kotlin.io.path.exists
 fun DBSelectorUi(component: IDBSelectorComponent) {
     val lastOpenedDBPaths by remember(component) { component.lastOpenedDBPaths }.subscribeAsState()
     val currentDBPath by remember(component) { component.currentDBPath }.subscribeAsState()
-    Column {
-        RenderPathSelector(currentPath = currentDBPath, onPathChanged = {})
+    Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        RenderPathSelector(currentPath = currentDBPath, onPathChanged = {
+            component.setCurrentDBPath(it)
+        })
 
     }
 
@@ -39,7 +41,7 @@ private fun ColumnScope.RenderPathSelector(
     currentPath: String,
     onPathChanged: (String) -> Unit,
 ) {
-    var tempPath by remember(currentPath) { mutableStateOf(currentPath) }
+    var tempPath by remember(currentPath) { mutableStateOf(currentPath.ifEmpty { Settings.DB.DEFAULT_DB_PATH.stringValue }) }
 
     val isError = remember(tempPath) {
         if (tempPath.isEmpty()) {

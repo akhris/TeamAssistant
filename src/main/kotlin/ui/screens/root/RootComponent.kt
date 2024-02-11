@@ -5,13 +5,17 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.replaceCurrent
+import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import domain.IRepositoryObservable
 import domain.ISettingsRepository
 import domain.User
+import domain.settings.Setting
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.factory
 import org.kodein.di.instance
@@ -47,10 +51,24 @@ class RootComponent(
     private val dbSettingsRepoFactory: (DatabaseArguments) -> ISettingsRepository by di.factory(tag = "settings.db")
     private val userRepoFactory: (DatabaseArguments) -> IRepositoryObservable<User> by di.factory()
 
+    private val _currentDBPath: MutableValue<String> = MutableValue("")
+    override val currentDBPath: Value<String> = _currentDBPath
 
+    override fun loadDatabase() {
+        navHostNav.replaceCurrent(RootDestination.DBSelector)
+    }
+
+    private suspend fun invalidateCurrentDBPath() {
+        //1. load dbpath from settings:
+        val dbPathSetting = appSettingsRepo.getSetting(Settings.DB.SETTING_ID_DB_PATH)
+            ?: Settings.DB.DEFAULT_DB_PATH
+        // loaded path - non-empty string, now check its validity:
+        onDBSet(dbPathSetting.stringValue)
+    }
     private fun onDBSet(dbPath: String) {
         // 1.check path existence
         val path = Path(dbPath)
+        _currentDBPath.value = dbPath
         if (path.notExists()) {
             //database is not exist - show DBSelector screen - to create or choose another one
             navHostNav.replaceCurrent(RootDestination.DBSelector)
@@ -59,12 +77,14 @@ class RootComponent(
             val userRepo = userRepoFactory(DatabaseArguments(path = dbPath))
             scope.launch {
                 val user = userRepo.getByIDBlocking(userID).item
-                if (user == null) {
-                    //user doesn't exist in given database - go create it
-                    navHostNav.replaceCurrent(RootDestination.UserCreate(dbPath = dbPath))
-                } else {
-                    //user exists - go to logged screen
-                    navHostNav.replaceCurrent(RootDestination.LoggedIn(dbPath = dbPath, user = user))
+                withContext(Dispatchers.Main) {
+                    if (user == null) {
+                        //user doesn't exist in given database - go create it
+                        navHostNav.replaceCurrent(RootDestination.UserCreate(dbPath = dbPath))
+                    } else {
+                        //user exists - go to logged screen
+                        navHostNav.replaceCurrent(RootDestination.LoggedIn(dbPath = dbPath, user = user))
+                    }
                 }
             }
         }
@@ -124,12 +144,7 @@ class RootComponent(
     init {
         //decide here what screen to show:
         scope.launch {
-            //1. load dbpath from settings:
-            val dbPathSetting = appSettingsRepo.getSetting(Settings.DB.SETTING_ID_DB_PATH)
-                ?: Settings.DB.defaults.find { it.id == Settings.DB.SETTING_ID_DB_PATH }
-                ?: throw IllegalStateException("Cannot find default database path in settings")
-            // loaded path - non-empty string, now check its validity:
-            onDBSet(dbPathSetting.stringValue)
+            invalidateCurrentDBPath()
         }
     }
 }

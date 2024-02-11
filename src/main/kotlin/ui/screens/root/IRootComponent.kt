@@ -13,6 +13,10 @@ interface IRootComponent {
 
     val rootStack: Value<ChildStack<*, Screen>>
 
+    val currentDBPath: Value<String>
+
+    fun loadDatabase()
+
     sealed class Screen {
         object NONE: Screen()
         class DBSelector(val component: IDBSelectorComponent) : Screen()

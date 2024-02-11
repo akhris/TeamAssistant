@@ -7,5 +7,5 @@ interface IDBSelectorComponent {
     val lastOpenedDBPaths: Value<List<String>>
 
     val currentDBPath: Value<String>
-
+    fun setCurrentDBPath(path: String)
 }

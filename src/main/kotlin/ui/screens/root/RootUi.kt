@@ -1,13 +1,18 @@
 package ui.screens.root
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.window.WindowDraggableArea
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.WindowPlacement
@@ -15,10 +20,13 @@ import androidx.compose.ui.window.WindowState
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.Children
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.fade
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimation
+import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import ui.screens.db_selector.DBSelectorUi
 import ui.screens.logged_in_root.LoggedInRootUi
 import ui.screens.user_create.UserCreateUi
+import kotlin.io.path.Path
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FrameWindowScope.RootUi(
     component: IRootComponent,
@@ -29,6 +37,7 @@ fun FrameWindowScope.RootUi(
 ) {
 
     val scaffoldState = rememberScaffoldState()
+    val currentDBPath by remember(component) { component.currentDBPath }.subscribeAsState()
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -39,7 +48,30 @@ fun FrameWindowScope.RootUi(
             WindowDraggableArea {
                 TopAppBar {
                     Spacer(modifier = Modifier.weight(1f))
-                    Text(text = "TeamAssistant")
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(text = "TeamAssistant")
+                        if (currentDBPath.isNotEmpty()) {
+                            Text(modifier = Modifier.padding(end = 16.dp), text = " : ")
+//                            Spacer(modifier = Modifier.width(16.dp))
+                            TooltipArea(tooltip = {
+                                Surface {
+                                    Text(text = currentDBPath)
+                                }
+                            }, content = {
+                                Text(
+                                    modifier = Modifier.clickable {
+                                        component.loadDatabase()
+                                    },
+                                    text = Path(currentDBPath).fileName.toString(),
+                                    textDecoration = TextDecoration.Underline
+                                )
+                            })
+
+                        }
+                    }
 //                Children(stack = component.toolbarUtilsStack) {
 //                    when (val child = it.instance) {
 //                        is IRootComponent.ToolbarUtils.SampleTypesSelector -> SampleTypesSelectorUi(
