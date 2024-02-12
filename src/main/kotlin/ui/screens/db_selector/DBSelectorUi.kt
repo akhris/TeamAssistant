@@ -1,13 +1,11 @@
 package ui.screens.db_selector
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +28,12 @@ fun DBSelectorUi(component: IDBSelectorComponent) {
         RenderPathSelector(currentPath = currentDBPath, onPathChanged = {
             component.setCurrentDBPath(it)
         })
+        Text(modifier = Modifier.padding(16.dp), text = "последние файлы:", style = MaterialTheme.typography.h6)
+        lastOpenedDBPaths.forEach {
+            Text(modifier = Modifier.padding(8.dp).clickable {
+                component.setCurrentDBPath(it)
+            }, text = it)
+        }
 
     }
 
@@ -42,6 +46,7 @@ private fun ColumnScope.RenderPathSelector(
     onPathChanged: (String) -> Unit,
 ) {
     var tempPath by remember(currentPath) { mutableStateOf(currentPath.ifEmpty { Settings.DB.DEFAULT_DB_PATH.stringValue }) }
+
 
     val isError = remember(tempPath) {
         if (tempPath.isEmpty()) {

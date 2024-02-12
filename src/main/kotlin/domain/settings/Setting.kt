@@ -41,7 +41,10 @@ sealed class Setting : IEntity {
         override val id: String,
         override val stringValue: String,
     ) : Setting() {
-        constructor(id: String, values: List<String>) : this(id = id, stringValue = Json.encodeToString(values))
+        constructor(id: String, values: List<String>) : this(
+            id = id,
+            stringValue = Json.encodeToString(values)
+        )
 
         val value: List<String> = Json.decodeFromString(stringValue)
     }

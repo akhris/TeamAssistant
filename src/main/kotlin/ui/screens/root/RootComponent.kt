@@ -65,17 +65,21 @@ class RootComponent(
         // loaded path - non-empty string, now check its validity:
         onDBSet(dbPathSetting.stringValue)
     }
+
     private fun onDBSet(dbPath: String) {
         // 1.check path existence
         val path = Path(dbPath)
         _currentDBPath.value = dbPath
-        if (path.notExists()) {
-            //database is not exist - show DBSelector screen - to create or choose another one
-            navHostNav.replaceCurrent(RootDestination.DBSelector)
-        } else {
-            //database exists - check user:
-            val userRepo = userRepoFactory(DatabaseArguments(path = dbPath))
-            scope.launch {
+        scope.launch {
+            if (path.notExists()) {
+                //database is not exist - show DBSelector screen - to create or choose another one
+                withContext(Dispatchers.Main) {
+                    navHostNav.replaceCurrent(RootDestination.DBSelector)
+                }
+            } else {
+                //database exists - check user:
+                val userRepo = userRepoFactory(DatabaseArguments(path = dbPath))
+
                 val user = userRepo.getByIDBlocking(userID).item
                 withContext(Dispatchers.Main) {
                     if (user == null) {

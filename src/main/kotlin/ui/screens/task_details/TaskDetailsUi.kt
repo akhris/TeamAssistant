@@ -214,6 +214,7 @@ private fun RenderTaskDetails(
                     }
                 )
             Spacer(modifier = Modifier.weight(1f))
+            /*
             BadgedBox(
                 modifier = Modifier.padding(12.dp),
                 badge = {
@@ -233,15 +234,19 @@ private fun RenderTaskDetails(
                         tint = LocalContentColor.current.copy(alpha = if (showForum) ContentAlpha.high else ContentAlpha.medium)
                     )
                 }
+
+
             }
+            */
+
         },
-        bottomSheetContent = {
-            Text(modifier = Modifier.padding(8.dp), text = "обсуждение:", style = MaterialTheme.typography.h6)
-            RenderForum(task = tempTask, currentUser = currentUser, onMessageAdded = { message ->
-                tempTask = tempTask.copy(messages = tempTask.messages.plus(message))
-            })
-        },
-        bottomSheetState = bottomSheetState
+//        bottomSheetContent = {
+//            Text(modifier = Modifier.padding(8.dp), text = "обсуждение:", style = MaterialTheme.typography.h6)
+//            RenderForum(task = tempTask, currentUser = currentUser, onMessageAdded = { message ->
+//                tempTask = tempTask.copy(messages = tempTask.messages.plus(message))
+//            })
+//        },
+//        bottomSheetState = bottomSheetState
     )
 
     if (showDatePicker) {

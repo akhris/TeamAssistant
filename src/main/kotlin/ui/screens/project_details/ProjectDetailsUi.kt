@@ -122,6 +122,7 @@ private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjec
                         //if there are new messages - show badge here
                     }
                 }) {
+                /*
                 IconButton(onClick = {
                     //open chat screen
                     showForum = !showForum
@@ -132,6 +133,8 @@ private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjec
                         tint = LocalContentColor.current.copy(alpha = if (showForum) ContentAlpha.high else ContentAlpha.medium)
                     )
                 }
+
+                 */
             }
         }
     )

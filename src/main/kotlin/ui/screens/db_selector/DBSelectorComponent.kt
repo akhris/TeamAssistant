@@ -38,7 +38,27 @@ class DBSelectorComponent(
     private suspend fun invalidateLastOpenedDBPaths() {
         val lastOpenedDBPathsSetting =
             appSettingsRepo.getSetting(Settings.DB.SETTING_ID_DB_LAST_OPENED_PATHS) as? Setting.ListSetting ?: return
-        _lastOpenedDBPaths.value = lastOpenedDBPathsSetting.value
+
+        //check path existence:
+        val existingPaths =
+            lastOpenedDBPathsSetting
+                .value
+                .filter {
+                    Path(it).exists()
+                }
+        if (existingPaths != lastOpenedDBPathsSetting.value)
+            saveLastPaths(existingPaths)
+
+        _lastOpenedDBPaths.value = existingPaths
+    }
+
+    private suspend fun saveLastPaths(lastPaths: List<String>) {
+        appSettingsRepo.update(
+            Setting.ListSetting(
+                Settings.DB.SETTING_ID_DB_LAST_OPENED_PATHS,
+                lastPaths.take(Settings.DB.LAST_OPENED_PATHS_MAX_ITEMS_COUNT)
+            )
+        )
     }
 
     private suspend fun invalidateCurrentDBPath() {
@@ -55,13 +75,26 @@ class DBSelectorComponent(
                 //current path exists
                 val previousRealm = realmFactory(DatabaseArguments(currentPath))
                 log(previousRealm.toString(), "going to close previous realm database: ")
-                previousRealm.close()
+                // FIXME: if close realm, it's instance in DI is still present
+                //  and when it opens again - it's closed, need to call RealmInit.createRealm() somehow
+//                previousRealm.close()
             }
             //2. create/init new realm database:
             val newRealm = realmFactory(DatabaseArguments(path))
+//            if (newRealm.isClosed()) {
+//                log("going to re-init closed realm")
+//                //open it again
+//
+//            }
             log(newRealm.toString(), "going to use realm database: ")
             appSettingsRepo.update(Settings.DB.DEFAULT_DB_PATH.copy(stringValue = path))
             //todo: add path to the top of last opened paths
+            val lastOpenedPaths = _lastOpenedDBPaths.value.toMutableList()
+            lastOpenedPaths.remove(path)
+            lastOpenedPaths.add(0, path)
+            saveLastPaths(lastOpenedPaths)
+            invalidateLastOpenedDBPaths()
+
             onPathSelected(path)
         }
     }

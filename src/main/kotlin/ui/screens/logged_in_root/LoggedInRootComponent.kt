@@ -26,7 +26,7 @@ import ui.screens.master_detail.users.UsersMasterDetailsComponent
 class LoggedInRootComponent(
     private val di: DI,
     componentContext: ComponentContext,
-    private val dbPath: String,
+    private val dbPath: String,     //fixme maybe use Realm instance? This allows to close & open realm files
     private val loggedUser: User,
 ) : ILoggedInRootComponent, BaseComponent(componentContext) {
 

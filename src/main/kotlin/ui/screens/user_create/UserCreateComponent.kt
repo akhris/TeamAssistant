@@ -18,7 +18,7 @@ class UserCreateComponent(
     private val di: DI,
     componentContext: ComponentContext,
     private val dbPath: String,
-    onUserCreated: (User) -> Unit,
+    private val onUserCreated: (User) -> Unit,
 ) : IUserCreateComponent, BaseComponent(componentContext) {
 
     private val userID = UserUtils.getUserID()
@@ -47,6 +47,7 @@ class UserCreateComponent(
             usersRepo.insert(
                 newUser
             )
+            onUserCreated(newUser)
         }
     }
 

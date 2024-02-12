@@ -15,7 +15,9 @@ import utils.log
 import java.time.LocalDateTime
 
 class TasksMasterDetailsComponent(
-    private val di: DI, componentContext: ComponentContext, dbPath: String,
+    private val di: DI,
+    componentContext: ComponentContext,
+    dbPath: String,
     override val currentUser: User,
 ) :
     BaseMasterDetailsComponent<Task>(componentContext = componentContext,
