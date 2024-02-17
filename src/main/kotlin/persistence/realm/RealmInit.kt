@@ -7,6 +7,7 @@ import kotlinx.coroutines.runBlocking
 import settings.Settings
 import utils.UserUtils
 import utils.log
+import java.util.UUID
 import kotlin.io.path.Path
 
 object RealmInit {
@@ -30,7 +31,8 @@ object RealmInit {
                 RealmSubTask::class,
                 RealmAttachment::class,
                 RealmTaskMessage::class,
-                RealmSetting::class
+                RealmSetting::class,
+                RealmDBPolicy::class
             )
         )
             .name(realmPath.name)
@@ -40,7 +42,12 @@ object RealmInit {
                     _id = Settings.DB.SETTING_ID_DB_CREATOR
                     value = UserUtils.getUserID()
                 })
+                copyToRealm(RealmSetting().apply {
+                    _id = Settings.DB.SETTING_ID_DB_ID
+                    value = UUID.randomUUID().toString()
+                })
             }
+            .schemaVersion(VERSION_1_0)
             .build()
 
 
@@ -52,5 +59,20 @@ object RealmInit {
         return Realm.open(config)
     }
 
+    const val VERSION_1_0 = 1L
+    /**
+     * Realm classes:
+     *                 RealmTask::class,
+     *                 RealmProject::class,
+     *                 RealmUser::class,
+     *                 RealmTeam::class,
+     *                 RealmTask::class,
+     *                 RealmSubTask::class,
+     *                 RealmAttachment::class,
+     *                 RealmTaskMessage::class,
+     *                 RealmSetting::class,
+     *                 RealmDBPolicy::class
+     * date: 17.02.2024
+     */
 
 }

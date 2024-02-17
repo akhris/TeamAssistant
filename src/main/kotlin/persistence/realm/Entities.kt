@@ -112,3 +112,13 @@ class RealmSetting : RealmObject {
 const val REALMSETTING_TYPE_STRING = "realm.setting.type.string"
 const val REALMSETTING_TYPE_BOOLEAN = "realm.setting.type.boolean"
 const val REALMSETTING_TYPE_PATH = "realm.setting.type.path"
+
+
+class RealmDBPolicy: RealmObject{
+    @PrimaryKey
+    var _id: String = ""
+    var name: String = ""
+    var value: String = ""
+    var defaultValue: String = ""
+    var possibleValues: RealmSet<String> = realmSetOf()
+}

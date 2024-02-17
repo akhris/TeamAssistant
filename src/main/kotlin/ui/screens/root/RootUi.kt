@@ -72,17 +72,6 @@ fun FrameWindowScope.RootUi(
 
                         }
                     }
-//                Children(stack = component.toolbarUtilsStack) {
-//                    when (val child = it.instance) {
-//                        is IRootComponent.ToolbarUtils.SampleTypesSelector -> SampleTypesSelectorUi(
-//                            component = child.component,
-//                            onSampleTypeSelected = {
-//                                selectedSampleType = it
-//                            }, onAddNewSampleTypeClick = {
-//                                component.showAddSampleTypeDialog()
-//                            })
-//                    }
-//                }
                     Spacer(modifier = Modifier.weight(1f))
                     Icon(
                         modifier = Modifier

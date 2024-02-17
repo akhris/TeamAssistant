@@ -90,53 +90,53 @@ private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjec
                 )
             }
         } else null,
-        rightPanel = {
-            Text(modifier = Modifier.padding(4.dp), text = "команды", style = MaterialTheme.typography.caption)
-
-            tempProject.teams.forEach { team ->
-                RenderTeamListIcon(
-                    team = team
-                )
-
-            }
-            CircleIconButton(
-                iconRes = "vector/add_circle_black_24dp.svg",
-                onClick = {
-                    //add team to the project
-                    navController?.showTeamsPickerDialog(
-                        isMultipleSelection = true,
-                        initialSelection = tempProject.teams,
-                        onTeamsPicked = {
-                            tempProject = tempProject.copy(teams = it)
-                        }
-                    )
-                }
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            BadgedBox(
-                modifier = Modifier.padding(12.dp),
-                badge = {
-                    Badge(
-                        backgroundColor = MaterialTheme.colors.background
-                    ) {
-                        //if there are new messages - show badge here
-                    }
-                }) {
-                /*
-                IconButton(onClick = {
-                    //open chat screen
-                    showForum = !showForum
-                }) {
-                    Icon(
-                        painterResource(resourcePath = "vector/forum_black_24dp.svg"),
-                        contentDescription = "open chat screen",
-                        tint = LocalContentColor.current.copy(alpha = if (showForum) ContentAlpha.high else ContentAlpha.medium)
-                    )
-                }
-
-                 */
-            }
-        }
+//        rightPanel = {
+//            Text(modifier = Modifier.padding(4.dp), text = "команды", style = MaterialTheme.typography.caption)
+//
+//            tempProject.teams.forEach { team ->
+//                RenderTeamListIcon(
+//                    team = team
+//                )
+//
+//            }
+//            CircleIconButton(
+//                iconRes = "vector/add_circle_black_24dp.svg",
+//                onClick = {
+//                    //add team to the project
+//                    navController?.showTeamsPickerDialog(
+//                        isMultipleSelection = true,
+//                        initialSelection = tempProject.teams,
+//                        onTeamsPicked = {
+//                            tempProject = tempProject.copy(teams = it)
+//                        }
+//                    )
+//                }
+//            )
+//            Spacer(modifier = Modifier.weight(1f))
+//            BadgedBox(
+//                modifier = Modifier.padding(12.dp),
+//                badge = {
+//                    Badge(
+//                        backgroundColor = MaterialTheme.colors.background
+//                    ) {
+//                        //if there are new messages - show badge here
+//                    }
+//                }) {
+//                /*
+//                IconButton(onClick = {
+//                    //open chat screen
+//                    showForum = !showForum
+//                }) {
+//                    Icon(
+//                        painterResource(resourcePath = "vector/forum_black_24dp.svg"),
+//                        contentDescription = "open chat screen",
+//                        tint = LocalContentColor.current.copy(alpha = if (showForum) ContentAlpha.high else ContentAlpha.medium)
+//                    )
+//                }
+//
+//                 */
+//            }
+//        }
     )
 
 

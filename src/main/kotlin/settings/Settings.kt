@@ -9,6 +9,7 @@ import kotlin.io.path.pathString
 object Settings {
     // DB-related Settings
     object DB {
+        const val SETTING_ID_DB_ID = "setting.id.db_id"
         const val SETTING_ID_DB_PATH = "setting.id.db_path"
         const val SETTING_ID_DB_CREATOR = "setting.id.db_creator"
         const val SETTING_ID_DB_LAST_OPENED_PATHS = "setting.id.db_last_opened_paths"

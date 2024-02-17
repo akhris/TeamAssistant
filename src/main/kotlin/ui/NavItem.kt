@@ -7,7 +7,7 @@ package ui
  */
 sealed class NavItem(val pathToIcon: String, val title: String) {
 
-    object UserDetails : NavItem(
+    object Users : NavItem(
         pathToIcon = "vector/users/person_black_24dp.svg",
         title = "Пользователь"
     )
@@ -39,7 +39,12 @@ sealed class NavItem(val pathToIcon: String, val title: String) {
 
     companion object {
         fun getMainNavigationItems() =
-            listOf<NavItem>(Tasks, Projects, Team, UserDetails)
+            listOf(
+                Tasks,
+                Projects,
+//                Team,
+                Users
+            )
 
         val bottomNavigationItem: NavItem? = Settings
         val homeItem = Tasks

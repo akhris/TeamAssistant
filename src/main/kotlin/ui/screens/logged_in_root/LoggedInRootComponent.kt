@@ -5,13 +5,10 @@ import com.arkivanov.decompose.router.slot.*
 import com.arkivanov.decompose.router.stack.*
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
-import com.arkivanov.essenty.lifecycle.subscribe
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import domain.*
-import kotlinx.coroutines.*
 import org.kodein.di.DI
-import settings.Settings
 import ui.NavItem
 import ui.dialogs.entity_picker_dialogs.ProjectPickerComponent
 import ui.dialogs.entity_picker_dialogs.TeamPickerComponent
@@ -227,7 +224,7 @@ class LoggedInRootComponent(
             NavItem.Projects -> NavHostConfig.ProjectsList
             NavItem.Tasks -> NavHostConfig.TasksList
             NavItem.Team -> NavHostConfig.TeamsList
-            NavItem.UserDetails -> NavHostConfig.UsersList
+            NavItem.Users -> NavHostConfig.UsersList
             NavItem.Settings -> NavHostConfig.Settings
         }
     }

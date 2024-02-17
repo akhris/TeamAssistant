@@ -139,3 +139,11 @@ data class SubTask(
     val completedBy: User? = null,
 ) : IEntity
 
+
+data class DBPolicy(
+    override val id: String = UUID.randomUUID().toString(),
+    val name: String,
+    val value: String,
+    val defaultValue: String,
+    val possibleValues: List<String>
+): IEntity

@@ -261,3 +261,23 @@ fun Setting.toRealmSetting(): RealmSetting {
         value = value
     }
 }
+
+fun RealmDBPolicy.toDBPolicy(): DBPolicy {
+    return DBPolicy(
+        id = _id,
+        name = name,
+        value = value,
+        defaultValue = defaultValue,
+        possibleValues = possibleValues.toList()
+    )
+}
+
+fun DBPolicy.toRealmDBPolicy(): RealmDBPolicy {
+    return RealmDBPolicy().apply {
+        _id = this@toRealmDBPolicy.id
+        name = this@toRealmDBPolicy.name
+        value = this@toRealmDBPolicy.value
+        defaultValue = this@toRealmDBPolicy.defaultValue
+        possibleValues = this@toRealmDBPolicy.possibleValues.toRealmSet()
+    }
+}
