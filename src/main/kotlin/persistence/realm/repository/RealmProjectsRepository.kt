@@ -63,6 +63,22 @@ class RealmProjectsRepository(private val realm: Realm) : IRepositoryObservable<
 
     }
 
+    override suspend fun queryBlocking(specifications: List<ISpecification>): EntitiesList<Project> {
+        var query = realm.query<RealmProject>()
+
+        specifications
+            .filterIsInstance(Specification.GetAllForUserID::class.java)
+            .forEach { spec ->
+                query = query
+                    .query("admins._id == $0 OR creator._id == $0", spec.userID)
+            }
+        val a = query
+            .find().map {
+                it.toProject()
+            }
+        return EntitiesList.NotGrouped(a)
+    }
+
     override fun getFilterSpecs(): Flow<List<FilterSpec>> {
         return realm
             .query<RealmProject>()

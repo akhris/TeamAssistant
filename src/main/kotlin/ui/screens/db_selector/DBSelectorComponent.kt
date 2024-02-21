@@ -69,15 +69,19 @@ class DBSelectorComponent(
 
     override fun setCurrentDBPath(path: String) {
         scope.launch {
-            //1. close previous realm DB (if exists):
-            val currentPath = currentDBPath.value
-            if (currentPath.isNotEmpty() && Path(currentPath).exists() && currentPath != path) {
-                //current path exists
-                val previousRealm = realmFactory(DatabaseArguments(currentPath))
-                log(previousRealm.toString(), "going to close previous realm database: ")
-                // FIXME: if close realm, it's instance in DI is still present
-                //  and when it opens again - it's closed, need to call RealmInit.createRealm() somehow
+            try {
+                //1. close previous realm DB (if exists):
+                val currentPath = currentDBPath.value
+                if (currentPath.isNotEmpty() && Path(currentPath).exists() && currentPath != path) {
+                    //current path exists
+                    val previousRealm = realmFactory(DatabaseArguments(currentPath))
+                    log(previousRealm.toString(), "going to close previous realm database: ")
+                    // FIXME: if close realm, it's instance in DI is still present
+                    //  and when it opens again - it's closed, need to call RealmInit.createRealm() somehow
 //                previousRealm.close()
+                }
+            } catch (e: Throwable) {
+                log("cannot close previous realm: ${e.localizedMessage}")
             }
             //2. create/init new realm database:
             val newRealm = realmFactory(DatabaseArguments(path))

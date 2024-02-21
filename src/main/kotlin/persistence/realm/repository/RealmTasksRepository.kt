@@ -5,6 +5,7 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.notifications.*
+import io.realm.kotlin.query.RealmQuery
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import persistence.realm.*
@@ -38,6 +39,7 @@ class RealmTasksRepository(private val realm: Realm) : IRepositoryObservable<Tas
             RepoResult.InitialItem(it.toTask())
         } ?: RepoResult.PendindObject()
     }
+
     override suspend fun remove(specifications: List<ISpecification>) {
         TODO("Not yet implemented")
     }
@@ -90,6 +92,54 @@ class RealmTasksRepository(private val realm: Realm) : IRepositoryObservable<Tas
 
 
         } ?: flowOf(EntitiesList.empty())
+    }
+
+    override suspend fun queryBlocking(specifications: List<ISpecification>): EntitiesList<Task> {
+        val a = buildQuery(specifications)
+            .find().map {
+                it.toTask()
+            }
+        return EntitiesList.NotGrouped(a)
+    }
+
+    private fun buildQuery(specifications: List<ISpecification>): RealmQuery<RealmTask> {
+        //0. get all items:
+        var query = realm.query<RealmTask>()
+
+        //1. get all items for user ID:
+        specifications
+            .filterIsInstance(Specification.GetAllForUserID::class.java)
+            .forEach { spec ->
+                query = query
+                    .query("admins._id == $0 OR creator._id == $0", spec.userID)
+            }
+        //2. filter query:
+        specifications
+            .filterIsInstance(Specification.Filtered::class.java)
+            .forEach { spec ->
+                spec.filters.forEach { filter ->
+                    when (filter) {
+                        is FilterSpec.Range<*> -> {
+
+                        }
+
+                        is FilterSpec.Values -> {
+                            // https://github.com/realm/realm-kotlin/issues/929
+                            val values = filter.filteredValues.filterNotNull()
+                                .joinToString(separator = ",", prefix = "{", postfix = "}")
+                            val filterNot = when (spec.isFilteredOut) {
+                                true -> "not "
+                                false -> ""
+                            }
+                            query = query
+                                .query("${filter.columnName} ${filterNot}in $values")
+                        }
+                    }
+
+                }
+
+            }
+        return query
     }
 
     override suspend fun insert(entity: Task) {

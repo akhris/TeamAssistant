@@ -26,7 +26,7 @@ data class User(
     val avatar: String = "",
     val lastOnline: LocalDateTime? = null,
     val isPinned: Boolean = false,
-    val isDBCreator: Boolean = false
+    val isDBCreator: Boolean = false,
 ) : IEntity {
     override fun toString() = "$name $surname"
 
@@ -118,7 +118,8 @@ data class Task(
     val targetDate: LocalDateTime? = null,
     val state: State.Task? = null,
     val users: List<User> = listOf(),
-    val subtasks: List<SubTask> = listOf(),
+    val parentTask: Task? = null,
+    val subchecks: List<SubCheck> = listOf(),
     val attachments: List<Attachment> = listOf(),
     val isPinned: Boolean = false,
     val priority: Int = 1,
@@ -129,7 +130,7 @@ data class Task(
 }
 
 
-data class SubTask(
+data class SubCheck(
     override val id: String = UUID.randomUUID().toString(),
     val name: String = "",
     val description: String = "",
@@ -145,5 +146,5 @@ data class DBPolicy(
     val name: String,
     val value: String,
     val defaultValue: String,
-    val possibleValues: List<String>
-): IEntity
+    val possibleValues: List<String>,
+) : IEntity

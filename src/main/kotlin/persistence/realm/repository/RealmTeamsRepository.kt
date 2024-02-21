@@ -68,6 +68,22 @@ class RealmTeamsRepository(private val realm: Realm) : IRepositoryObservable<Tea
             .distinctUntilChanged()
     }
 
+    override suspend fun queryBlocking(specifications: List<ISpecification>): EntitiesList<Team> {
+        var query = realm.query<RealmTeam>()
+
+        specifications
+            .filterIsInstance(Specification.GetAllForUserID::class.java)
+            .forEach { spec ->
+                query = query
+                    .query("admins._id == $0 OR creator._id == $0", spec.userID)
+            }
+        val a = query
+            .find().map {
+                it.toTeam()
+            }
+        return EntitiesList.NotGrouped(a)
+    }
+
     override suspend fun insert(entity: Team) {
         realm.write {
             try {

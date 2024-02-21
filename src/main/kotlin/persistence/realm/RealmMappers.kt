@@ -119,7 +119,10 @@ fun Task.toRealmTask(): RealmTask =
         completedAt = this@toRealmTask.completedAt?.toRealmInstant()
         targetDate = this@toRealmTask.targetDate?.toRealmInstant()
         users = this@toRealmTask.users.map { it.toRealmUser() }.toRealmSet()
-        subtasks = this@toRealmTask.subtasks.map { it.toRealmSubTask() }.toRealmSet()
+        parentTask = if (this@toRealmTask.parentTask?.id != _id) {
+            this@toRealmTask.parentTask?.toRealmTask()
+        } else null
+        subchecks = this@toRealmTask.subchecks.map { it.toRealmSubTask() }.toRealmSet()
         attachments = this@toRealmTask.attachments.map { it.toRealmAttachment() }.toRealmList()
         isPinned = this@toRealmTask.isPinned
         priority = this@toRealmTask.priority
@@ -139,7 +142,10 @@ fun RealmTask.toTask(): Task =
         completedAt = completedAt?.toLocalDateTime(),
         targetDate = targetDate?.toLocalDateTime(),
         users = users.map { it.toUser() },
-        subtasks = subtasks.map { it.toSubTask() },
+        parentTask = if (parentTask?._id != _id) {
+            parentTask?.toTask()
+        } else null,
+        subchecks = subchecks.map { it.toSubTask() },
         attachments = attachments.map { it.toAttachment() },
         isPinned = isPinned,
         priority = priority,
@@ -147,8 +153,8 @@ fun RealmTask.toTask(): Task =
         usersLastOnline = usersLastOnline.map { it.key to it.value.toLocalDateTime() }.toMap()
     )
 
-fun SubTask.toRealmSubTask(): RealmSubTask =
-    RealmSubTask().apply {
+fun SubCheck.toRealmSubTask(): RealmSubCheck =
+    RealmSubCheck().apply {
         _id = this@toRealmSubTask.id
         name = this@toRealmSubTask.name
         description = this@toRealmSubTask.description
@@ -158,8 +164,8 @@ fun SubTask.toRealmSubTask(): RealmSubTask =
         completedBy = this@toRealmSubTask.completedBy?.toRealmUser()
     }
 
-fun RealmSubTask.toSubTask(): SubTask =
-    SubTask(
+fun RealmSubCheck.toSubTask(): SubCheck =
+    SubCheck(
         id = _id,
         name = name,
         description = description,

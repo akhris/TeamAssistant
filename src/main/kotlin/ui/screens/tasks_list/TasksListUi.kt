@@ -50,10 +50,10 @@ fun TasksListUi(component: IMasterComponent<Task>) {
             override fun getIconTint(item: Task): Color? = item.project?.color?.let { Color(it) }
 
         },
+        onItemClicked = {component.onItemClicked(it)},
         onAddItemClick = {
             showAddNewTaskDialog = true
-        },
-        onItemClicked = {component.onItemClicked(it)}
+        }
     )
 
     if (showAddNewTaskDialog) {

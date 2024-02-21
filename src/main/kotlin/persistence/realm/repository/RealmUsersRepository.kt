@@ -72,6 +72,22 @@ class RealmUsersRepository(private val realm: Realm) : IRepositoryObservable<Use
 
     }
 
+    override suspend fun queryBlocking(specifications: List<ISpecification>): EntitiesList<User> {
+        var query = realm.query<RealmUser>()
+
+        specifications
+            .filterIsInstance(Specification.GetAllForUserID::class.java)
+            .forEach { spec ->
+                query = query
+                    .query("admins._id == $0 OR creator._id == $0", spec.userID)
+            }
+        val a = query
+            .find().map {
+                it.toUser()
+            }
+        return EntitiesList.NotGrouped(a)
+    }
+
     override fun getFilterSpecs(): Flow<List<FilterSpec>>? = null
 
     override suspend fun insert(entity: User) {

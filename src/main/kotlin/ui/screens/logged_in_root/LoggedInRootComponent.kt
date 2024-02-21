@@ -9,10 +9,9 @@ import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import domain.*
 import org.kodein.di.DI
+import ui.ItemRenderer
 import ui.NavItem
-import ui.dialogs.entity_picker_dialogs.ProjectPickerComponent
-import ui.dialogs.entity_picker_dialogs.TeamPickerComponent
-import ui.dialogs.entity_picker_dialogs.UserPickerComponent
+import ui.dialogs.entity_picker_dialogs.*
 import ui.screens.BaseComponent
 import ui.screens.master_detail.projects.ProjectsMasterDetailsComponent
 import ui.screens.master_detail.settings.SettingsMasterDetailsComponent
@@ -44,10 +43,11 @@ class LoggedInRootComponent(
                     component = UserPickerComponent(
                         isMultipleSelection = config.isMultipleSelection,
                         initialSelection = config.initialSelection,
-                        onUsersPicked = config.onUsersPicked,
-                        hiddenUsers = config.hiddenUsers,
+                        onItemsPicked = config.onUsersPicked,
+                        hiddenItems = config.hiddenUsers.toSet(),
                         di = di,
-                        componentContext = childComponentContext
+                        componentContext = childComponentContext,
+                        dbPath = dbPath
                     )
                 )
 
@@ -55,9 +55,11 @@ class LoggedInRootComponent(
                     component = TeamPickerComponent(
                         isMultipleSelection = config.isMultipleSelection,
                         initialSelection = config.initialSelection,
-                        onTeamsPicked = config.onTeamsPicked,
-                        di,
-                        childComponentContext
+                        onItemsPicked = config.onTeamsPicked,
+                        hiddenItems = config.hiddenTeams.toSet(),
+                        di = di,
+                        componentContext = childComponentContext,
+                        dbPath = dbPath
                     )
                 )
 
@@ -65,9 +67,23 @@ class LoggedInRootComponent(
                     component = ProjectPickerComponent(
                         isMultipleSelection = config.isMultipleSelection,
                         initialSelection = config.initialSelection,
-                        onProjectsPicked = config.onProjectsPicked,
-                        di,
-                        childComponentContext
+                        onItemsPicked = config.onProjectsPicked,
+                        hiddenItems = config.hiddenProjects.toSet(),
+                        di = di,
+                        componentContext = childComponentContext,
+                        dbPath = dbPath
+                    )
+                )
+
+                is DialogConfig.TaskPickerDialog -> ILoggedInRootComponent.Dialog.PickerDialog(
+                    component = TaskPickerComponent(
+                        isMultipleSelection = config.isMultipleSelection,
+                        initialSelection = config.initialSelection,
+                        onItemsPicked = config.onTasksPicked,
+                        hiddenItems = config.hiddenTasks.toSet(),
+                        di = di,
+                        componentContext = childComponentContext,
+                        dbPath = dbPath
                     )
                 )
             }
@@ -113,13 +129,15 @@ class LoggedInRootComponent(
         override fun showTeamsPickerDialog(
             isMultipleSelection: Boolean,
             initialSelection: List<Team>,
+            hiddenTeams: List<Team>,
             onTeamsPicked: (List<Team>) -> Unit,
         ) {
             dialogNav.activate(
                 DialogConfig.TeamPickerDialog(
                     isMultipleSelection = isMultipleSelection,
                     initialSelection = initialSelection,
-                    onTeamsPicked = onTeamsPicked
+                    onTeamsPicked = onTeamsPicked,
+                    hiddenTeams = hiddenTeams
                 )
             )
         }
@@ -127,13 +145,31 @@ class LoggedInRootComponent(
         override fun showProjectsPickerDialog(
             isMultipleSelection: Boolean,
             initialSelection: List<Project>,
+            hiddenProjects: List<Project>,
             onProjectsPicked: (List<Project>) -> Unit,
         ) {
             dialogNav.activate(
                 DialogConfig.ProjectPickerDialog(
                     isMultipleSelection = isMultipleSelection,
                     initialSelection = initialSelection,
-                    onProjectsPicked = onProjectsPicked
+                    onProjectsPicked = onProjectsPicked,
+                    hiddenProjects = hiddenProjects
+                )
+            )
+        }
+
+        override fun showTasksPickerDialog(
+            isMultipleSelection: Boolean,
+            initialSelection: List<Task>,
+            hiddenTasks: List<Task>,
+            onTasksPicked: (List<Task>) -> Unit,
+        ) {
+            dialogNav.activate(
+                DialogConfig.TaskPickerDialog(
+                    isMultipleSelection = isMultipleSelection,
+                    initialSelection = initialSelection,
+                    onTasksPicked = onTasksPicked,
+                    hiddenTasks = hiddenTasks
                 )
             )
         }
@@ -246,6 +282,7 @@ class LoggedInRootComponent(
         data class TeamPickerDialog(
             val isMultipleSelection: Boolean = false,
             val initialSelection: List<Team> = listOf(),
+            val hiddenTeams: List<Team> = listOf(),
             val onTeamsPicked: (List<Team>) -> Unit,
         ) : DialogConfig()
 
@@ -253,9 +290,17 @@ class LoggedInRootComponent(
         data class ProjectPickerDialog(
             val isMultipleSelection: Boolean = false,
             val initialSelection: List<Project> = listOf(),
+            val hiddenProjects: List<Project> = listOf(),
             val onProjectsPicked: (List<Project>) -> Unit,
         ) : DialogConfig()
 
+        @Parcelize
+        data class TaskPickerDialog(
+            val isMultipleSelection: Boolean = false,
+            val initialSelection: List<Task> = listOf(),
+            val hiddenTasks: List<Task> = listOf(),
+            val onTasksPicked: (List<Task>) -> Unit,
+        ) : DialogConfig()
 
     }
 

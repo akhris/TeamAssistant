@@ -39,9 +39,9 @@ fun <T> EntitiesListUi(
             is EntitiesList.Grouped -> RenderGroupedList(list, selectMode, itemRenderer)
             is EntitiesList.NotGrouped -> RenderNotGroupedList(
                 list = list,
+                selection = selection,
                 selectMode = selectMode,
                 itemRenderer = itemRenderer,
-                selection = selection,
                 onItemClicked = { item ->
                     when (selectMode) {
                         SelectMode.MULTIPLE, SelectMode.SINGLE -> {

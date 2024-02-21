@@ -26,13 +26,15 @@ interface IRepository<ENTITY : IEntity> {
 interface IRepositoryObservable<ENTITY : IEntity> {
     fun getByID(id: String): Flow<RepoResult<ENTITY>>
 
-    fun getByIDBlocking(id: String) : RepoResult<ENTITY>
+    fun getByIDBlocking(id: String): RepoResult<ENTITY>
     suspend fun remove(entity: ENTITY)
     suspend fun update(entity: ENTITY)
     suspend fun update(entities: List<ENTITY>)
     suspend fun insert(entity: ENTITY)
     suspend fun remove(specifications: List<ISpecification>)
     fun query(specifications: List<ISpecification>): Flow<EntitiesList<ENTITY>>
+
+    suspend fun queryBlocking(specifications: List<ISpecification>): EntitiesList<ENTITY>
     fun getFilterSpecs(): Flow<List<FilterSpec>>?
 }
 

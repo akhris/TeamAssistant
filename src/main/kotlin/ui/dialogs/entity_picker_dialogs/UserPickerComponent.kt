@@ -1,43 +1,58 @@
 package ui.dialogs.entity_picker_dialogs
 
 import com.arkivanov.decompose.ComponentContext
-import domain.EntitiesList
-import domain.IRepositoryObservable
-import domain.Specification
-import domain.User
-import kotlinx.coroutines.flow.Flow
+import com.arkivanov.decompose.value.MutableValue
+import com.arkivanov.decompose.value.Value
+import domain.*
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
-import org.kodein.di.instance
+import org.kodein.di.factory
+import settings.DatabaseArguments
 import ui.ItemRenderer
 import ui.SelectMode
 import ui.screens.BaseComponent
 
 class UserPickerComponent(
-    val isMultipleSelection: Boolean,
+    isMultipleSelection: Boolean,
     override val initialSelection: List<User>,
-    val hiddenUsers: List<User> = listOf(),
-    val onUsersPicked: (List<User>) -> Unit,
+    private val onItemsPicked: (List<User>) -> Unit,
+    override val hiddenItems: Set<User> = setOf(),
     di: DI,
     componentContext: ComponentContext,
-) : IBaseEntityPickerDialogComponent<User>, BaseComponent(componentContext) {
+    private val dbPath: String,
+)  : IBaseEntityPickerDialogComponent<User>, BaseComponent(componentContext) {
 
-    private val repo: IRepositoryObservable<User> by di.instance()
+    private val repo: (DatabaseArguments) -> IRepositoryObservable<User> by di.factory()
 
-    override val items: Flow<EntitiesList<User>> =
-        repo.query(listOf(Specification.QueryAllButIDs(hiddenUsers.map { it.id })))
+    override val itemRenderer: ItemRenderer<User> = object : ItemRenderer<User> {
+        override fun getPrimaryText(item: User): String = item.getInitials()
+        override fun getIconPath(item: User): String = "vector/users/person_black_24dp.svg"
+    }
+
+
+    private val _items: MutableValue<EntitiesList<User>> = MutableValue(EntitiesList.empty())
+    override val items: Value<EntitiesList<User>> = _items
 
     override val selectMode: SelectMode = when (isMultipleSelection) {
         true -> SelectMode.MULTIPLE
         false -> SelectMode.SINGLE
     }
 
-    override val itemRenderer: ItemRenderer<User> = object : ItemRenderer<User> {
-        override fun getPrimaryText(item: User): String = item.getInitials()
-        override fun getIconPath(item: User): String = "vector/users/person_black_24dp.svg"
-    }
-    override val title: String = "выбор пользователей"
+    override val title: String = "выбор проектов"
 
     override fun onItemsSelected(items: List<User>) {
-        onUsersPicked(items)
+        onItemsPicked(items)
+    }
+
+    private suspend fun invalidateItems() {
+        val itemsRepo = repo(DatabaseArguments(path = dbPath))
+        val loadedItems = itemsRepo.queryBlocking(listOf(Specification.QueryAll))
+        _items.value = loadedItems
+    }
+
+    init {
+        scope.launch {
+            invalidateItems()
+        }
     }
 }

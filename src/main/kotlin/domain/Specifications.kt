@@ -1,9 +1,5 @@
 package domain
 
-import org.jetbrains.exposed.sql.Column
-
-//import ui.components.tables.ColumnId
-
 sealed class Specification : ISpecification {
     object QueryAll : Specification()
 
@@ -37,11 +33,6 @@ sealed class FilterSpec {
         override val columnName: String,
     ) : FilterSpec()
 }
-
-/**
- * Class for storing Slice values (data from a single table column)
- */
-data class SliceValue<VALUETYPE>(val name: Any, val value: VALUETYPE?, val column: Column<VALUETYPE?>)
 
 /*
 data class GroupingSpec(

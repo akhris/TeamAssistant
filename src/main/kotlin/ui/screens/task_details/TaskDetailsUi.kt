@@ -19,7 +19,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import domain.SubTask
+import domain.SubCheck
 import domain.Task
 import domain.User
 import domain.valueobjects.Attachment
@@ -98,46 +98,14 @@ private fun RenderTaskDetails(
     val navController = LocalNavController.current
 
     BaseDetailsScreen(
-        mainTag = tempTask.project?.let { project ->
-            {
-                Chip(
-                    shape = UiSettings.DetailsScreen.tagsShape,
-                    onClick = {
-                        if (isEditable)
-                            navController?.showProjectsPickerDialog(
-                                initialSelection = listOfNotNull(project),
-                                isMultipleSelection = false,
-                                onProjectsPicked = {
-                                    tempTask = tempTask.copy(project = it.firstOrNull())
-                                }
-                            )
-                    },
-                    content = { Text(text = project.name) },
-                    colors = ChipDefaults.chipColors(
-                        backgroundColor = project.color?.let { Color(it) }
-                            ?: Color.Unspecified
-                    ),
-                    leadingIcon = if (project.icon.isNotEmpty()) {
-                        {
-                            Icon(painter = painterResource(project.icon), contentDescription = "иконка проекта")
-                        }
-                    } else null
-
-
-                )
-            }
-        } ?: {
-            if (isEditable) {
-                TextButton(onClick = {
-                    navController?.showProjectsPickerDialog(
-                        initialSelection = listOf(),
-                        isMultipleSelection = false,
-                        onProjectsPicked = {
-                            tempTask = tempTask.copy(project = it.firstOrNull())
-                        }
-                    )
-                }, content = { Text("привязать к проекту") })
-            }
+        mainTag = {
+            RenderMainTag(
+                task = tempTask,
+                isEditable = isEditable,
+                onTaskUpdated = {
+                    tempTask = it
+                }
+            )
         },
         secondaryTag = if (tempTask.targetDate != null || isEditable) {
             {
@@ -160,12 +128,12 @@ private fun RenderTaskDetails(
                     tempTask = tempTask.copy(attachments = it)
                 })
             RenderSubTasks(
-                subtasks = tempTask.subtasks,
+                subtasks = tempTask.subchecks,
                 currentUser = currentUser,
                 isEditable = isEditable,
                 isControllable = isControllable,
                 onSubtasksEdited = {
-                    tempTask = tempTask.copy(subtasks = it)
+                    tempTask = tempTask.copy(subchecks = it)
                 }
             )
         },
@@ -277,6 +245,91 @@ private fun RenderTaskDetails(
 
         delay(UiSettings.Debounce.debounceTime)
         onTaskUpdated(tempTask)
+    }
+}
+
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun RenderMainTag(task: Task, isEditable: Boolean, onTaskUpdated: (Task) -> Unit) {
+    val navController = LocalNavController.current
+
+    Row {
+        //show parent project
+        task.project?.let { project ->
+            Chip(
+                shape = UiSettings.DetailsScreen.tagsShape,
+                onClick = {
+                    if (isEditable)
+                        navController?.showProjectsPickerDialog(
+                            initialSelection = listOfNotNull(project),
+                            isMultipleSelection = false,
+                            onProjectsPicked = {
+                                onTaskUpdated(task.copy(project = it.firstOrNull()))
+                            }
+                        )
+                },
+                content = { Text(text = project.name) },
+                colors = ChipDefaults.chipColors(
+                    backgroundColor = project.color?.let { Color(it) }
+                        ?: Color.Unspecified
+                ),
+                leadingIcon = if (project.icon.isNotEmpty()) {
+                    {
+                        Icon(painter = painterResource(project.icon), contentDescription = "иконка проекта")
+                    }
+                } else null
+
+
+            )
+        } ?: if (isEditable) {
+            TextButton(onClick = {
+                navController?.showProjectsPickerDialog(
+                    initialSelection = listOf(),
+                    isMultipleSelection = false,
+                    onProjectsPicked = {
+                        onTaskUpdated(task.copy(project = it.firstOrNull()))
+                    }
+                )
+            }, content = { Text("привязать к проекту") })
+        } else {
+        }
+        //todo show parent task chip here
+        task.parentTask?.let { parentTask ->
+            Chip(
+                shape = UiSettings.DetailsScreen.tagsShape,
+                onClick = {
+                    if (isEditable)
+                        navController?.showTasksPickerDialog(
+                            initialSelection = listOfNotNull(parentTask),
+                            isMultipleSelection = false,
+                            hiddenTasks = listOf(task),
+                            onTasksPicked = {
+                                onTaskUpdated(task.copy(parentTask = it.firstOrNull()))
+                            }
+                        )
+                },
+                content = { Text(text = parentTask.name) },
+//                colors = ChipDefaults.chipColors(
+//                    backgroundColor = parentTask.color?.let { Color(it) }
+//                        ?: Color.Unspecified
+//                ),
+
+            )
+        } ?: if (isEditable) {
+            TextButton(onClick = {
+                navController?.showTasksPickerDialog(
+                    initialSelection = listOf(),
+                    isMultipleSelection = false,
+                    hiddenTasks = listOf(task),
+                    onTasksPicked = {
+                        onTaskUpdated(task.copy(parentTask = it.firstOrNull()))
+                    }
+                )
+            }, content = { Text("родительская задача") })
+        } else {
+        }
+
     }
 }
 
@@ -463,11 +516,11 @@ private fun RenderAttachment(
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterialApi::class)
 @Composable
 private fun ColumnScope.RenderSubTasks(
-    subtasks: List<SubTask>,
+    subtasks: List<SubCheck>,
     currentUser: User,
     isEditable: Boolean,
     isControllable: Boolean,
-    onSubtasksEdited: (List<SubTask>) -> Unit,
+    onSubtasksEdited: (List<SubCheck>) -> Unit,
 ) {
 
     var addSubtask by remember { mutableStateOf(false) }
@@ -504,7 +557,7 @@ private fun ColumnScope.RenderSubTasks(
             },
             onTextEdited = { text ->
                 onSubtasksEdited(
-                    subtasks.plus(SubTask(name = text, createdAt = LocalDateTime.now()))
+                    subtasks.plus(SubCheck(name = text, createdAt = LocalDateTime.now()))
                 )
             }
         )
@@ -514,7 +567,7 @@ private fun ColumnScope.RenderSubTasks(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun RenderSubTask(subtask: SubTask, isControllable: Boolean, onClick: () -> Unit) {
+private fun RenderSubTask(subtask: SubCheck, isControllable: Boolean, onClick: () -> Unit) {
     Chip(
         enabled = isControllable,
         onClick = onClick,

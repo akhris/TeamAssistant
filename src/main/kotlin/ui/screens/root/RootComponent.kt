@@ -12,7 +12,6 @@ import com.arkivanov.essenty.parcelable.Parcelize
 import domain.IRepositoryObservable
 import domain.ISettingsRepository
 import domain.User
-import domain.settings.Setting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -26,6 +25,7 @@ import ui.screens.db_selector.DBSelectorComponent
 import ui.screens.logged_in_root.LoggedInRootComponent
 import ui.screens.user_create.UserCreateComponent
 import utils.UserUtils
+import utils.log
 import kotlin.io.path.Path
 import kotlin.io.path.notExists
 
@@ -36,10 +36,10 @@ class RootComponent(
 
     private val userID = UserUtils.getUserID()
 
-    private val navHostNav = StackNavigation<RootDestination>()
+    private val rootNav = StackNavigation<RootDestination>()
 
     override val rootStack: Value<ChildStack<*, IRootComponent.Screen>> = childStack(
-        source = navHostNav,
+        source = rootNav,
         initialConfiguration = RootDestination.None,
 //            handleBackButton = true,
         childFactory = ::createChild,
@@ -48,14 +48,14 @@ class RootComponent(
 
     private val appSettingsRepo: ISettingsRepository by di.instance(tag = "settings.local")
 
-    private val dbSettingsRepoFactory: (DatabaseArguments) -> ISettingsRepository by di.factory(tag = "settings.db")
+    //    private val dbSettingsRepoFactory: (DatabaseArguments) -> ISettingsRepository by di.factory(tag = "settings.db")
     private val userRepoFactory: (DatabaseArguments) -> IRepositoryObservable<User> by di.factory()
 
     private val _currentDBPath: MutableValue<String> = MutableValue("")
     override val currentDBPath: Value<String> = _currentDBPath
 
     override fun loadDatabase() {
-        navHostNav.replaceCurrent(RootDestination.DBSelector)
+        rootNav.replaceCurrent(RootDestination.DBSelector)
     }
 
     private suspend fun invalidateCurrentDBPath() {
@@ -67,6 +67,7 @@ class RootComponent(
     }
 
     private fun onDBSet(dbPath: String) {
+        log(dbPath, "onDBSet: ")
         // 1.check path existence
         val path = Path(dbPath)
         _currentDBPath.value = dbPath
@@ -74,20 +75,29 @@ class RootComponent(
             if (path.notExists()) {
                 //database is not exist - show DBSelector screen - to create or choose another one
                 withContext(Dispatchers.Main) {
-                    navHostNav.replaceCurrent(RootDestination.DBSelector)
+                    rootNav.replaceCurrent(RootDestination.DBSelector)
                 }
             } else {
                 //database exists - check user:
-                val userRepo = userRepoFactory(DatabaseArguments(path = dbPath))
+                try {
 
-                val user = userRepo.getByIDBlocking(userID).item
-                withContext(Dispatchers.Main) {
-                    if (user == null) {
-                        //user doesn't exist in given database - go create it
-                        navHostNav.replaceCurrent(RootDestination.UserCreate(dbPath = dbPath))
-                    } else {
-                        //user exists - go to logged screen
-                        navHostNav.replaceCurrent(RootDestination.LoggedIn(dbPath = dbPath, user = user))
+
+                    val userRepo = userRepoFactory(DatabaseArguments(path = dbPath))
+
+                    val user = userRepo.getByIDBlocking(userID).item
+                    withContext(Dispatchers.Main) {
+                        if (user == null) {
+                            //user doesn't exist in given database - go create it
+                            rootNav.replaceCurrent(RootDestination.UserCreate(dbPath = dbPath))
+                        } else {
+                            //user exists - go to logged screen
+                            rootNav.replaceCurrent(RootDestination.LoggedIn(dbPath = dbPath, user = user))
+                        }
+                    }
+                } catch (e: Throwable) {
+                    log("error while opening database: ${e.localizedMessage}")
+                    withContext(Dispatchers.Main) {
+                        rootNav.replaceCurrent(RootDestination.DBSelector)
                     }
                 }
             }
@@ -127,8 +137,12 @@ class RootComponent(
                     componentContext = componentContext,
                     dbPath = config.dbPath,
                     onUserCreated = {
-                        //user created in given database path -> show logged in screen
-                        navHostNav.replaceCurrent(RootDestination.LoggedIn(dbPath = config.dbPath, user = it))
+                        scope.launch {
+                            withContext(Dispatchers.Main) {
+                                //user created in given database path -> show logged in screen
+                                rootNav.replaceCurrent(RootDestination.LoggedIn(dbPath = config.dbPath, user = it))
+                            }
+                        }
                     })
             )
 

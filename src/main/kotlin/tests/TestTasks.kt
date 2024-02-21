@@ -1,6 +1,6 @@
 package tests
 
-import domain.SubTask
+import domain.SubCheck
 import domain.Task
 import domain.valueobjects.Attachment
 import domain.valueobjects.State
@@ -17,10 +17,10 @@ val testTask1 = Task(
         Attachment.InternetLink(name = "vendor's site", link = """http://www.ti.com"""),
         Attachment.Email(name = "Task manager", email = """boss@mail.ru""")
     ),
-    subtasks = listOf(
-        SubTask(name = "Открыть папку с проектом", description = "Адрес указан во вложении"),
-        SubTask(name = "Открыть файл проекта", description = "В соответствующей программе"),
-        SubTask(name = "Отправить результат", description = "На e-mail task manager")
+    subchecks = listOf(
+        SubCheck(name = "Открыть папку с проектом", description = "Адрес указан во вложении"),
+        SubCheck(name = "Открыть файл проекта", description = "В соответствующей программе"),
+        SubCheck(name = "Отправить результат", description = "На e-mail task manager")
 
     )
 )

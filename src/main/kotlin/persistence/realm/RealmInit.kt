@@ -1,9 +1,7 @@
 package persistence.realm
 
-import domain.ISettingsRepository
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
-import kotlinx.coroutines.runBlocking
 import settings.Settings
 import utils.UserUtils
 import utils.log
@@ -28,7 +26,7 @@ object RealmInit {
                 RealmUser::class,
                 RealmTeam::class,
                 RealmTask::class,
-                RealmSubTask::class,
+                RealmSubCheck::class,
                 RealmAttachment::class,
                 RealmTaskMessage::class,
                 RealmSetting::class,

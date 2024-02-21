@@ -6,7 +6,7 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.window.rememberDialogState
-import domain.EntitiesList
+import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import ui.EntitiesListUi
 import ui.dialogs.BaseDialogWindow
 import ui.theme.DialogSettings
@@ -16,7 +16,7 @@ fun <T> EntityPickerDialogUi(
     component: IBaseEntityPickerDialogComponent<T>,
     onDismiss: () -> Unit,
 ) {
-    val items by remember(component) { component.items }.collectAsState(EntitiesList.empty())
+    val items by remember(component) { component.items }.subscribeAsState()
     var selection by remember(component) { mutableStateOf(component.initialSelection) }
 
     val selectionMode = remember(component) { component.selectMode }
@@ -50,13 +50,12 @@ fun <T> EntityPickerDialogUi(
         content = {
             EntitiesListUi(
                 list = items,
-                initialSelection = selection,
                 selectMode = selectionMode,
-                itemRenderer = remember(component) { component.itemRenderer },
-                onSelectionChanged = {
-                    selection = it
-                }
-            )
+                initialSelection = selection,
+                itemRenderer = remember(component) { component.itemRenderer }
+            ) {
+                selection = it
+            }
         }
     )
 }

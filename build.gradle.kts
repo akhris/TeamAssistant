@@ -36,15 +36,6 @@ dependencies {
     implementation("com.arkivanov.decompose:decompose:$decomposeVersion")
     implementation("com.arkivanov.decompose:extensions-compose-jetbrains:$decomposeVersion")
 
-    //    exposed:
-    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
-
-    //sqlite driver:
-    implementation("org.xerial:sqlite-jdbc:$SQLiteDriverVersion")
-
     //for qualifiers
     implementation("javax.inject:javax.inject:1")
 

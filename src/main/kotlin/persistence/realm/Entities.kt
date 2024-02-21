@@ -4,12 +4,11 @@ import io.realm.kotlin.ext.realmDictionaryOf
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.ext.realmSetOf
 import io.realm.kotlin.types.*
-import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
 import org.mongodb.kbson.ObjectId
 import java.util.*
 
-class RealmTask() : RealmObject {
+class RealmTask: RealmObject {
     @PrimaryKey
     var _id: String = UUID.randomUUID().toString()
     var name: String = ""
@@ -20,7 +19,8 @@ class RealmTask() : RealmObject {
     var targetDate: RealmInstant? = null
     var completedAt: RealmInstant? = null
     var users: RealmSet<RealmUser> = realmSetOf()
-    var subtasks: RealmSet<RealmSubTask> = realmSetOf()
+    var parentTask: RealmTask? = null
+    var subchecks: RealmSet<RealmSubCheck> = realmSetOf()
     var attachments: RealmList<RealmAttachment> = realmListOf()
     var isPinned: Boolean = false
     var priority: Int = 1
@@ -28,7 +28,7 @@ class RealmTask() : RealmObject {
     var usersLastOnline: RealmDictionary<RealmInstant> = realmDictionaryOf()
 }
 
-class RealmSubTask() : RealmObject {
+class RealmSubCheck : RealmObject {
     @PrimaryKey
     var _id: String = UUID.randomUUID().toString()
     var name: String = ""
@@ -114,7 +114,7 @@ const val REALMSETTING_TYPE_BOOLEAN = "realm.setting.type.boolean"
 const val REALMSETTING_TYPE_PATH = "realm.setting.type.path"
 
 
-class RealmDBPolicy: RealmObject{
+class RealmDBPolicy : RealmObject {
     @PrimaryKey
     var _id: String = ""
     var name: String = ""
