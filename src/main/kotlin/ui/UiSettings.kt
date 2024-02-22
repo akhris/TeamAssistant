@@ -87,5 +87,9 @@ object UiSettings {
 
     }
 
+    object GroupedList {
+        val groupOffset = 16.dp
+    }
+
 
 }

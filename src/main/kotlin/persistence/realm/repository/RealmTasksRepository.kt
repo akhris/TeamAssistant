@@ -69,29 +69,18 @@ class RealmTasksRepository(private val realm: Realm) : IRepositoryObservable<Tas
     }
 
     override fun query(specifications: List<ISpecification>): Flow<EntitiesList<Task>> {
-        return (specifications.find { it is Specification.GetAllForUserID } as? Specification.GetAllForUserID)?.let { spec: Specification.GetAllForUserID ->
-            //show tasks:
-            //1. all team tasks for team admin
-            //2. all user-created tasks
-            //3. all tasks with user in list
-            realm
-                .query<RealmTask>(
-                    "creator._id == $0 OR users._id == $0 OR project.creator._id == $0 OR project.admins._id == $0",
-                    spec.userID
+        return buildQuery(specifications)
+            .find()
+            .asFlow()
+            .map {
+                EntitiesList.NotGrouped(
+                    it
+                        .list
+                        .map { it.toTask() }
                 )
-                .find()
-                .asFlow()
-                .map {
-                    EntitiesList.NotGrouped(
-                        it
-                            .list
-                            .map { it.toTask() }
-                    )
-                }
-                .distinctUntilChanged()
+            }
+            .distinctUntilChanged()
 
-
-        } ?: flowOf(EntitiesList.empty())
     }
 
     override suspend fun queryBlocking(specifications: List<ISpecification>): EntitiesList<Task> {
@@ -111,33 +100,33 @@ class RealmTasksRepository(private val realm: Realm) : IRepositoryObservable<Tas
             .filterIsInstance(Specification.GetAllForUserID::class.java)
             .forEach { spec ->
                 query = query
-                    .query("admins._id == $0 OR creator._id == $0", spec.userID)
+                    .query("creator._id == $0 OR users._id == $0 OR project.creator._id == $0 OR project.admins._id == $0", spec.userID)
             }
         //2. filter query:
         specifications
             .filterIsInstance(Specification.Filtered::class.java)
-            .forEach { spec ->
-                spec.filters.forEach { filter ->
-                    when (filter) {
-                        is FilterSpec.Range<*> -> {
+            .forEach { filtered ->
+                when (filtered.spec) {
+                    is FilterSpec.Range<*> -> {
 
-                        }
-
-                        is FilterSpec.Values -> {
-                            // https://github.com/realm/realm-kotlin/issues/929
-                            val values = filter.filteredValues.filterNotNull()
-                                .joinToString(separator = ",", prefix = "{", postfix = "}")
-                            val filterNot = when (spec.isFilteredOut) {
-                                true -> "not "
-                                false -> ""
-                            }
-                            query = query
-                                .query("${filter.columnName} ${filterNot}in $values")
-                        }
                     }
 
+                    is FilterSpec.Values -> {
+                        // https://github.com/realm/realm-kotlin/issues/929
+                        // https://www.mongodb.com/docs/realm/realm-query-language/
+                        val values =
+                            filtered.spec
+                                .filteredValues
+                                .filterNotNull()
+                                .joinToString(separator = ",", prefix = "{", postfix = "}", transform = { """'$it'""" })
+                        val filterNot = when (filtered.isFilteredOut) {
+                            true -> "not "
+                            false -> ""
+                        }
+                        query = query
+                            .query("${filterNot}${filtered.spec.columnName} IN $values")
+                    }
                 }
-
             }
         return query
     }

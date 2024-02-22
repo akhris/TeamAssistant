@@ -3,12 +3,16 @@ package ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import domain.EntitiesList
@@ -31,37 +35,45 @@ fun <T> EntitiesListUi(
     var filterPanelSize by remember { mutableStateOf(IntSize(0, 0)) }
     var bottomPanelSize by remember { mutableStateOf(IntSize(0, 0)) }
 
+
+
     Box(modifier = Modifier.fillMaxHeight()) {
         RenderFilterPanel(modifier = Modifier.onSizeChanged {
             filterPanelSize = it
         })
-        when (list) {
-            is EntitiesList.Grouped -> RenderGroupedList(list, selectMode, itemRenderer)
-            is EntitiesList.NotGrouped -> RenderNotGroupedList(
-                list = list,
-                selection = selection,
-                selectMode = selectMode,
-                itemRenderer = itemRenderer,
-                onItemClicked = { item ->
-                    when (selectMode) {
-                        SelectMode.MULTIPLE, SelectMode.SINGLE -> {
-                            selection = if (selection.contains(item)) {
-                                selection.minus(item)
-                            } else {
-                                selection.plus(item)
-                            }
-                        }
 
-                        SelectMode.NONSELECTABLE -> {
-                            onItemClicked?.invoke(item)
+        val listModifier = remember(filterPanelSize, bottomPanelSize) {
+            Modifier.padding(
+                top = filterPanelSize.height.dp,
+                bottom = bottomPanelSize.height.dp
+            )
+        }
+
+        RenderEntitiesList(
+            modifier = listModifier,
+            entitiesList = list,
+            selection = selection,
+            selectMode = selectMode,
+            itemRenderer = itemRenderer,
+            onItemClicked = { item ->
+                when (selectMode) {
+                    SelectMode.MULTIPLE, SelectMode.SINGLE -> {
+                        selection = if (selection.contains(item)) {
+                            selection.minus(item)
+                        } else {
+                            selection.plus(item)
                         }
                     }
-                },
-                topOffset = filterPanelSize,
-                bottomOffset = bottomPanelSize,
 
-                )
-        }
+                    SelectMode.NONSELECTABLE -> {
+                        onItemClicked?.invoke(item)
+                    }
+                }
+            },
+            topOffset = filterPanelSize,
+            bottomOffset = bottomPanelSize,
+        )
+
         onAddItemClick?.let { oaic ->
             RenderBottomAction(modifier = Modifier.align(Alignment.BottomCenter).onSizeChanged {
                 bottomPanelSize = it
@@ -110,98 +122,189 @@ private fun RenderBottomAction(
 }
 
 @Composable
-private fun <T> RenderGroupedList(
-    list: EntitiesList.Grouped<T>,
-    selectionMode: SelectMode,
+private fun <T> RenderEntitiesList(
+    modifier: Modifier = Modifier,
+    entitiesList: EntitiesList<T>,
+    selection: List<T>,
+    selectMode: SelectMode,
     itemRenderer: ItemRenderer<T>,
+    onItemClicked: ((T) -> Unit)? = null,
+    startOffset: Dp = 0.dp,
     topOffset: IntSize? = null,
+    bottomOffset: IntSize? = null,
 ) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        when (entitiesList) {
+            is EntitiesList.Grouped -> RenderGroupedList(
+                list = entitiesList,
+                selection, selectMode, itemRenderer, onItemClicked, startOffset, topOffset, bottomOffset
+            )
+
+            is EntitiesList.NotGrouped -> RenderNotGroupedList(
+                list = entitiesList.items,
+                selection, selectMode, itemRenderer, onItemClicked, startOffset, topOffset, bottomOffset
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun <T> ColumnScope.RenderGroupedList(
+    list: EntitiesList.Grouped<T>,
+    selection: List<T>,
+    selectMode: SelectMode,
+    itemRenderer: ItemRenderer<T>,
+    onItemClicked: ((T) -> Unit)? = null,
+    startOffset: Dp = 0.dp,
+    topOffset: IntSize? = null,
+    bottomOffset: IntSize? = null,
+) {
+
+    list
+        .items
+        .forEach { groupedItem ->
+            var isExpanded by remember { mutableStateOf(true) }
+
+            //title
+            groupedItem.parentItem?.let { pItem ->
+                RenderListItem(
+                    item = pItem,
+                    selection = selection,
+                    selectMode = selectMode, itemRenderer = itemRenderer, onItemClicked = onItemClicked,
+                    trailing = if (groupedItem.items.isNotEmpty()) {
+                        {
+                            IconButton(
+                                onClick = {
+                                    isExpanded = !isExpanded
+                                },
+                                content = {
+                                    Icon(
+                                        modifier = Modifier.rotate(if (isExpanded) 0f else 180f),
+                                        imageVector = Icons.Rounded.ArrowDropDown,
+                                        contentDescription = "show/hide subtasks"
+                                    )
+                                }
+                            )
+                        }
+                    } else null
+                )
+            }
+            //items:
+            if (isExpanded)
+                RenderEntitiesList(
+                    entitiesList = groupedItem.items,
+                    selection = selection,
+                    selectMode = selectMode,
+                    itemRenderer = itemRenderer,
+                    onItemClicked = onItemClicked,
+                    startOffset = startOffset + UiSettings.GroupedList.groupOffset,
+                    topOffset = topOffset,
+                    bottomOffset = bottomOffset
+                )
+        }
+}
+
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun <T> ColumnScope.RenderNotGroupedList(
+    list: List<T>,
+    selection: List<T>,
+    selectMode: SelectMode,
+    itemRenderer: ItemRenderer<T>,
+    onItemClicked: ((T) -> Unit)? = null,
+    startOffset: Dp = 0.dp,
+    topOffset: IntSize? = null,
+    bottomOffset: IntSize? = null,
+) {
+
+    list.forEach { item ->
+        RenderListItem(
+            item = item,
+            selection = selection,
+            selectMode = selectMode,
+            itemRenderer = itemRenderer,
+            onItemClicked = onItemClicked
+        )
+        Divider(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colors.onBackground.copy(alpha = 0.12f))
+
+    }
 
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun <T> RenderNotGroupedList(
-    list: EntitiesList.NotGrouped<T>,
+private fun <T> RenderListItem(
+    item: T,
     selection: List<T>,
     selectMode: SelectMode,
     itemRenderer: ItemRenderer<T>,
     onItemClicked: ((T) -> Unit)? = null,
-    topOffset: IntSize? = null,
-    bottomOffset: IntSize? = null,
+    trailing: @Composable (() -> Unit)? = null,
 ) {
-
-    val modifier = remember(topOffset, bottomOffset) {
-        Modifier.padding(top = topOffset?.height?.dp ?: 0.dp, bottom = bottomOffset?.height?.dp ?: 0.dp)
-    }
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        list.items.forEach { item ->
-
-            val iconRes =
-                remember(item, selection) {
-                    when (selectMode) {
-                        SelectMode.MULTIPLE -> {
-                            if (item in selection) {
-                                "vector/check_box_black_24dp.svg"
-                            } else {
-                                "vector/check_box_outline_blank_black_24dp.svg"
-                            }
-                        }
-
-                        SelectMode.NONSELECTABLE -> {
-                            itemRenderer.getIconPath(item)
-                        }
-
-                        SelectMode.SINGLE -> {
-                            if (item in selection) {
-                                "vector/radio_button_checked_black_24dp.svg"
-                            } else {
-                                "vector/radio_button_unchecked_black_24dp.svg"
-                            }
-                        }
+    val iconRes =
+        remember(item, selection) {
+            when (selectMode) {
+                SelectMode.MULTIPLE -> {
+                    if (item in selection) {
+                        "vector/check_box_black_24dp.svg"
+                    } else {
+                        "vector/check_box_outline_blank_black_24dp.svg"
                     }
                 }
 
-            ListItem(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .clickable(
-                        onClick = {
-                            onItemClicked?.invoke(item)
-                        },
-                        enabled = onItemClicked != null
-                    ),
-                text = {
-                    Text(text = itemRenderer.getPrimaryText(item) ?: "")
-                }, secondaryText = itemRenderer.getSecondaryText(item)?.let {
-                    if (it.isEmpty()) {
-                        null
-                    } else {
-                        { Text(it) }
-                    }
-                }, overlineText = itemRenderer.getOverlineText(item)?.let {
-                    if (it.isEmpty()) {
-                        null
-                    } else {
-                        { Text(it) }
-                    }
-                }, icon = iconRes?.let { icon ->
-                    {
-                        Icon(
-                            painter = painterResource(icon),
-                            contentDescription = null,
-                            tint = itemRenderer.getIconTint(item)
-                                ?: LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
-                        )
-                    }
-                })
-            Divider(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colors.onBackground.copy(alpha = 0.12f))
+                SelectMode.NONSELECTABLE -> {
+                    itemRenderer.getIconPath(item)
+                }
 
+                SelectMode.SINGLE -> {
+                    if (item in selection) {
+                        "vector/radio_button_checked_black_24dp.svg"
+                    } else {
+                        "vector/radio_button_unchecked_black_24dp.svg"
+                    }
+                }
+            }
         }
-    }
+
+    ListItem(
+        modifier = Modifier
+            .padding(4.dp)
+            .clickable(
+                onClick = {
+                    onItemClicked?.invoke(item)
+                },
+                enabled = onItemClicked != null
+            ),
+        text = {
+            Text(text = itemRenderer.getPrimaryText(item) ?: "")
+        }, secondaryText = itemRenderer.getSecondaryText(item)?.let {
+            if (it.isEmpty()) {
+                null
+            } else {
+                { Text(it) }
+            }
+        }, overlineText = itemRenderer.getOverlineText(item)?.let {
+            if (it.isEmpty()) {
+                null
+            } else {
+                { Text(it) }
+            }
+        }, icon = iconRes?.let { icon ->
+            {
+                Icon(
+                    painter = painterResource(icon),
+                    contentDescription = null,
+                    tint = itemRenderer.getIconTint(item)
+                        ?: LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+                )
+            }
+        }, trailing = trailing
+    )
 }
 
 

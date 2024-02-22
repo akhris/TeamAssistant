@@ -34,6 +34,7 @@ import ui.fields.DateTimeChip
 import ui.fields.EditableTextField
 import ui.screens.BaseDetailsScreen
 import ui.screens.master_detail.IDetailsComponent
+import utils.log
 import java.time.DayOfWeek
 import java.time.LocalDateTime
 
@@ -51,7 +52,12 @@ fun TaskDetailsUi(component: IDetailsComponent<Task>) {
             isEditable = setOfNotNull(t.creator).contains(component.currentUser),
             isControllable = setOfNotNull(t.creator).plus(t.users).contains(component.currentUser),
             onTaskUpdated = { updatedTask ->
-                component.updateItem(updatedTask)
+                try {
+                    component.updateItem(updatedTask)
+                } catch (e: Exception) {
+                    log(e.localizedMessage, "error while updating task:")
+                    // TODO: show error dialog using navController
+                }
             },
             onAddUsersClicked = {
                 navController?.showUsersPickerDialog(

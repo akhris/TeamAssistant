@@ -15,7 +15,7 @@ sealed class EntitiesList<T> {
     data class NotGrouped<T>(val items: List<T>) : EntitiesList<T>()
 
     fun isNotEmpty(): Boolean {
-        return when(this){
+        return when (this) {
             is Grouped -> items.isNotEmpty()
             is NotGrouped -> items.isNotEmpty()
         }
@@ -26,13 +26,26 @@ sealed class EntitiesList<T> {
     }
 }
 
+fun <T> EntitiesList<T>.flatten(): List<T> = when (this) {
+    is EntitiesList.Grouped -> {
+        items.flatMap {
+            listOfNotNull(it.parentItem).plus(it.items.flatten())
+        }
+    }
+
+    is EntitiesList.NotGrouped -> {
+        this.items
+    }
+}
+
 data class GroupedItem<T>(
     val groupID: GroupID,
-    val items: List<T>
+    val parentItem: T?,
+    val items: EntitiesList<T>,
 )
 
 data class GroupID(
     val categoryName: String,
     val key: Any?,
-    val keyName: String? = null
+    val keyName: String? = null,
 )

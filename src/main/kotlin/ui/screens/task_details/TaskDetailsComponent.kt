@@ -18,7 +18,7 @@ class TaskDetailsComponent(
     di: DI,
     componentContext: ComponentContext,
     dpPath: String,
-    override val currentUser: User
+    override val currentUser: User,
 ) : IDetailsComponent<Task>, BaseComponent(componentContext) {
 
     private val repo: IRepositoryObservable<Task> by di.instance(arg = DatabaseArguments(path = dpPath))
@@ -56,9 +56,41 @@ class TaskDetailsComponent(
 
     override fun updateItem(item: Task) {
         scope.launch {
-            repo.update(item)
+            // TODO: check children-parents relations here:
+            //1. get all current children tasks tree:
+            val taskWithChildren = getTaskWithChildren(item.id)
+            val parentNotInTree = taskWithChildren?.let {
+                it.flatten().find { it.id == item.parentTask?.id } == null
+            } ?: true
+            if (parentNotInTree)
+                repo.update(item)
+            else {
+                throw IllegalArgumentException("cannot set ${item.parentTask} as parent: already in the task tree")
+            }
         }
     }
+
+    private suspend fun getTaskWithChildren(id: String): TaskWithChildren? {
+        val task = repo.getByIDBlocking(id).item
+        return task?.let {
+            val children = repo.queryBlocking(
+                listOf(
+                    Specification.Filtered(
+                        FilterSpec.Values(
+                            filteredValues = listOf(it.id),
+                            columnName = "parentTask._id"
+                        )
+                    )
+                )
+            )
+                .flatten()
+                .mapNotNull {
+                    getTaskWithChildren(id = it.id)
+                }
+            TaskWithChildren(it, children)
+        }
+    }
+
 
     override fun removeItem(item: Task) {
         scope.launch {
@@ -84,6 +116,4 @@ class TaskDetailsComponent(
         object None : DialogConfig()
 
     }
-
-
 }

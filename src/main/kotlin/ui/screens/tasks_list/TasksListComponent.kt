@@ -9,6 +9,7 @@ import com.arkivanov.essenty.parcelable.Parcelize
 import domain.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import org.kodein.di.DI
 import org.kodein.di.instance
 import settings.DatabaseArguments
@@ -24,7 +25,7 @@ class TasksListComponent(
     componentContext: ComponentContext,
     private val onTaskSelected: (String) -> Unit,
     private val dpPath: String,
-    override val currentUser: User
+    override val currentUser: User,
 ) : IMasterComponent<Task>, ComponentContext by componentContext {
 
     private val scope =
@@ -38,7 +39,15 @@ class TasksListComponent(
 
     override val filterSpecs: Flow<List<FilterSpec>>? = repo.getFilterSpecs()
 
-    override val items: Flow<EntitiesList<Task>> = repo.query(listOf(Specification.GetAllForUserID(userID)))
+    override val items: Flow<EntitiesList<Task>> =
+        repo
+            .query(listOf(Specification.GetAllForUserID(userID)))
+            .map { rawList ->
+                when (rawList) {
+                    is EntitiesList.Grouped -> rawList
+                    is EntitiesList.NotGrouped -> rawList.groupByParents()
+                }
+            }
 
 
     override fun onAddNewItem(item: Task) {

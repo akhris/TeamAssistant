@@ -50,17 +50,21 @@ class TaskPickerComponent(
             listOf(
                 Specification.QueryAll,
                 Specification.Filtered(
-                    filters = listOf(
-                        FilterSpec.Values(
-                            filteredValues = hiddenItems.map { it.id },
-                            columnName = "parentTask"
-                        )
+                    spec = FilterSpec.Values(
+                        filteredValues = hiddenItems.map { it.id },
+                        columnName = "_id"
                     ),
                     isFilteredOut = true
-                )
+                ),
+//                Specification.Filtered(
+//                    spec = FilterSpec.Values(
+//                        filteredValues = hiddenItems.map { it.id },
+//                        columnName = "parentTask._id"
+//                    ),
+//                    isFilteredOut = true
+//                )
             )
         )
-        // TODO: add specification to filter out instead of passing hidden out
         _items.value = loadedItems
     }
 
