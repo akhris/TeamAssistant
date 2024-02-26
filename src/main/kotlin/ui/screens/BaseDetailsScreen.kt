@@ -2,13 +2,11 @@ package ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ui.FABState
 import ui.UiSettings
 import utils.applyTextStyle
 
@@ -79,7 +77,7 @@ private fun BaseDetailsScreenPattern(
             ModalBottomSheetLayout(
                 modifier = Modifier.weight(1f),
                 sheetState = bottomSheetState,
-                sheetShape = UiSettings.DetailsScreen.bottomSheetShape,
+                sheetShape = UiSettings.MasterDetailsScreen.bottomSheetShape,
                 sheetContent = {
                     bottomSheetContent()
                 }
@@ -88,7 +86,7 @@ private fun BaseDetailsScreenPattern(
                     modifier = Modifier
                         .weight(1f)
                         .background(MaterialTheme.colors.surface)
-                        .padding(UiSettings.DetailsScreen.mainPanelPadding)
+                        .padding(UiSettings.MasterDetailsScreen.mainPanelPadding)
                 ) {
                     //main content
                     mainContent()
@@ -99,7 +97,7 @@ private fun BaseDetailsScreenPattern(
                 modifier = Modifier
                     .weight(1f)
                     .background(MaterialTheme.colors.surface)
-                    .padding(UiSettings.DetailsScreen.mainPanelPadding)
+                    .padding(UiSettings.MasterDetailsScreen.mainPanelPadding)
             ) {
                 //main content
                 mainContent()

@@ -40,8 +40,8 @@ sealed class NavItem(val pathToIcon: String, val title: String) {
     companion object {
         fun getMainNavigationItems() =
             listOf(
-                Tasks,
                 Projects,
+                Tasks,
 //                Team,
                 Users
             )

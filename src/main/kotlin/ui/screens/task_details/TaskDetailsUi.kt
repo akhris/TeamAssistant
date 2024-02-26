@@ -122,7 +122,7 @@ private fun RenderTaskDetails(
                         dateTime = tempTask.targetDate,
                         label = "срок выполнения",
                         isEditable = isEditable,
-                        shape = UiSettings.DetailsScreen.tagsShape,
+                        shape = UiSettings.MasterDetailsScreen.tagsShape,
                         onDateTimeChanged = { tempTask = tempTask.copy(targetDate = it) })
             }
         } else null,
@@ -264,7 +264,7 @@ private fun RenderMainTag(task: Task, isEditable: Boolean, onTaskUpdated: (Task)
         //show parent project
         task.project?.let { project ->
             Chip(
-                shape = UiSettings.DetailsScreen.tagsShape,
+                shape = UiSettings.MasterDetailsScreen.tagsShape,
                 onClick = {
                     if (isEditable)
                         navController?.showProjectsPickerDialog(
@@ -303,7 +303,7 @@ private fun RenderMainTag(task: Task, isEditable: Boolean, onTaskUpdated: (Task)
         //todo show parent task chip here
         task.parentTask?.let { parentTask ->
             Chip(
-                shape = UiSettings.DetailsScreen.tagsShape,
+                shape = UiSettings.MasterDetailsScreen.tagsShape,
                 onClick = {
                     if (isEditable)
                         navController?.showTasksPickerDialog(
@@ -435,8 +435,8 @@ private fun ColumnScope.RenderAttachments(
     var addAttachment by remember { mutableStateOf(false) }
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(UiSettings.DetailsScreen.chipsHorizontalSpacing),
-        verticalArrangement = Arrangement.spacedBy(UiSettings.DetailsScreen.chipsVerticalSpacing)
+        horizontalArrangement = Arrangement.spacedBy(UiSettings.MasterDetailsScreen.chipsHorizontalSpacing),
+        verticalArrangement = Arrangement.spacedBy(UiSettings.MasterDetailsScreen.chipsVerticalSpacing)
     ) {
         attachments.forEachIndexed { index, attachment ->
             RenderAttachment(
@@ -533,8 +533,8 @@ private fun ColumnScope.RenderSubTasks(
 
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(UiSettings.DetailsScreen.chipsHorizontalSpacing),
-        verticalArrangement = Arrangement.spacedBy(UiSettings.DetailsScreen.chipsVerticalSpacing)
+        horizontalArrangement = Arrangement.spacedBy(UiSettings.MasterDetailsScreen.chipsHorizontalSpacing),
+        verticalArrangement = Arrangement.spacedBy(UiSettings.MasterDetailsScreen.chipsVerticalSpacing)
     ) {
         subtasks.forEachIndexed { index, subtask ->
             RenderSubTask(subtask = subtask, isControllable = isControllable, onClick = {

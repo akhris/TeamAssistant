@@ -1,10 +1,7 @@
 package ui.screens.user_details
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,24 +13,28 @@ import kotlinx.coroutines.delay
 import tests.testUser1
 import ui.UiSettings
 import ui.fields.EditableTextField
+import ui.screens.BaseDetailsScreen
 import ui.screens.master_detail.IDetailsComponent
 
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun UserDetailsUi(component: IDetailsComponent<User>) {
 
     val user by remember(component) { component.item }.collectAsState(null)
 
-    var tempUser by remember(user) { mutableStateOf(user) }
+//    var tempUser by remember(user) { mutableStateOf(user) }
 
     user?.let {
+
+
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             RenderUserCard(
                 it,
                 it.id == component.currentUser.id,
                 onUserEdited = { editedUser ->
-                    tempUser = editedUser
-//                component.updateUser(editedUser)
+//                    tempUser = editedUser
+                    component.updateItem(editedUser)
                 }
             )
         }
@@ -41,92 +42,99 @@ fun UserDetailsUi(component: IDetailsComponent<User>) {
 
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun RenderUserCard(
     user: User,
     isEditable: Boolean,
-    onUserEdited: ((User) -> Unit)? = null
+    onUserEdited: ((User) -> Unit)? = null,
 ) {
 
-    var tempUser by remember(user) { mutableStateOf(user) }
+    var tempUser by remember { mutableStateOf(user) }
 
-    Card {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            //1. User Icon
-            Icon(
-                modifier = Modifier.size(128.dp),
-                painter = painterResource("vector/users/person_black_24dp.svg"),
-                contentDescription = "user icon"
-            )
-            //2. Name/surname fields
-            EditableTextField(
-                value = tempUser.name,
-                onValueChange = { tempUser = tempUser.copy(name = it) },
-                isEditable = isEditable,
-                label = "имя"
-            )
-            EditableTextField(
-                value = tempUser.middleName,
-                onValueChange = { tempUser = tempUser.copy(middleName = it) },
-                isEditable = isEditable,
-                label = "отчество"
+    BaseDetailsScreen(
+        title = {
+            Column {
+                EditableTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = tempUser.name,
+                    isEditable = isEditable,
+                    onValueChange = {
+                        tempUser = tempUser.copy(name = it)
+                    },
+                    label = if (tempUser.name.isEmpty()) "имя" else "",
+                    withClearIcon = true
+                )
 
-            )
-            EditableTextField(
-                value = tempUser.surname,
-                onValueChange = { tempUser = tempUser.copy(surname = it) },
-                isEditable = isEditable,
-                label = "фамилия"
-            )
-            //3. Room
-            EditableTextField(
-                value = tempUser.roomNumber,
-                onValueChange = { tempUser = tempUser.copy(roomNumber = it) },
-                isEditable = isEditable,
-                label = "комната"
+                EditableTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = tempUser.middleName,
+                    isEditable = isEditable,
+                    onValueChange = {
+                        tempUser = tempUser.copy(middleName = it)
+                    },
+                    label = if (tempUser.middleName.isEmpty()) "отчество" else "",
+                    withClearIcon = true
+                )
 
-            )
-            //4. Phone number
-            EditableTextField(
-                value = tempUser.phoneNumber,
-                onValueChange = { tempUser = tempUser.copy(phoneNumber = it) },
-                isEditable = isEditable,
-                label = "телефон"
-            )
-            //5. Email
-            EditableTextField(
-                value = tempUser.email,
-                onValueChange = { tempUser = tempUser.copy(email = it) },
-                isEditable = isEditable,
-                label = "email"
-            )
-//
-//            if (isEditable && tempUser != user) {
-//                Row {
-//                    OutlinedButton(content = {
-//                        Text("отмена")
-//                    }, onClick = {
-//                        tempUser = user
-//                    })
-//
-//                    Button(content = {
-//                        Text("сохранить")
-//                    }, onClick = {
-//                        onUserEdited?.let { it(tempUser) }
-//                    })
-//                }
-//            }
-
-            LaunchedEffect(tempUser) {
-//                if (tempUser == user) {
-//                    return@LaunchedEffect
-//                }
-                delay(UiSettings.Debounce.debounceTime)
-                onUserEdited?.let { it(tempUser) }
+                EditableTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = tempUser.surname,
+                    isEditable = isEditable,
+                    onValueChange = {
+                        tempUser = tempUser.copy(surname = it)
+                    },
+                    label = if (tempUser.surname.isEmpty()) "фамилия" else "",
+                    withClearIcon = true
+                )
             }
+        },
+        description = {
+            EditableTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = tempUser.roomNumber,
+                isEditable = isEditable,
+                onValueChange = {
+                    tempUser = tempUser.copy(roomNumber = it)
+                },
+                label = if (tempUser.roomNumber.isEmpty()) "комната" else "",
+                withClearIcon = true
+            )
 
+            EditableTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = tempUser.phoneNumber,
+                isEditable = isEditable,
+                onValueChange = {
+                    tempUser = tempUser.copy(phoneNumber = it)
+                },
+                label = if (tempUser.phoneNumber.isEmpty()) "телефон" else "",
+                withClearIcon = true
+            )
+
+            EditableTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = tempUser.email,
+                isEditable = isEditable,
+                onValueChange = {
+                    tempUser = tempUser.copy(email = it)
+                },
+                label = if (tempUser.email.isEmpty()) "e-mail" else "",
+                withClearIcon = true
+            )
         }
+    )
+
+
+    LaunchedEffect(tempUser) {
+        if (tempUser == user) {
+            return@LaunchedEffect
+        }
+        delay(UiSettings.Debounce.debounceTime)
+        onUserEdited?.let { it(tempUser) }
     }
+
+
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -135,7 +143,7 @@ private fun RenderUserDetailsTextField(
     value: String,
     onValueChange: (newValue: String) -> Unit,
     isEditable: Boolean,
-    label: String
+    label: String,
 ) {
     if (isEditable)
         TextField(

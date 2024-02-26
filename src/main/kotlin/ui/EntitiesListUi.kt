@@ -57,7 +57,15 @@ fun <T> EntitiesListUi(
             itemRenderer = itemRenderer,
             onItemClicked = { item ->
                 when (selectMode) {
-                    SelectMode.MULTIPLE, SelectMode.SINGLE -> {
+                    SelectMode.SINGLE -> {
+                        selection = if (selection.contains(item)) {
+                            listOf()
+                        } else {
+                            listOf(item)
+                        }
+                    }
+
+                    SelectMode.MULTIPLE -> {
                         selection = if (selection.contains(item)) {
                             selection.minus(item)
                         } else {
@@ -190,7 +198,8 @@ private fun <T> ColumnScope.RenderGroupedList(
                                 }
                             )
                         }
-                    } else null
+                    } else null,
+                    startOffset = startOffset
                 )
             }
             //items:
@@ -228,7 +237,8 @@ private fun <T> ColumnScope.RenderNotGroupedList(
             selection = selection,
             selectMode = selectMode,
             itemRenderer = itemRenderer,
-            onItemClicked = onItemClicked
+            onItemClicked = onItemClicked,
+            startOffset = startOffset
         )
         Divider(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colors.onBackground.copy(alpha = 0.12f))
 
@@ -245,6 +255,7 @@ private fun <T> RenderListItem(
     itemRenderer: ItemRenderer<T>,
     onItemClicked: ((T) -> Unit)? = null,
     trailing: @Composable (() -> Unit)? = null,
+    startOffset: Dp = 0.dp,
 ) {
     val iconRes =
         remember(item, selection) {
@@ -273,7 +284,7 @@ private fun <T> RenderListItem(
 
     ListItem(
         modifier = Modifier
-            .padding(4.dp)
+            .padding(start = startOffset)
             .clickable(
                 onClick = {
                     onItemClicked?.invoke(item)

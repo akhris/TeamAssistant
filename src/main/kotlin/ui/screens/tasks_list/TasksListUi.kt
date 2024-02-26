@@ -43,14 +43,14 @@ fun TasksListUi(component: IMasterComponent<Task>) {
 
             override fun getSecondaryText(item: Task) = item.creator?.getInitials() ?: ""
 
-            override fun getOverlineText(item: Task) = null
+            override fun getOverlineText(item: Task) = item.project?.name
 
             override fun getIconPath(item: Task): String = "vector/circle_black_24dp.svg"
 
             override fun getIconTint(item: Task): Color? = item.project?.color?.let { Color(it) }
 
         },
-        onItemClicked = {component.onItemClicked(it)},
+        onItemClicked = { component.onItemClicked(it) },
         onAddItemClick = {
             showAddNewTaskDialog = true
         }

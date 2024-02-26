@@ -38,7 +38,8 @@ object UiSettings {
         val screenPadding = 4.dp
     }
 
-    object DetailsScreen {
+    object MasterDetailsScreen {
+        val masterPanelWidth = 240.dp
         val rightPanelWidth = 80.dp
         val mainPanelPadding = 32.dp
         val tagsShape = RoundedCornerShape(4.dp)
