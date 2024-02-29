@@ -81,6 +81,10 @@ object UiSettings {
         val panelHeight: Dp = 56.dp
     }
 
+    object ColorPicker {
+        val colorCircleSize: Dp = 48.dp
+    }
+
     object Dialogs {
         val defaultWideDialogWidth = 480.dp
         val defaultWideDialogHeight = 640.dp

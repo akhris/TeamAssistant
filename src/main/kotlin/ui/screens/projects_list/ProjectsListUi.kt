@@ -1,6 +1,7 @@
 package ui.screens.projects_list
 
 import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Color
 import domain.EntitiesList
 import domain.Project
 import ui.EntitiesListUi
@@ -28,6 +29,8 @@ fun ProjectsListUi(component: IMasterComponent<Project>) {
 
             override fun getIconPath(item: Project): String =
                 item.icon.ifEmpty { "vector/projects/rocket_black_24dp.svg" }
+
+            override fun getIconTint(item: Project): Color? = item.color?.let { Color(it) }
 
         },
         onItemClicked = { component.onItemClicked(it) },

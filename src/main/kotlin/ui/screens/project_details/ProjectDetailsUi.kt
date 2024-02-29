@@ -8,12 +8,15 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import domain.Project
 import domain.Team
 import kotlinx.coroutines.delay
 import ui.UiSettings
+import ui.dialogs.ColorPickerDialog
 import ui.dialogs.IconsPickerDialog
 import ui.fields.CircleIconButton
 import ui.fields.EditableTextField
@@ -28,7 +31,7 @@ fun ProjectDetailsUi(component: IDetailsComponent<Project>) {
     project?.let {
         RenderProjectDetails(
             project = it,
-            isEditable = listOfNotNull(it.creator).contains( component.currentUser),
+            isEditable = listOfNotNull(it.creator).contains(component.currentUser),
             onProjectUpdated = { updatedProject ->
                 component.updateItem(updatedProject)
             }
@@ -44,6 +47,7 @@ private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjec
     var tempProject by remember(project) { mutableStateOf(project) }
 
     var showIconPicker by remember { mutableStateOf(false) }
+    var showColorPicker by remember { mutableStateOf(false) }
     var showForum by remember { mutableStateOf(false) }
     val navController = LocalNavController.current
     BaseDetailsScreen(
@@ -55,11 +59,11 @@ private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjec
                         .size(64.dp)
                         .clickable {
                             showIconPicker = true
-                        }
-
-                        ,
+                        },
                     painter = painterResource(tempProject.icon.ifEmpty { "vector/broken_image_black_24dp.svg" }),
-                    contentDescription = "иконка проекта"
+                    contentDescription = "иконка проекта",
+                    tint = tempProject.color?.let { Color(it) }
+                        ?: LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
                 )
                 EditableTextField(
                     modifier = Modifier.weight(1f),
@@ -90,6 +94,9 @@ private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjec
                 )
             }
         } else null,
+        secondaryTag = {
+            TextButton(onClick = { showColorPicker = true }, content = { Text("установить цвет") })
+        }
 //        rightPanel = {
 //            Text(modifier = Modifier.padding(4.dp), text = "команды", style = MaterialTheme.typography.caption)
 //
@@ -146,6 +153,16 @@ private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjec
             initialSelection = tempProject.icon,
             onIconPicked = { tempProject = tempProject.copy(icon = it) },
             onDismiss = { showIconPicker = false }
+        )
+    }
+
+    if (showColorPicker) {
+        ColorPickerDialog(
+            initialSelection = tempProject.color?.let { Color(it) },
+            onColorPicked = {
+                tempProject = tempProject.copy(color = it?.toArgb())
+            },
+            onDismiss = { showColorPicker = false }
         )
     }
 

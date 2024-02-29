@@ -27,7 +27,6 @@ fun UserDetailsUi(component: IDetailsComponent<User>) {
 
     user?.let {
 
-
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             RenderUserCard(
                 it,
@@ -62,7 +61,7 @@ fun RenderUserCard(
                     onValueChange = {
                         tempUser = tempUser.copy(name = it)
                     },
-                    label = if (tempUser.name.isEmpty()) "имя" else "",
+                    label = "имя",
                     withClearIcon = true
                 )
 
@@ -73,7 +72,7 @@ fun RenderUserCard(
                     onValueChange = {
                         tempUser = tempUser.copy(middleName = it)
                     },
-                    label = if (tempUser.middleName.isEmpty()) "отчество" else "",
+                    label = "отчество",
                     withClearIcon = true
                 )
 
@@ -84,7 +83,7 @@ fun RenderUserCard(
                     onValueChange = {
                         tempUser = tempUser.copy(surname = it)
                     },
-                    label = if (tempUser.surname.isEmpty()) "фамилия" else "",
+                    label = "фамилия",
                     withClearIcon = true
                 )
             }
@@ -97,7 +96,7 @@ fun RenderUserCard(
                 onValueChange = {
                     tempUser = tempUser.copy(roomNumber = it)
                 },
-                label = if (tempUser.roomNumber.isEmpty()) "комната" else "",
+                label = "комната",
                 withClearIcon = true
             )
 
@@ -108,7 +107,7 @@ fun RenderUserCard(
                 onValueChange = {
                     tempUser = tempUser.copy(phoneNumber = it)
                 },
-                label = if (tempUser.phoneNumber.isEmpty()) "телефон" else "",
+                label = "телефон",
                 withClearIcon = true
             )
 
@@ -119,7 +118,7 @@ fun RenderUserCard(
                 onValueChange = {
                     tempUser = tempUser.copy(email = it)
                 },
-                label = if (tempUser.email.isEmpty()) "e-mail" else "",
+                label = "e-mail",
                 withClearIcon = true
             )
         }
