@@ -1,7 +1,9 @@
 package ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowDropDown
@@ -12,11 +14,13 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import domain.EntitiesList
 import kotlinx.coroutines.delay
+import utils.oppositeColor
 
 @Composable
 fun <T> EntitiesListUi(
@@ -303,7 +307,16 @@ private fun <T> RenderListItem(
             if (it.isEmpty()) {
                 null
             } else {
-                { Text(it) }
+                {
+
+                    Text(
+                        style = MaterialTheme.typography.overline.copy(
+                            background = itemRenderer.getOverlineBackgroundColor(item) ?: Color.Unspecified,
+                        ),
+                        text = it,
+                        color = itemRenderer.getOverlineBackgroundColor(item)?.oppositeColor() ?: Color.Unspecified
+                    )
+                }
             }
         }, icon = iconRes?.let { icon ->
             {
@@ -323,6 +336,8 @@ interface ItemRenderer<T> {
     fun getPrimaryText(item: T): String? = null
     fun getSecondaryText(item: T): String? = null
     fun getOverlineText(item: T): String? = null
+
+    fun getOverlineBackgroundColor(item: T): Color? = null
     fun getIconPath(item: T): String? = null
     fun getIconTint(item: T): Color? = null
 }

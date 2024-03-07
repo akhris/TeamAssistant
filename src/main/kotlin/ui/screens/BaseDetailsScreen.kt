@@ -16,7 +16,7 @@ import utils.applyTextStyle
 fun BaseDetailsScreen(
     mainTag: @Composable() (() -> Unit)? = null,
     secondaryTag: @Composable() (() -> Unit)? = null,
-    attachments: @Composable() (ColumnScope.() -> Unit)? = null,
+    body: @Composable() (ColumnScope.() -> Unit)? = null,
     title: @Composable() (() -> Unit)? = null,
     description: @Composable() (() -> Unit)? = null,
     rightPanel: @Composable() (ColumnScope.() -> Unit)? = null,
@@ -43,7 +43,7 @@ fun BaseDetailsScreen(
                         //secondary tags:
                         styledSecondaryTag?.invoke()
                         //attachments:
-                        attachments?.invoke(this)
+                        body?.invoke(this)
                     }
                 }
             }

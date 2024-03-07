@@ -22,6 +22,7 @@ import ui.fields.CircleIconButton
 import ui.fields.EditableTextField
 import ui.screens.BaseDetailsScreen
 import ui.screens.master_detail.IDetailsComponent
+import ui.screens.task_details.RenderUserListItem
 import utils.ResourcesUtils
 
 @Composable
@@ -96,6 +97,15 @@ private fun RenderProjectDetails(project: Project, isEditable: Boolean, onProjec
         } else null,
         secondaryTag = {
             TextButton(onClick = { showColorPicker = true }, content = { Text("установить цвет") })
+        },
+        rightPanel = {
+            tempProject.creator?.let { creator ->
+                Text(modifier = Modifier.padding(4.dp), text = "создатель", style = MaterialTheme.typography.caption)
+                RenderUserListItem(
+                    user = creator,
+                    isCreator = true
+                )
+            }
         }
 //        rightPanel = {
 //            Text(modifier = Modifier.padding(4.dp), text = "команды", style = MaterialTheme.typography.caption)

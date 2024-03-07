@@ -23,7 +23,7 @@ fun ProjectsListUi(component: IMasterComponent<Project>) {
         itemRenderer = object : ItemRenderer<Project> {
             override fun getPrimaryText(item: Project) = item.name
 
-            override fun getSecondaryText(item: Project) = item.creator?.getInitials() ?: ""
+//            override fun getSecondaryText(item: Project) = item.creator?.getInitials() ?: ""
 
             override fun getOverlineText(item: Project) = null
 

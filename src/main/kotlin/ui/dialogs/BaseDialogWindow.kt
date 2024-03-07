@@ -50,7 +50,9 @@ fun BaseDialogWindow(
                             }
                         }
                     }
-                    Box(modifier = Modifier.weight(1f)) {
+                    Box(
+                        modifier = Modifier.weight(1f).align(Alignment.CenterHorizontally)
+                    ) {
                         content()
                     }
                     buttons?.let { b ->

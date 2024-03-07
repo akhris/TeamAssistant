@@ -3,25 +3,25 @@ package ui.dialogs
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.Icon
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Done
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.rememberDialogState
 import ui.UiSettings
-import ui.fields.CircleIconButton
 import ui.theme.DialogSettings
+import utils.oppositeColor
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -31,15 +31,29 @@ fun ColorPickerDialog(
     onDismiss: () -> Unit,
     circlesSize: Dp = UiSettings.ColorPicker.colorCircleSize,
     colors: List<Color> = listOf(
-        Color.DarkGray,
-        Color.Green,
-        Color.Blue,
-        Color.Cyan,
-        Color.Gray,
-        Color.Magenta,
-        Color.Red,
-        Color.Yellow
-    ),
+        Color(0xFF7FFFD4),
+        Color(0xFF00BFFF),
+        Color(0xFF8A2BE2),
+        Color(0xFFDE3163),
+        Color(0xFFFDEE00),
+        Color(0xFFEF9B0F),
+        Color(0xFFAB274F),
+        Color(0xFFFF00FF),
+        Color(0xFF91A3B0),
+        Color(0xFFACE1AF),
+        Color(0xFF80FF00),
+        Color(0xFFFF4F00),
+        Color(0xFFE09540),
+        Color(0xFFFCF75E),
+        Color(0xFF007FFF),
+        Color(0xFF4F7942),
+        Color(0xFFFFFF00),
+        Color(0xFF808000),
+        Color(0xFFFFDEAD),
+        Color(0xFF1E2952),
+
+
+        ).sortedBy { it.toArgb() },
 ) {
 
     val dialogState = rememberDialogState(
@@ -73,9 +87,11 @@ fun ColorPickerDialog(
         },
         content = {
             FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.CenterHorizontally),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxSize().padding(vertical = 8.dp).verticalScroll(rememberScrollState())
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .verticalScroll(rememberScrollState())
             ) {
                 colors.forEach { color ->
                     Box(
@@ -83,16 +99,15 @@ fun ColorPickerDialog(
                             .size(circlesSize)
                             .clip(CircleShape)
                             .background(color)
-                            .border(1.dp, MaterialTheme.colors.onBackground, CircleShape)
+                            .border(1.dp, Color.Unspecified, CircleShape)
                             .clickable { selectedColor = color },
                         contentAlignment = Alignment.Center,
                         content = {
                             if (color == selectedColor) {
-                                Image(
-                                    Icons.Rounded.Done,
-                                    contentDescription = null,
-                                    colorFilter = ColorFilter.tint(color, blendMode = BlendMode.ColorDodge),
-                                    contentScale = ContentScale.Fit,
+                                Icon(
+                                    imageVector = Icons.Rounded.Done,
+                                    tint = color.oppositeColor(),
+                                    contentDescription = "selected color",
                                     modifier = Modifier.fillMaxSize(0.75f)
                                 )
                             }
